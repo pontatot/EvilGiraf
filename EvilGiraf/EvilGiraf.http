@@ -1,0 +1,6 @@
+@EvilGiraf_HostAddress = http://localhost:5255
+
+GET {{EvilGiraf_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
