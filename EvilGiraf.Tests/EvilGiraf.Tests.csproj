@@ -24,4 +24,8 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\EvilGiraf\EvilGiraf.csproj" />
+    </ItemGroup>
+
 </Project>
