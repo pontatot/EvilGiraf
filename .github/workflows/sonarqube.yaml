@@ -8,24 +8,27 @@ on:
 
 jobs:
   build:
-    name: Build and analyze
+    name: Build, Test, and Analyze
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'zulu' # Alternative distribution options are available.
+
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache SonarQube scanner
         id: cache-sonar-scanner
         uses: actions/cache@v4
@@ -33,13 +36,40 @@ jobs:
           path: ./.sonar/scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
+
       - name: Install SonarQube scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
           mkdir -p ./.sonar/scanner
           dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
-      - name: Build and analyze
+
+      - name: Install Dotnet report Generator for code coverage
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"pontatot_EvilGiraf_cc00103c-92c6-4c02-beee-5ca0bd65407f" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}"
-          dotnet build
-          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Run SonarQube Analysis
+        run: |
+          ./.sonar/scanner/dotnet-sonarscanner begin \
+            /k:"pontatot_EvilGiraf_cc00103c-92c6-4c02-beee-5ca0bd65407f" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}"
+
+      - name: Build Project
+        run: dotnet build
+
+      - name: Run Tests and Generate Coverage
+        run: |
+          dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults
+
+      - name: Convert coverage results for SonarQube
+        run: |
+          reportgenerator \
+            -reports:./TestResults/*/coverage.cobertura.xml \
+            -targetdir:./TestResults/CoverageReport \
+            -reporttypes:Cobertura
+
+      - name: Complete SonarQube Analysis
+        run: |
+          ./.sonar/scanner/dotnet-sonarscanner end \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.coverageReportPaths="./TestResults/CoverageReport/Cobertura.xml"
