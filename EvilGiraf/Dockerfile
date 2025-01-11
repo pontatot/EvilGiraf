@@ -11,11 +11,11 @@ COPY ["EvilGiraf/EvilGiraf.csproj", "EvilGiraf/"]
 RUN dotnet restore "EvilGiraf/EvilGiraf.csproj"
 COPY . .
 WORKDIR "/src/EvilGiraf"
-RUN dotnet build "EvilGiraf.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "EvilGiraf.csproj" -c "$BUILD_CONFIGURATION" -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "EvilGiraf.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "EvilGiraf.csproj" -c "$BUILD_CONFIGURATION" -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
