@@ -1,4 +1,4 @@
-name: Build
+name: SonarQube
 
 on:
   push:
@@ -6,12 +6,13 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build, Test, and Analyze
+  sonarqube:
+    name: SonarQube analysis
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 

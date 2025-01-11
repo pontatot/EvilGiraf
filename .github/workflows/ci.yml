@@ -1,26 +1,23 @@
-name: CI Pipeline
+name: Tests
 
 on: [push, pull_request]
 
 jobs:
-  unit-tests:
+  tests:
+    name: Tests
     runs-on: ubuntu-latest 
 
     steps:
-      # Étape 1 : Récupérer le code du dépôt
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Étape 2 : Configurer l'environnement (par exemple, ici pour .NET)
       - name: Set up .NET
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '8.0.x'
 
-      # Étape 3 : Restaurer les dépendances
       - name: Install dependencies
         run: dotnet restore
 
-      # Étape 4 : Exécuter les tests unitaires uniquement
       - name: Run unit tests
         run: dotnet test
