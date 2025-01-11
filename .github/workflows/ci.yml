@@ -23,4 +23,4 @@ jobs:
 
       # Étape 4 : Exécuter les tests unitaires uniquement
       - name: Run unit tests
-        run: dotnet test --filter "Category=Unit"
+        run: dotnet test
