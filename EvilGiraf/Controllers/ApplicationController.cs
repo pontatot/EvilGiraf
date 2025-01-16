@@ -18,4 +18,15 @@ public class ApplicationController : ControllerBase
         }
         return Created("/deploy/docker", new DeployResponse(ApplicationStatus.Running));
     }
+
+    [HttpPost("deploy/github")]
+    [ProducesResponseType(typeof(DeployResponse), 201)]
+    public IActionResult DeployGithub([FromBody] DeployGithubRequest deployGithubRequest)
+    {
+        if (string.IsNullOrEmpty(deployGithubRequest.Name) || string.IsNullOrEmpty(deployGithubRequest.Link))
+        {
+            return BadRequest("Name and Link are required.");
+        }
+        return Created("/deploy/github", new DeployResponse(ApplicationStatus.Running));
+    }
 }
