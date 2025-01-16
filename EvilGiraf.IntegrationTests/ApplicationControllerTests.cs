@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using EvilGiraf.Dto;
+using EvilGiraf.Model;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 
@@ -57,6 +59,9 @@ public class ApplicationControllerTests : IClassFixture<WebApplicationFactory<Pr
         var response = await client.PostAsJsonAsync("/deploy/docker", request);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
+        
+        var content = await response.Content.ReadFromJsonAsync<DeployResponse>();
+        content!.Status.Should().Be(ApplicationStatus.Running);
     }
 
     [Fact]

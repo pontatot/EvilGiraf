@@ -1,3 +1,5 @@
+using EvilGiraf.Dto;
+using EvilGiraf.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EvilGiraf.Controllers;
@@ -7,19 +9,13 @@ namespace EvilGiraf.Controllers;
 public class ApplicationController : ControllerBase
 {
     [HttpPost("deploy/docker")]
-    public IActionResult DeployDocker([FromBody] DeployRequest request)
+    [ProducesResponseType(typeof(DeployResponse), 201)]
+    public IActionResult DeployDocker([FromBody] DeployDockerRequest deployDockerRequest)
     {
-        if (string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.Link))
+        if (string.IsNullOrEmpty(deployDockerRequest.Name) || string.IsNullOrEmpty(deployDockerRequest.Link))
         {
             return BadRequest("Name and Link are required.");
         }
-        return Created("/deploy/docker", new { Status = "Running" });
+        return Created("/deploy/docker", new DeployResponse(ApplicationStatus.Running));
     }
 }
-
-public record DeployRequest(
-    string Name,
-    string Link,
-    string? Secret,
-    string? Version
-);
