@@ -86,7 +86,7 @@ public class ApplicationControllerTests : IClassFixture<WebApplicationFactory<Pr
 
         var request = new
         {
-            Link = "hello-world"
+            Link = "https://github.com/pontatot/EvilGiraf/"
         };
 
         var response = await client.PostAsJsonAsync("/deploy/github", request);
@@ -116,7 +116,7 @@ public class ApplicationControllerTests : IClassFixture<WebApplicationFactory<Pr
         var request = new
         {
             Name = "my-app",
-            Link = "hello-world"
+            Link = "https://github.com/pontatot/EvilGiraf/"
         };
 
         var response = await client.PostAsJsonAsync("/deploy/github", request);
@@ -134,7 +134,7 @@ public class ApplicationControllerTests : IClassFixture<WebApplicationFactory<Pr
         var request = new
         {
             Name = 12345,
-            Link = "hello-world"
+            Link = "https://github.com/pontatot/EvilGiraf/"
         };
 
         var response = await client.PostAsJsonAsync("/deploy/github", request);
