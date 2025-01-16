@@ -78,4 +78,67 @@ public class ApplicationControllerTests : IClassFixture<WebApplicationFactory<Pr
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task DeployGithub_ReturnsBadRequest_WhenNameIsMissing()
+    {
+        var client = _factory.CreateClient();
+
+        var request = new
+        {
+            Link = "https://github.com/pontatot/EvilGiraf/"
+        };
+
+        var response = await client.PostAsJsonAsync("/deploy/github", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task DeployGithub_ReturnsBadRequest_WhenLinkIsMissing()
+    {
+        var client = _factory.CreateClient();
+
+        var request = new
+        {
+            Name = "my-app"
+        };
+
+        var response = await client.PostAsJsonAsync("/deploy/github", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task DeployGithub_ReturnsCreated_WhenRequestIsValid()
+    {
+        var client = _factory.CreateClient();
+        var request = new
+        {
+            Name = "my-app",
+            Link = "https://github.com/pontatot/EvilGiraf/"
+        };
+
+        var response = await client.PostAsJsonAsync("/deploy/github", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        
+        var content = await response.Content.ReadFromJsonAsync<DeployResponse>();
+        content!.Status.Should().Be(ApplicationStatus.Running);
+    }
+
+    [Fact]
+    public async Task DeployGithub_ReturnsBadRequest_WhenNameTypeIsNotString()
+    {
+        var client = _factory.CreateClient();
+        var request = new
+        {
+            Name = 12345,
+            Link = "https://github.com/pontatot/EvilGiraf/"
+        };
+
+        var response = await client.PostAsJsonAsync("/deploy/github", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
 }
