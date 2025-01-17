@@ -1,0 +1,23 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log into registry
+        run: echo '${{ secrets.REGISTRY_PASSWORD }}' | docker login harbor.pyxis.dopolytech.fr/main -u '${{ secrets.REGISTRY_USERNAME }}' --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t harbor.pyxis.dopolytech.fr/main/evil-giraf:latest .
+
+      - name: Push Docker image
+        run: docker push harbor.pyxis.dopolytech.fr/main/evil-giraf:latest
