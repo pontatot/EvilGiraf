@@ -32,6 +32,22 @@ public class ApplicationControllerTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     [Fact]
+    public async Task DeployDocker_ReturnsBadRequest_WhenNameIsEmpty()
+    {
+        var client = _factory.CreateClient();
+
+        var request = new
+        {
+            Name = string.Empty,
+            Link = "hello-world"
+        };
+
+        var response = await client.PostAsJsonAsync("/deploy/docker", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task DeployDocker_ReturnsBadRequest_WhenLinkIsMissing()
     {
         var client = _factory.CreateClient();
@@ -39,6 +55,22 @@ public class ApplicationControllerTests : IClassFixture<WebApplicationFactory<Pr
         var request = new
         {
             Name = "my-app"
+        };
+
+        var response = await client.PostAsJsonAsync("/deploy/docker", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task DeployDocker_ReturnsBadRequest_WhenLinkIsEmpty()
+    {
+        var client = _factory.CreateClient();
+
+        var request = new
+        {
+            Name = "my-app",
+            Link = string.Empty
         };
 
         var response = await client.PostAsJsonAsync("/deploy/docker", request);
@@ -95,6 +127,22 @@ public class ApplicationControllerTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     [Fact]
+    public async Task DeployGithub_ReturnsBadRequest_WhenNameIsEmpty()
+    {
+        var client = _factory.CreateClient();
+
+        var request = new
+        {
+            Name = string.Empty,
+            Link = "https://github.com/pontatot/EvilGiraf/"
+        };
+
+        var response = await client.PostAsJsonAsync("/deploy/github", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task DeployGithub_ReturnsBadRequest_WhenLinkIsMissing()
     {
         var client = _factory.CreateClient();
@@ -102,6 +150,22 @@ public class ApplicationControllerTests : IClassFixture<WebApplicationFactory<Pr
         var request = new
         {
             Name = "my-app"
+        };
+
+        var response = await client.PostAsJsonAsync("/deploy/github", request);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task DeployGithub_ReturnsBadRequest_WhenLinkIsEmpty()
+    {
+        var client = _factory.CreateClient();
+
+        var request = new
+        {
+            Name = "my-app",
+            Link = string.Empty
         };
 
         var response = await client.PostAsJsonAsync("/deploy/github", request);
