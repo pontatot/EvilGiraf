@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "evil-giraf.fullname" . }}-test-connection"
+  labels:
+    {{- include "evil-giraf.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "evil-giraf.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
