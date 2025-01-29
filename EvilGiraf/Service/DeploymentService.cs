@@ -58,4 +58,10 @@ public class DeploymentService : IDeploymentService
         };
         return await _client.AppsV1.CreateNamespacedDeploymentAsync(deployment, model.Namespace);
     }
+
+    // Delete deployment
+    public async Task<V1Status> DeleteDeployment(string name, string @namespace)
+    {
+        return await _client.AppsV1.DeleteNamespacedDeploymentAsync(name, @namespace);
+    }
 }
