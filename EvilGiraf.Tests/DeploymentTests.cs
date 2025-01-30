@@ -42,4 +42,22 @@ public class DeploymentTests
             .And.BeOfType<V1Deployment>();
         await Client.AppsV1.Received().CreateNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), "default");
     }
+
+    [Fact]
+    public async Task DeleteDeployment_Should_Return_Status()
+    {
+        var result = await DeploymentService.DeleteDeployment("deployment-test", "default");
+        result.Should().NotBeNull()
+            .And.BeOfType<V1Status>();
+        await Client.AppsV1.Received().DeleteNamespacedDeploymentWithHttpMessagesAsync("deployment-test", "default");
+    }
+
+    [Fact]
+    public async Task DeleteDeployment_Should_Throw_Exception()
+    {
+        Client.AppsV1.DeleteNamespacedDeploymentWithHttpMessagesAsync("deployment-test", "default")
+            .Returns<Task<HttpOperationResponse<V1Status>>>(x => throw new Exception("Error"));
+        Func<Task> act = async () => await DeploymentService.DeleteDeployment("deployment-test", "default");
+        await act.Should().ThrowAsync<Exception>();
+    }
 }
