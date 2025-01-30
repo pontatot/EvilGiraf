@@ -29,15 +29,4 @@ public class ApplicationController : ControllerBase
         }
         return Created("/deploy/github", new DeployResponse(ApplicationStatus.Running));
     }
-
-    [HttpPost("delete")]
-    [ProducesResponseType(204)]
-    public IActionResult DeleteDeployment([FromBody] DeleteDeploymentRequest deleteDeploymentRequest)
-    {
-        if (string.IsNullOrEmpty(deleteDeploymentRequest.Name) || string.IsNullOrEmpty(deleteDeploymentRequest.Namespace))
-        {
-            return BadRequest("Name and Namespace are required.");
-        }
-        return Created("/delete", new DeleteResponse());
-    }
 }
