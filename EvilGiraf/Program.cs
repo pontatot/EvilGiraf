@@ -22,7 +22,7 @@ public class Program
                 KubernetesClientConfiguration.BuildConfigFromConfigFile();
             return new Kubernetes(config);
         });
-        builder.Services.AddSingleton<IDeploymentService>(sp => new DeploymentService(sp.GetRequiredService<IKubernetes>()));
+        builder.Services.AddSingleton<IDeploymentService, DeploymentService>();
 
         var app = builder.Build();
 
