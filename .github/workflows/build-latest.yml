@@ -1,12 +1,12 @@
-name: Build
+name: Build Latest
 on:
   push:
     branches:
       - main
 
 jobs:
-  build:
-    name: Build
+  build-latest:
+    name: Build Latest
     runs-on: ubuntu-latest
     
     steps:
