@@ -18,10 +18,17 @@ public class DeploymentTests
     {
         Client = Substitute.For<IKubernetes>();
         var appv1OperationsSubstitute = Substitute.For<IAppsV1Operations>();
+
         var deploymentResponse = new HttpOperationResponse<V1Deployment>();
         deploymentResponse.Body = new V1Deployment();
         appv1OperationsSubstitute.CreateNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), Arg.Any<string>())
             .Returns(deploymentResponse);
+
+        var deleteResponse = new HttpOperationResponse<V1Status>();
+        deleteResponse.Body = new V1Status();
+        appv1OperationsSubstitute.DeleteNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>())
+            .Returns(deleteResponse);
+
         Client.AppsV1.Returns(appv1OperationsSubstitute);
         
         DeploymentService = new DeploymentService(Client);
@@ -38,8 +45,8 @@ public class DeploymentTests
             [80]
         );
         var result = await DeploymentService.CreateDeployment(model);
-        result.Should().NotBeNull()
-            .And.BeOfType<V1Deployment>();
+        result.Should().NotBeNull();
+        result.Should().BeOfType<V1Deployment>();
         await Client.AppsV1.Received().CreateNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), "default");
     }
 
