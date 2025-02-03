@@ -60,7 +60,14 @@ public class DeploymentTests
 
         var deploymentResponse = new HttpOperationResponse<V1Deployment>
         {
-            Body = new V1Deployment()
+            Body = new V1Deployment
+            {
+                Metadata = new V1ObjectMeta
+                {
+                    Name = deploymentName,
+                    NamespaceProperty = @namespace
+                }
+            }
         };
 
         Client.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>())
@@ -68,8 +75,9 @@ public class DeploymentTests
 
         var result = await DeploymentService.ReadDeployment(deploymentName, @namespace);
 
-        result.Should().NotBeNull()
-            .And.BeOfType<V1Deployment>();
+        result.Metadata.Name.Should().Be(deploymentName);
+        result.Metadata.NamespaceProperty.Should().Be(@namespace);
+        
         await Client.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>());
     }
 
@@ -87,66 +95,10 @@ public class DeploymentTests
         Client.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>())
             .Throws(httpException);
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await DeploymentService.ReadDeployment(deploymentName, @namespace)
-        );
+        await DeploymentService.Invoking(x => x.ReadDeployment(deploymentName, @namespace))
+            .Should().ThrowAsync<KeyNotFoundException>();
 
         await Client.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task ReadDeployment_Should_Return_Deployment_With_Correct_Deployment_Name()
-    {
-        var deploymentName = "expected-deployment-name";
-        var @namespace = "default";
-
-        var deploymentResponse = new HttpOperationResponse<V1Deployment>
-        {
-            Body = new V1Deployment
-            {
-                Metadata = new V1ObjectMeta
-                {
-                    Name = deploymentName
-                }
-            }
-        };
-
-        Client.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(deploymentResponse));
-
-        var result = await DeploymentService.ReadDeployment(deploymentName, @namespace);
-
-        result.Should().NotBeNull();
-        result.Metadata.Name.Should().Be(deploymentName);
-        await Client.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>());
-    }
-    
-    [Fact]
-    public async Task ReadDeployment_Should_Return_Deployment_With_Correct_Namespace()
-    {
-        var deploymentName = "deployment-test";
-        var expectedNamespace = "expected-namespace";
-
-        var deploymentResponse = new HttpOperationResponse<V1Deployment>
-        {
-            Body = new V1Deployment
-            {
-                Metadata = new V1ObjectMeta
-                {
-                    Name = deploymentName,
-                    NamespaceProperty = expectedNamespace
-                }
-            }
-        };
-
-        Client.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, expectedNamespace, null, null, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(deploymentResponse));
-
-        var result = await DeploymentService.ReadDeployment(deploymentName, expectedNamespace);
-
-        result.Should().NotBeNull();
-        result.Metadata.NamespaceProperty.Should().Be(expectedNamespace);
-        await Client.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, expectedNamespace, null, null, Arg.Any<CancellationToken>());
     }
 
     [Fact]
