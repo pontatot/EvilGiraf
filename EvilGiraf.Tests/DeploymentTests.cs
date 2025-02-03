@@ -1,3 +1,4 @@
+using System.Net;
 using EvilGiraf.Interface;
 using EvilGiraf.Model;
 using EvilGiraf.Service;
@@ -6,6 +7,7 @@ using k8s;
 using k8s.Autorest;
 using k8s.Models;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace EvilGiraf.Tests;
 
@@ -48,6 +50,55 @@ public class DeploymentTests
         result.Should().NotBeNull();
         result.Should().BeOfType<V1Deployment>();
         await Client.AppsV1.Received().CreateNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), "default");
+    }
+    
+    [Fact]
+    public async Task ReadDeployment_Should_Return_Deployment()
+    {
+        var deploymentName = "deployment-test";
+        var @namespace = "default";
+
+        var deploymentResponse = new HttpOperationResponse<V1Deployment>
+        {
+            Body = new V1Deployment
+            {
+                Metadata = new V1ObjectMeta
+                {
+                    Name = deploymentName,
+                    NamespaceProperty = @namespace
+                }
+            }
+        };
+
+        Client.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(deploymentResponse));
+
+        var result = await DeploymentService.ReadDeployment(deploymentName, @namespace);
+
+        result.Metadata.Name.Should().Be(deploymentName);
+        result.Metadata.NamespaceProperty.Should().Be(@namespace);
+        
+        await Client.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ReadDeployment_Should_Throw_KeyNotFoundException_When_NotFound()
+    {
+        var deploymentName = "non-existent-deployment";
+        var @namespace = "default";
+
+        var httpException = new HttpOperationException
+        {
+            Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
+        };
+
+        Client.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>())
+            .Throws(httpException);
+
+        await DeploymentService.Invoking(x => x.ReadDeployment(deploymentName, @namespace))
+            .Should().ThrowAsync<KeyNotFoundException>();
+
+        await Client.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>());
     }
 
     [Fact]
