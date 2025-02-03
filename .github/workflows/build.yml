@@ -16,5 +16,9 @@ jobs:
       - name: Build Docker image
         run: docker build -t harbor.pyxis.dopolytech.fr/main/evil-giraf:${{ github.sha }} .
 
+      - name: Tag main Docker image with 'latest'
+        if: github.ref == 'refs/heads/main'
+        run: docker tag harbor.pyxis.dopolytech.fr/main/evil-giraf:${{ github.sha }} harbor.pyxis.dopolytech.fr/main/evil-giraf:latest
+
       - name: Push Docker image
-        run: docker push harbor.pyxis.dopolytech.fr/main/evil-giraf:${{ github.sha }}
+        run: docker push -a harbor.pyxis.dopolytech.fr/main/evil-giraf:${{ github.sha }}
