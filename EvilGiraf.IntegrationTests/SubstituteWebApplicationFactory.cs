@@ -13,8 +13,8 @@ public class SubstituteWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            var descriptor = new ServiceDescriptor(typeof(IKubernetes), Substitute.For<IKubernetes>());
-            services.Replace(descriptor);
+            var kubeDescriptor = new ServiceDescriptor(typeof(IKubernetes), Substitute.For<IKubernetes>());
+            services.Replace(kubeDescriptor);
         });
     }
 }
