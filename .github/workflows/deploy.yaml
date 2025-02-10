@@ -9,7 +9,7 @@ on:
 jobs:
   deploy:
     name: Deploy to Kubernetes
-    runs-on: ubuntu-latest
+    runs-on: github-runner
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:

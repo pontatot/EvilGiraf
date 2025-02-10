@@ -7,7 +7,7 @@ on:
 jobs:
   sonarqube:
     name: SonarQube analysis
-    runs-on: ubuntu-latest
+    runs-on: github-runner
     
     steps:
       - name: Checkout code

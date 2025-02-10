@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: github-runner
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     
     steps:
