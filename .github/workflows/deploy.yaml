@@ -1,0 +1,34 @@
+name: Deploy to Kubernetes
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types:
+      - completed
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kubernetes config
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install evilgiraf helm-chart \
+            --namespace evilgiraf \
+            --create-namespace \
+            --set image.tag=${{ github.sha }} \
+            --wait --timeout 15m
