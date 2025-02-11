@@ -1,13 +1,6 @@
 name: Build
 
-on:
-  workflow_run:
-    workflows: [ "Tests" ]
-    types:
-      - completed
-    branches: [ main ]
-  push:
-    branches-ignore: [ main ]
+on: [ push ]
 
 jobs:
   build:
