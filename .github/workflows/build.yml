@@ -6,7 +6,8 @@ on:
     types:
       - completed
     branches: [ main ]
-  pull_request:
+  push:
+    branches-ignore: [ main ]
 
 jobs:
   build:
