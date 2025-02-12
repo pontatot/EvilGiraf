@@ -31,6 +31,11 @@ public class DeploymentTests
         appv1OperationsSubstitute.DeleteNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>())
             .Returns(deleteResponse);
 
+        var updateResponse = new HttpOperationResponse<V1Deployment>();
+        updateResponse.Body = new V1Deployment();
+        appv1OperationsSubstitute.ReplaceNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), Arg.Any<string>(), Arg.Any<string>(), null, null, null, null, null, Arg.Any<CancellationToken>())
+            .Returns(updateResponse);
+
         Client.AppsV1.Returns(appv1OperationsSubstitute);
         
         DeploymentService = new DeploymentService(Client);
@@ -116,6 +121,38 @@ public class DeploymentTests
         Client.AppsV1.DeleteNamespacedDeploymentWithHttpMessagesAsync("deployment-test", "default")
             .Returns<Task<HttpOperationResponse<V1Status>>>(x => throw new Exception("Error"));
         Func<Task> act = async () => await DeploymentService.DeleteDeployment("deployment-test", "default");
+        await act.Should().ThrowAsync<Exception>();
+    }
+
+    [Fact]
+    public async Task UpdateDeployment_Should_Return_Deployment()
+    {
+        var model = new DeploymentModel(
+            "deployment-test",
+            "default",
+            1,
+            "nginx",
+            [80]
+        );
+        var result = await DeploymentService.UpdateDeployment(model);
+        result.Should().NotBeNull();
+        result.Should().BeOfType<V1Deployment>();
+        await Client.AppsV1.Received().ReplaceNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), "deployment-test", Arg.Any<string>(), null, null, null, null, null, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpdateDeployment_Should_Throw_Exception()
+    {
+        var model = new DeploymentModel(
+            "deployment-test",
+            "default",
+            1,
+            "nginx",
+            [80]
+        );
+        Client.AppsV1.ReplaceNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), "deployment-test", Arg.Any<string>(), null, null, null, null, null, Arg.Any<CancellationToken>())
+            .Returns<Task<HttpOperationResponse<V1Deployment>>>(x => throw new Exception("Error"));
+        Func<Task> act = async () => await DeploymentService.UpdateDeployment(model);
         await act.Should().ThrowAsync<Exception>();
     }
 }
