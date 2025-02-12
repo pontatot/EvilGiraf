@@ -26,6 +26,7 @@ public class Program
         builder.Services.AddDbContext<DatabaseService>(opt =>
             opt.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
         builder.Services.AddSingleton<IDeploymentService, DeploymentService>();
+        builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
         var app = builder.Build();
 
