@@ -36,7 +36,7 @@ jobs:
           useConfigFile: true
           
       - name: Echo Build Number
-        run: echo ${{ steps.gitversion.outputs.semVer }}
+        run: echo '${{ steps.gitversion.outputs.semVer }}'
 
       - name: Tag Docker image
         run: docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:${{ github.sha }}'
