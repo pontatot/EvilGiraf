@@ -10,12 +10,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.1.11
+        with:
+          versionSpec: '6.0.x'
 
       - name: Log into registry
         run: echo '${{ secrets.REGISTRY_PASSWORD }}' | docker login ${{ secrets.REGISTRY_URL }} -u '${{ secrets.REGISTRY_USERNAME }}' --password-stdin
 
       - name: Build Docker image
         run: docker build -t evil-giraf .
+        
+      - name: Determine Version
+        id: version_step
+        uses: gittools/actions/gitversion/execute@v3.1.11
+        with:
+          useConfigFile: true
+          
+      - name: Echo Build Number
+        run: echo ${{ steps.gitversion.outputs.semVer }}
 
       - name: Tag Docker image
         run: docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:${{ github.sha }}'
