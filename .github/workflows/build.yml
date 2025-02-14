@@ -5,7 +5,7 @@ on: [ push ]
 jobs:
   build:
     name: Build
-    runs-on: github-runner
+    runs-on: github-runner-evilgiraf
     
     steps:
       - name: Checkout code
