@@ -10,7 +10,7 @@ on:
 jobs:
   deploy:
     name: Deploy to Kubernetes
-    runs-on: github-runner
+    runs-on: github-runner-evilgiraf
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
