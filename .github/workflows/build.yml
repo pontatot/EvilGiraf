@@ -30,16 +30,19 @@ jobs:
         run: docker build -t evil-giraf .
         
       - name: Determine Version
-        id: version_step
+        id: version
         uses: gittools/actions/gitversion/execute@v3.1.11
         with:
           useConfigFile: true
           
       - name: Echo Build Number
-        run: echo '${{ steps.gitversion.outputs.semVer }}'
+        run: echo ${{ steps.version.outputs.semVer }}
 
       - name: Tag Docker image
         run: docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:${{ github.sha }}'
+
+      - name: Tag Docker image with version
+        run: docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:${{ steps.version.outputs.semVer }}'
 
       - name: Tag main Docker image with 'latest'
         if: github.ref == 'refs/heads/main'
