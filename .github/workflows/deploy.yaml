@@ -15,6 +15,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.1.11
+        with:
+          versionSpec: '6.0.x'
+
+      - name: Determine Version
+        id: version
+        uses: gittools/actions/gitversion/execute@v3.1.11
+        with:
+          useConfigFile: true
 
       - name: Setup Kubernetes config
         run: |
@@ -32,5 +50,5 @@ jobs:
           helm upgrade --install evilgiraf helm-chart \
             --namespace evilgiraf \
             --create-namespace \
-            --set image.tag=${{ github.sha }} \
+            --set image.tag=${{ steps.version.outputs.semVer }} \
             --wait --timeout 15m

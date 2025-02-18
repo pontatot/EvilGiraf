@@ -1,6 +1,12 @@
 name: Build
 
-on: [ push ]
+on:
+  push:
+    branches
+
+permissions:
+  contents: write
+
 
 jobs:
   build:
@@ -34,9 +40,13 @@ jobs:
         uses: gittools/actions/gitversion/execute@v3.1.11
         with:
           useConfigFile: true
-          
-      - name: Echo Build Number
-        run: echo ${{ steps.version.outputs.semVer }}
+
+      - name: Create Git Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git tag -a v${{ steps.version.outputs.semVer }} -m "Release v${{ steps.version.outputs.semVer }}"
+          git push origin v${{ steps.version.outputs.semVer }}
+
 
       - name: Tag Docker image
         run: docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:${{ github.sha }}'
