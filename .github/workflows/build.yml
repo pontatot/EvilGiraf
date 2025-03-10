@@ -32,8 +32,11 @@ jobs:
       - name: Log into registry
         run: echo '${{ secrets.REGISTRY_PASSWORD }}' | docker login ${{ secrets.REGISTRY_URL }} -u '${{ secrets.REGISTRY_USERNAME }}' --password-stdin
 
+      - name: Push Docker image
+        run: docker pull '${{ secrets.REGISTRY_URL }}/evil-giraf:latest'
+
       - name: Build Docker image
-        run: docker build -t evil-giraf .
+        run: docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from '${{ secrets.REGISTRY_URL }}/evil-giraf:latest' -t evil-giraf .
         
       - name: Determine Version
         id: version
