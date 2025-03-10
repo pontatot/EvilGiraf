@@ -1,3 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace EvilGiraf.Model;
 
-public record Application(int Id, string Name, ApplicationType Type, string Link, string? Version);
+public class Application
+{
+    [Key]
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public ApplicationType Type { get; set; }
+    public string Link { get; set; }
+    public string? Version { get; set; }
+}
