@@ -2,6 +2,7 @@ using EvilGiraf.Interface;
 using EvilGiraf.Service;
 using k8s;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace EvilGiraf;
 public class Program
@@ -24,7 +25,9 @@ public class Program
             return new Kubernetes(config);
         });
         builder.Services.AddDbContext<DatabaseService>(opt =>
-            opt.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
+            opt.UseNpgsql(
+                builder.Configuration.GetSection("Postgres")
+                .Get<NpgsqlConnectionStringBuilder>()?.ConnectionString));
         builder.Services.AddSingleton<IDeploymentService, DeploymentService>();
         builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
