@@ -5,9 +5,18 @@ namespace EvilGiraf.Model;
 public class Application
 {
     [Key]
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public ApplicationType Type { get; set; }
-    public string Link { get; set; }
-    public string? Version { get; set; }
+    public int Id { get; init; }
+    
+    [Required]
+    [MaxLength(255)]
+    public required string Name { get; init; }
+    
+    public ApplicationType Type { get; init; }
+    
+    [Required]
+    [MaxLength(255)]
+    public required string Link { get; init; }
+    
+    [MaxLength(255)]
+    public string? Version { get; init; }
 }
