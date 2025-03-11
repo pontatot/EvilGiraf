@@ -50,10 +50,11 @@ jobs:
       - name: Run SonarQube Analysis
         run: |
           ./.sonar/scanner/dotnet-sonarscanner begin \
-            /k:"pontatot_EvilGiraf_cc00103c-92c6-4c02-beee-5ca0bd65407f" \
+            /k:"EvilGiraf" \
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+            /d:sonar.scanner.scanAll=true
 
       - name: Build Project
         run: dotnet build
