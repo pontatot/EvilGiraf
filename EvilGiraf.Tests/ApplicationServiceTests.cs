@@ -75,6 +75,9 @@ public class ApplicationServiceTests
         // Act
         var result = await _applicationService.DeleteApplication(createdApplication.Id);
 
+        // Assert
+        result.Should().NotBeNull();
+
         Func<Task> act = async () => await _applicationService.GetApplication(createdApplication.Id);
         await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Application with id " + createdApplication.Id + " not found");
     }
