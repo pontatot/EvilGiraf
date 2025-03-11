@@ -63,4 +63,29 @@ public class ApplicationServiceTests
         // Assert
         await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Application with id 999 not found");
     }
+
+    [Fact]
+    public async Task DeleteApplication_ShouldDeleteApplication()
+    {
+        // Arrange
+        var applicationDto = new ApplicationDto(
+            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
+        var createdApplication = await _applicationService.CreateApplication(applicationDto);
+
+        // Act
+        var result = await _applicationService.DeleteApplication(createdApplication.Id);
+
+        Func<Task> act = async () => await _applicationService.GetApplication(createdApplication.Id);
+        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Application with id " + createdApplication.Id + " not found");
+    }
+
+    [Fact]
+    public async Task DeleteApplication_ShouldThrowKeyNotFoundException()
+    {
+        // Act
+        Func<Task> act = async () => await _applicationService.DeleteApplication(999);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Application with id 999 not found");
+    }
 }
