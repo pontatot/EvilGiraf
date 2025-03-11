@@ -32,4 +32,19 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
             return application;
         }
     }
+
+    public async Task<Application> DeleteApplication(int applicationId)
+    {
+        var application = await databaseService.Applications.FindAsync(applicationId);
+
+        if (application == null)
+        {
+            throw new KeyNotFoundException($"Application with id {applicationId} not found");
+        }
+        else {
+            databaseService.Applications.Remove(application);
+            await databaseService.SaveChangesAsync();
+            return application;
+        }
+    }
 }
