@@ -22,9 +22,10 @@ jobs:
           distribution: 'zulu'
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+          cache: true
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
@@ -55,6 +56,9 @@ jobs:
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
             /d:sonar.scanner.scanAll=true
+
+      - name: Install dependencies
+        run: dotnet restore --locked-mode
 
       - name: Build Project
         run: dotnet build
