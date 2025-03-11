@@ -47,7 +47,7 @@ public class ApplicationServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        result.Id.Should().Be(createdApplication.Id);
+        result!.Id.Should().Be(createdApplication.Id);
         result.Name.Should().Be(applicationDto.Name);
         result.Type.Should().Be(applicationDto.Type);
         result.Link.Should().Be(applicationDto.Link);
@@ -55,13 +55,13 @@ public class ApplicationServiceTests
     }
 
     [Fact]
-    public async Task GetApplication_ShouldThrowKeyNotFoundException()
+    public async Task GetApplication_ShouldReturnNull()
     {
         // Act
-        Func<Task> act = async () => await _applicationService.GetApplication(999);
+        var result = await _applicationService.GetApplication(999);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Application with id 999 not found");
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -78,17 +78,17 @@ public class ApplicationServiceTests
         // Assert
         result.Should().NotBeNull();
 
-        Func<Task> act = async () => await _applicationService.GetApplication(createdApplication.Id);
-        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Application with id " + createdApplication.Id + " not found");
+        var app = await _applicationService.GetApplication(createdApplication.Id);
+        app.Should().BeNull();
     }
 
     [Fact]
-    public async Task DeleteApplication_ShouldThrowKeyNotFoundException()
+    public async Task DeleteApplication_ShouldReturnNull()
     {
         // Act
-        Func<Task> act = async () => await _applicationService.DeleteApplication(999);
+        var result = await _applicationService.DeleteApplication(999);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>().WithMessage("Application with id 999 not found");
+        result.Should().BeNull();
     }
 }

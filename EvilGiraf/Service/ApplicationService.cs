@@ -20,31 +20,20 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
         return result.Entity;
     }
 
-    public async Task<Application> GetApplication(int applicationId)
+    public async Task<Application?> GetApplication(int applicationId)
     {
-        var application = await databaseService.Applications.FindAsync(applicationId);
-
-        if (application == null)
-        {
-            throw new KeyNotFoundException($"Application with id {applicationId} not found");
-        }
-        else {
-            return application;
-        }
+        return await databaseService.Applications.FindAsync(applicationId);
     }
 
-    public async Task<Application> DeleteApplication(int applicationId)
+    public async Task<Application?> DeleteApplication(int applicationId)
     {
         var application = await databaseService.Applications.FindAsync(applicationId);
 
-        if (application == null)
-        {
-            throw new KeyNotFoundException($"Application with id {applicationId} not found");
-        }
-        else {
-            databaseService.Applications.Remove(application);
-            await databaseService.SaveChangesAsync();
-            return application;
-        }
+        if (application is null)
+            return null;
+        
+        databaseService.Applications.Remove(application);
+        await databaseService.SaveChangesAsync();
+        return application;
     }
 }

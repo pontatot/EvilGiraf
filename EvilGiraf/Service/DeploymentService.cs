@@ -1,4 +1,3 @@
-using System.Net;
 using EvilGiraf.Interface;
 using EvilGiraf.Model;
 using k8s;
@@ -61,29 +60,32 @@ public class DeploymentService : IDeploymentService
         return await _client.AppsV1.CreateNamespacedDeploymentAsync(deployment, model.Namespace);
     }
     
-    public async Task<V1Deployment> ReadDeployment(string name, string @namespace)
+    public async Task<V1Deployment?> ReadDeployment(string name, string @namespace)
     {
         try
         {
             var deployment = await _client.AppsV1.ReadNamespacedDeploymentAsync(name, @namespace);
             return deployment;
         }
-        catch (HttpOperationException e)
+        catch (HttpOperationException)
         {
-            if (e.Response.StatusCode == HttpStatusCode.NotFound)
-            {
-                throw new KeyNotFoundException($"Deployment '{name}' not found in namespace '{@namespace}'");
-            }
-            throw;
+            return null;
         }
     }
 
-    public async Task<V1Status> DeleteDeployment(string name, string @namespace)
+    public async Task<V1Status?> DeleteDeployment(string name, string @namespace)
     {
-        return await _client.AppsV1.DeleteNamespacedDeploymentAsync(name, @namespace);
+        try
+        {
+            return await _client.AppsV1.DeleteNamespacedDeploymentAsync(name, @namespace);
+        }
+        catch (HttpOperationException)
+        {
+            return null;
+        }
     }
 
-    public async Task<V1Deployment> UpdateDeployment(DeploymentModel model)
+    public async Task<V1Deployment?> UpdateDeployment(DeploymentModel model)
     {
         var deployment = new V1Deployment
         {
@@ -125,6 +127,13 @@ public class DeploymentService : IDeploymentService
                 }
             }
         };
-        return await _client.AppsV1.ReplaceNamespacedDeploymentAsync(deployment, model.Name, model.Namespace);
+        try
+        {
+            return await _client.AppsV1.ReplaceNamespacedDeploymentAsync(deployment, model.Name, model.Namespace);
+        }
+        catch (HttpOperationException)
+        {
+            return null;
+        }
     }
 }
