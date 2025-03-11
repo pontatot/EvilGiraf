@@ -1,6 +1,7 @@
 using EvilGiraf.Dto;
 using EvilGiraf.Interface;
 using EvilGiraf.Model;
+using Npgsql;
 
 namespace EvilGiraf.Service;
 
@@ -22,12 +23,19 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
 
     public async Task<Application?> GetApplication(int applicationId)
     {
-        return await databaseService.Applications.FindAsync(applicationId);
+        try
+        {
+            return await databaseService.Applications.FindAsync(applicationId);
+        }
+        catch (PostgresException)
+        {
+            return null;
+        }
     }
 
     public async Task<Application?> DeleteApplication(int applicationId)
     {
-        var application = await databaseService.Applications.FindAsync(applicationId);
+        var application = await GetApplication(applicationId);
 
         if (application is null)
             return null;
