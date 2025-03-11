@@ -19,4 +19,17 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
         await databaseService.SaveChangesAsync();
         return result.Entity;
     }
+
+    public async Task<Application> GetApplication(int applicationId)
+    {
+        var application = await databaseService.Applications.FindAsync(applicationId);
+
+        if (application == null)
+        {
+            throw new KeyNotFoundException($"Application with id {applicationId} not found");
+        }
+        else {
+            return application;
+        }
+    }
 }
