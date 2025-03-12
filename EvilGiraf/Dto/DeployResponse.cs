@@ -1,7 +1,7 @@
-using EvilGiraf.Model;
+using k8s.Models;
 
 namespace EvilGiraf.Dto;
 
 public record DeployResponse(
-    ApplicationStatus Status
+    V1DeploymentStatus Status
 );
