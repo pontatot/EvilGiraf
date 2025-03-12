@@ -20,27 +20,25 @@ public class ApplicationServiceTests
     public async Task CreateApplication_ShouldCreateAndReturnNewApplication()
     {
         // Arrange
-        var applicationDto = new ApplicationDto(
-            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
 
         // Act
-        var result = await _applicationService.CreateApplication(applicationDto);
+        var result = await _applicationService.CreateApplication(application);
 
         // Assert
         result.Should().NotBeNull();
-        result.Name.Should().Be(applicationDto.Name);
-        result.Type.Should().Be(applicationDto.Type);
-        result.Link.Should().Be(applicationDto.Link);
-        result.Version.Should().Be(applicationDto.Version);
+        result.Name.Should().Be(application.Name);
+        result.Type.Should().Be(application.Type);
+        result.Link.Should().Be(application.Link);
+        result.Version.Should().Be(application.Version);
     }
 
     [Fact]
     public async Task GetApplication_ShouldReturnApplication()
     {
         // Arrange
-        var applicationDto = new ApplicationDto(
-            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
-        var createdApplication = await _applicationService.CreateApplication(applicationDto);
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
+        var createdApplication = await _applicationService.CreateApplication(application);
 
         // Act
         var result = await _applicationService.GetApplication(createdApplication.Id);
@@ -48,10 +46,10 @@ public class ApplicationServiceTests
         // Assert
         result.Should().NotBeNull();
         result!.Id.Should().Be(createdApplication.Id);
-        result.Name.Should().Be(applicationDto.Name);
-        result.Type.Should().Be(applicationDto.Type);
-        result.Link.Should().Be(applicationDto.Link);
-        result.Version.Should().Be(applicationDto.Version);
+        result.Name.Should().Be(application.Name);
+        result.Type.Should().Be(application.Type);
+        result.Link.Should().Be(application.Link);
+        result.Version.Should().Be(application.Version);
     }
 
     [Fact]
@@ -68,9 +66,8 @@ public class ApplicationServiceTests
     public async Task DeleteApplication_ShouldDeleteApplication()
     {
         // Arrange
-        var applicationDto = new ApplicationDto(
-            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
-        var createdApplication = await _applicationService.CreateApplication(applicationDto);
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
+        var createdApplication = await _applicationService.CreateApplication(application);
 
         // Act
         var result = await _applicationService.DeleteApplication(createdApplication.Id);

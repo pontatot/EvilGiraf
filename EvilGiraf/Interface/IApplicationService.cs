@@ -5,7 +5,7 @@ namespace EvilGiraf.Interface;
 
 public interface IApplicationService
 {
-    public Task<Application> CreateApplication(ApplicationDto applicationDto);
+    public Task<Application> CreateApplication(ApplicationCreateDto applicationDto);
 
     public Task<Application?> GetApplication(int applicationId);
 
