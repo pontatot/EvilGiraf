@@ -19,7 +19,7 @@ branches:
     is-source-branch-for: ['feature']
 
   feature:
-    regex: ^(feature|feat)?[/-]
+    regex: ^(feature|feat)/
     mode: ContinuousDelivery
     label: alpha
     increment: Inherit
@@ -29,6 +29,3 @@ branches:
     is-main-branch: false
     source-branches: ['main']
     is-source-branch-for: []
-
-ignore:
-  sha: []
