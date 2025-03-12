@@ -93,7 +93,7 @@ public class ApplicationServiceTests
     public async Task UpdateApplication_ShouldUpdateAndReturnApplication()
     {
         // Arrange
-        var applicationDto = new ApplicationDto(
+        var applicationDto = new ApplicationCreateDto(
             "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
         var createdApplication = await _applicationService.CreateApplication(applicationDto);
 
@@ -115,7 +115,7 @@ public class ApplicationServiceTests
     public async Task UpdateApplication_ShouldReturnNotUpdatedApplication()
     {
         // Arrange
-        var applicationDto = new ApplicationDto(
+        var applicationDto = new ApplicationCreateDto(
             "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
         var createdApplication = await _applicationService.CreateApplication(applicationDto);
 
