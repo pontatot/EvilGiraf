@@ -65,4 +65,52 @@ public class ApplicationControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+
+    [Fact]
+    public async Task Get_ShouldReturnApplication()
+    {
+        // Arrange
+        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0");
+
+        var response = await Client.PostAsJsonAsync("/application", createRequest);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var application = await response.Content.ReadFromJsonAsync<Application>();
+        
+        application.Should().NotBeNull();
+
+        // Act
+        response = await Client.GetAsync($"/application/{application!.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationDto = await response.Content.ReadFromJsonAsync<Application>();
+        
+        applicationDto.Should().NotBeNull();
+        applicationDto!.Name.Should().Be(application!.Name);
+        applicationDto.Type.Should().Be(application.Type);
+        applicationDto.Link.Should().Be(application.Link);
+        applicationDto.Version.Should().Be(application.Version);
+        applicationDto.Id.Should().Be(application.Id);
+    }
+
+    [Fact]
+    public async Task GetWithNonExistingId_ShouldReturnNotFound()
+    {
+        // Arrange
+        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0");
+
+        var response = await Client.PostAsJsonAsync("/application", createRequest);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var application = await response.Content.ReadFromJsonAsync<Application>();
+        
+        application.Should().NotBeNull();
+
+        // Act
+        response = await Client.GetAsync($"/application/{application!.Id + 1}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }

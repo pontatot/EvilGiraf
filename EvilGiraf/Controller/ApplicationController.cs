@@ -17,4 +17,16 @@ public class ApplicationController(IApplicationService applicationService) : Con
 
         return Created($"", application.ToDto());
     }
+
+    [HttpGet("{id:int}")]
+    [ProducesResponseType(typeof(ApplicationResultDto), 200)]
+    [ProducesResponseType(typeof(string), 404)]
+    public async Task<IActionResult> Get(int id)
+    {
+        var application = await applicationService.GetApplication(id);
+        if (application is null)
+            return NotFound($"Application {id} not found");
+
+        return Ok(application.ToDto());
+    }
 }
