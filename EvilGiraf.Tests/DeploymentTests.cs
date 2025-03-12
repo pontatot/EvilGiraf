@@ -79,15 +79,16 @@ public class DeploymentTests
             .Returns(Task.FromResult(deploymentResponse));
 
         var result = await DeploymentService.ReadDeployment(deploymentName, @namespace);
-
-        result.Metadata.Name.Should().Be(deploymentName);
+        
+        result.Should().NotBeNull();
+        result!.Metadata.Name.Should().Be(deploymentName);
         result.Metadata.NamespaceProperty.Should().Be(@namespace);
         
         await Client.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task ReadDeployment_Should_Throw_KeyNotFoundException_When_NotFound()
+    public async Task ReadDeployment_Should_Return_null_When_NotFound()
     {
         var deploymentName = "non-existent-deployment";
         var @namespace = "default";
@@ -100,8 +101,9 @@ public class DeploymentTests
         Client.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>())
             .Throws(httpException);
 
-        await DeploymentService.Invoking(x => x.ReadDeployment(deploymentName, @namespace))
-            .Should().ThrowAsync<KeyNotFoundException>();
+        var result = await DeploymentService.ReadDeployment(deploymentName, @namespace);
+        
+        result.Should().BeNull();
 
         await Client.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(deploymentName, @namespace, null, null, Arg.Any<CancellationToken>());
     }
@@ -116,12 +118,16 @@ public class DeploymentTests
     }
 
     [Fact]
-    public async Task DeleteDeployment_Should_Throw_Exception()
+    public async Task DeleteDeployment_Should_Return_Null()
     {
+        var httpException = new HttpOperationException
+        {
+            Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
+        };
         Client.AppsV1.DeleteNamespacedDeploymentWithHttpMessagesAsync("deployment-test", "default")
-            .Returns<Task<HttpOperationResponse<V1Status>>>(x => throw new Exception("Error"));
-        Func<Task> act = async () => await DeploymentService.DeleteDeployment("deployment-test", "default");
-        await act.Should().ThrowAsync<Exception>();
+            .Throws(httpException);
+        var result =  await DeploymentService.DeleteDeployment("deployment-test", "default");
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -141,7 +147,7 @@ public class DeploymentTests
     }
 
     [Fact]
-    public async Task UpdateDeployment_Should_Throw_Exception()
+    public async Task UpdateDeployment_Should_Return_Null()
     {
         var model = new DeploymentModel(
             "deployment-test",
@@ -150,9 +156,14 @@ public class DeploymentTests
             "nginx",
             [80]
         );
-        Client.AppsV1.ReplaceNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), "deployment-test", Arg.Any<string>(), null, null, null, null, null, Arg.Any<CancellationToken>())
-            .Returns<Task<HttpOperationResponse<V1Deployment>>>(x => throw new Exception("Error"));
-        Func<Task> act = async () => await DeploymentService.UpdateDeployment(model);
-        await act.Should().ThrowAsync<Exception>();
+        var httpException = new HttpOperationException
+        {
+            Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
+        };
+        Client.AppsV1.ReplaceNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), "deployment-test",
+                Arg.Any<string>(), null, null, null, null, null, Arg.Any<CancellationToken>())
+            .Throws(httpException);
+        var result = await DeploymentService.UpdateDeployment(model);
+        result.Should().BeNull();
     }
 }

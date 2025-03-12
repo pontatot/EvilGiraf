@@ -1,6 +1,7 @@
 using EvilGiraf.Dto;
 using EvilGiraf.Interface;
 using EvilGiraf.Model;
+using Npgsql;
 
 namespace EvilGiraf.Service;
 
@@ -20,31 +21,27 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
         return result.Entity;
     }
 
-    public async Task<Application> GetApplication(int applicationId)
+    public async Task<Application?> GetApplication(int applicationId)
     {
-        var application = await databaseService.Applications.FindAsync(applicationId);
-
-        if (application == null)
+        try
         {
-            throw new KeyNotFoundException($"Application with id {applicationId} not found");
+            return await databaseService.Applications.FindAsync(applicationId);
         }
-        else {
-            return application;
+        catch (PostgresException)
+        {
+            return null;
         }
     }
 
-    public async Task<Application> DeleteApplication(int applicationId)
+    public async Task<Application?> DeleteApplication(int applicationId)
     {
-        var application = await databaseService.Applications.FindAsync(applicationId);
+        var application = await GetApplication(applicationId);
 
-        if (application == null)
-        {
-            throw new KeyNotFoundException($"Application with id {applicationId} not found");
-        }
-        else {
-            databaseService.Applications.Remove(application);
-            await databaseService.SaveChangesAsync();
-            return application;
-        }
+        if (application is null)
+            return null;
+        
+        databaseService.Applications.Remove(application);
+        await databaseService.SaveChangesAsync();
+        return application;
     }
 }
