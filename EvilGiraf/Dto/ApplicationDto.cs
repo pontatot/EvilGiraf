@@ -16,3 +16,10 @@ public record ApplicationResultDto(
     string Link,
     string? Version
 );
+
+public record ApplicationUpdateDto(
+    string? Name,
+    ApplicationType? Type,
+    string? Link,
+    string? Version
+);
