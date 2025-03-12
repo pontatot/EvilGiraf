@@ -88,4 +88,40 @@ public class ApplicationServiceTests
         // Assert
         result.Should().BeNull();
     }
+    
+    [Fact]
+    public async Task UpdateApplication_ShouldUpdateAndReturnApplication()
+    {
+        // Arrange
+        var applicationDto = new ApplicationDto(
+            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
+        var createdApplication = await _applicationService.CreateApplication(applicationDto);
+
+        var updatedApplicationDto = new ApplicationDto(
+            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0");
+
+        // Act
+        var result = await _applicationService.UpdateApplication(createdApplication.Id, updatedApplicationDto);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Name.Should().Be(updatedApplicationDto.Name);
+        result.Type.Should().Be(applicationDto.Type);
+        result.Link.Should().Be(updatedApplicationDto.Link);
+        result.Version.Should().Be(updatedApplicationDto.Version);
+    }
+    
+        [Fact]
+        public async Task UpdateApplication_ShouldReturnNull_WhenApplicationDoesNotExist()
+        {
+            // Arrange
+            var updatedApplicationDto = new ApplicationDto(
+                "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0");
+    
+            // Act
+            var result = await _applicationService.UpdateApplication(999, updatedApplicationDto);
+    
+            // Assert
+            result.Should().BeNull();
+        }
 }

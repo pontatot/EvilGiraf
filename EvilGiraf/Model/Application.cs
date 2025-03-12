@@ -5,7 +5,7 @@ namespace EvilGiraf.Model;
 public class Application
 {
     [Key]
-    public int Id { get; init; }
+    public int Id { get; set; }
     
     [Required]
     [MaxLength(255)]
