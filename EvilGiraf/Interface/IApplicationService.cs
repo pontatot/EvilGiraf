@@ -11,5 +11,5 @@ public interface IApplicationService
 
     public Task<Application?> DeleteApplication(int applicationId);
     
-    public Task<Application?> UpdateApplication(int applicationId, ApplicationDto applicationDto);
+    public Task<Application?> UpdateApplication(int applicationId, ApplicationUpdateDto applicationUpdateDto);
 }

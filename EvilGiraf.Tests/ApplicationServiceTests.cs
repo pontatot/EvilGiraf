@@ -97,7 +97,7 @@ public class ApplicationServiceTests
             "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
         var createdApplication = await _applicationService.CreateApplication(applicationDto);
 
-        var updatedApplicationDto = new ApplicationDto(
+        var updatedApplicationDto = new ApplicationUpdateDto(
             "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0");
 
         // Act
@@ -106,16 +106,38 @@ public class ApplicationServiceTests
         // Assert
         result.Should().NotBeNull();
         result!.Name.Should().Be(updatedApplicationDto.Name);
-        result.Type.Should().Be(applicationDto.Type);
+        result.Type.Should().Be(updatedApplicationDto.Type);
         result.Link.Should().Be(updatedApplicationDto.Link);
         result.Version.Should().Be(updatedApplicationDto.Version);
+    }
+    
+    [Fact]
+    public async Task UpdateApplication_ShouldReturnNotUpdatedApplication()
+    {
+        // Arrange
+        var applicationDto = new ApplicationDto(
+            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
+        var createdApplication = await _applicationService.CreateApplication(applicationDto);
+
+        var updatedApplicationDto = new ApplicationUpdateDto(
+            null, null, null, null);
+
+        // Act
+        var result = await _applicationService.UpdateApplication(createdApplication.Id, updatedApplicationDto);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Name.Should().Be(applicationDto.Name);
+        result.Type.Should().Be(applicationDto.Type);
+        result.Link.Should().Be(applicationDto.Link);
+        result.Version.Should().Be(applicationDto.Version);
     }
     
         [Fact]
         public async Task UpdateApplication_ShouldReturnNull_WhenApplicationDoesNotExist()
         {
             // Arrange
-            var updatedApplicationDto = new ApplicationDto(
+            var updatedApplicationDto = new ApplicationUpdateDto(
                 "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0");
     
             // Act

@@ -31,21 +31,20 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
         return application;
     }
     
-    public async Task<Application?> UpdateApplication(int applicationId, ApplicationDto applicationDto)
+    public async Task<Application?> UpdateApplication(int applicationId, ApplicationUpdateDto applicationUpdateDto)
     {
         var application = await GetApplication(applicationId);
 
         if (application is null)
             return null;
-    
         var updatedApplication = new Application
         {
-            Name = applicationDto.Name,
-            Type = application.Type,
-            Link = applicationDto.Link,
-            Version = applicationDto.Version ?? application.Version
+            Name = applicationUpdateDto.Name ?? application.Name,
+            Type = applicationUpdateDto.Type ?? application.Type,
+            Link = applicationUpdateDto.Link ?? application.Link,
+            Version = applicationUpdateDto.Version ?? application.Version
         };
-    
+        
         databaseService.Applications.Update(updatedApplication);
         await databaseService.SaveChangesAsync();
         return updatedApplication;
