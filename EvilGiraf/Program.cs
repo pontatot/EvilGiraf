@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EvilGiraf.Interface;
 using EvilGiraf.Service;
 using k8s;
@@ -5,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace EvilGiraf;
+
+[ExcludeFromCodeCoverage]
 public class Program
 {
     public static void Main(string[] args)

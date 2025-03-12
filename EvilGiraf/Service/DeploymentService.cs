@@ -29,7 +29,7 @@ public class DeploymentService(IKubernetes client) : IDeploymentService
             var deployment = await client.AppsV1.ReadNamespacedDeploymentAsync(name, @namespace);
             return deployment;
         }
-        catch (HttpOperationException)
+        catch (HttpOperationException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return null;
         }
@@ -41,7 +41,7 @@ public class DeploymentService(IKubernetes client) : IDeploymentService
         {
             return await client.AppsV1.DeleteNamespacedDeploymentAsync(name, @namespace);
         }
-        catch (HttpOperationException)
+        catch (HttpOperationException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return null;
         }
@@ -53,7 +53,7 @@ public class DeploymentService(IKubernetes client) : IDeploymentService
         {
             return await client.AppsV1.ReplaceNamespacedDeploymentAsync(model.ToDeployment(), model.Name, model.Namespace);
         }
-        catch (HttpOperationException)
+        catch (HttpOperationException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return null;
         }
