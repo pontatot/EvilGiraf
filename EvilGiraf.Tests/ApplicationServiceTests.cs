@@ -20,12 +20,7 @@ public class ApplicationServiceTests
     public async Task CreateApplication_ShouldCreateAndReturnNewApplication()
     {
         // Arrange
-        var application = new Application(){
-            Name = "TestApp",
-            Type = ApplicationType.Docker,
-            Link = "https://test.com",
-            Version = "1.0.0"
-        };
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
 
         // Act
         var result = await _applicationService.CreateApplication(application);
@@ -42,12 +37,7 @@ public class ApplicationServiceTests
     public async Task GetApplication_ShouldReturnApplication()
     {
         // Arrange
-        var application = new Application(){
-            Name = "TestApp",
-            Type = ApplicationType.Docker,
-            Link = "https://test.com",
-            Version = "1.0.0"
-        };
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
         var createdApplication = await _applicationService.CreateApplication(application);
 
         // Act
@@ -76,12 +66,7 @@ public class ApplicationServiceTests
     public async Task DeleteApplication_ShouldDeleteApplication()
     {
         // Arrange
-        var application = new Application(){
-            Name = "TestApp",
-            Type = ApplicationType.Docker,
-            Link = "https://test.com",
-            Version = "1.0.0"
-        };
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0");
         var createdApplication = await _applicationService.CreateApplication(application);
 
         // Act

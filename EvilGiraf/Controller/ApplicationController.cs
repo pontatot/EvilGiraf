@@ -13,7 +13,7 @@ public class ApplicationController(IApplicationService applicationService) : Con
     [ProducesResponseType(typeof(ApplicationResultDto), 201)]
     public async  Task<IActionResult> Create([FromBody] ApplicationCreateDto request)
     {
-        var application = await applicationService.CreateApplication(request.ToModel());
+        var application = await applicationService.CreateApplication(request);
 
         return Created($"", application.ToDto());
     }

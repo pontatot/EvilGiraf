@@ -1,4 +1,5 @@
 using EvilGiraf.Dto;
+using EvilGiraf.Extensions;
 using EvilGiraf.Interface;
 using EvilGiraf.Model;
 
@@ -6,9 +7,9 @@ namespace EvilGiraf.Service;
 
 public class ApplicationService(DatabaseService databaseService) : IApplicationService
 {
-    public async Task<Application> CreateApplication(Application application)
+    public async Task<Application> CreateApplication(ApplicationCreateDto application)
     {
-        var result = databaseService.Applications.Add(application);
+        var result = databaseService.Applications.Add(application.ToModel());
         await databaseService.SaveChangesAsync();
         return result.Entity;
     }
