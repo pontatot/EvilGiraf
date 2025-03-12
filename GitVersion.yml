@@ -1,31 +1,23 @@
-mode: ContinuousDelivery
+mode: MainLine
 major-version-bump-message: "^(breaking|major):"
 minor-version-bump-message: "^(feature|feat|minor):"
 patch-version-bump-message: "^(fix|patch|refactor|style|chore|revert):"
-no-bump-message: "^(docs|test|ci):"
+no-bump-message: "^(none|skip|docs|test|ci):"
 tag-prefix: '[vV]'
 
 branches:
   main:
     regex: ^main$
-    mode: ContinuousDelivery
-    label: ''
+    is-mainline: true
     increment: Patch
-    prevent-increment:
-      of-merged-branch: true
-    track-merge-target: false
-    is-main-branch: true
-    source-branches: []
-    is-source-branch-for: ['feature']
-
   feature:
-    regex: ^(feature|feat)/
-    mode: ContinuousDelivery
-    label: alpha
-    increment: Inherit
-    prevent-increment:
-      of-merged-branch: false
-    track-merge-target: false
-    is-main-branch: false
+    regex: ^(feature|feat)?[/-]
+    increment: Minor
     source-branches: ['main']
-    is-source-branch-for: []
+  hotfix:
+    regex: ^hotfix?[/-]
+    increment: Patch
+    source-branches: ['main']
+ignore:
+  sha: []
+merge-message-formats: {}
