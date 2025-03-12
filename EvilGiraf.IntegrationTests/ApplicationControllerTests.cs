@@ -70,17 +70,19 @@ public class ApplicationControllerTests : IntegrationTestBase
     public async Task Get_ShouldReturnApplication()
     {
         // Arrange
-        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0");
+        var application = new Application
+        {
+            Name = "test-application",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-application:latest",
+            Version = "1.0.0"
+        };
 
-        var response = await Client.PostAsJsonAsync("/application", createRequest);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var application = await response.Content.ReadFromJsonAsync<Application>();
-        
-        application.Should().NotBeNull();
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
 
         // Act
-        response = await Client.GetAsync($"/application/{application!.Id}");
+        var response = await Client.GetAsync($"/application/{application!.Id}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -98,17 +100,19 @@ public class ApplicationControllerTests : IntegrationTestBase
     public async Task GetWithNonExistingId_ShouldReturnNotFound()
     {
         // Arrange
-        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0");
+        var application = new Application
+        {
+            Name = "test-application",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-application:latest",
+            Version = "1.0.0"
+        };
 
-        var response = await Client.PostAsJsonAsync("/application", createRequest);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var application = await response.Content.ReadFromJsonAsync<Application>();
-        
-        application.Should().NotBeNull();
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
 
         // Act
-        response = await Client.GetAsync($"/application/{application!.Id + 1}");
+        var response = await Client.GetAsync($"/application/{application!.Id + 1}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
