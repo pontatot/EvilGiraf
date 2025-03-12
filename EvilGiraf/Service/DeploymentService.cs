@@ -10,6 +10,15 @@ public class DeploymentService(IKubernetes client) : IDeploymentService
 {
     public async Task<V1Deployment> CreateDeployment(DeploymentModel model)
     {
+        try
+        {
+            await client.CoreV1.ReadNamespaceAsync(model.Namespace);
+        }
+        catch (HttpOperationException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            await client.CoreV1.CreateNamespaceAsync(new V1Namespace { Metadata = new V1ObjectMeta { Name = model.Namespace } });
+        }
+        
         return await client.AppsV1.CreateNamespacedDeploymentAsync(model.ToDeployment(), model.Namespace);
     }
     

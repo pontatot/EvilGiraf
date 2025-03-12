@@ -6,6 +6,8 @@ public record DeploymentModel(string Name, string Namespace, int Replicas, strin
 
 public static class DeploymentModelExtensions
 {
+    public static string ToNamespace(this int id) => $"evilgiraf-{id}";
+    
     public static V1Deployment ToDeployment(this DeploymentModel model)
     {
         return new V1Deployment

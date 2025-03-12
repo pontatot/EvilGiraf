@@ -38,12 +38,38 @@ public class DeploymentTests
 
         Client.AppsV1.Returns(appv1OperationsSubstitute);
         
+        var corev1OperationsSubstitute = Substitute.For<ICoreV1Operations>();
+        corev1OperationsSubstitute.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>());
+        
+        Client.CoreV1.Returns(corev1OperationsSubstitute);
+        
         DeploymentService = new DeploymentService(Client);
     }
     
     [Fact]
     public async Task CreateDeployment_Should_Return_Deployment()
     {
+        var model = new DeploymentModel(
+            "deployment-test",
+            "default",
+            1,
+            "nginx",
+            [80]
+        );
+        var result = await DeploymentService.CreateDeployment(model);
+        result.Should().NotBeNull();
+        result.Should().BeOfType<V1Deployment>();
+        await Client.AppsV1.Received().CreateNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<V1Deployment>(), "default");
+    }
+    
+    [Fact]
+    public async Task CreateDeployment_with_namespace_not_exist_Should_Return_Deployment()
+    {
+        var response = new HttpOperationException();
+        response.Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty);
+        Client.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Throws(response);
+        Client.CoreV1.CreateNamespaceWithHttpMessagesAsync(Arg.Any<V1Namespace>()).Returns(new HttpOperationResponse<V1Namespace>());
+        
         var model = new DeploymentModel(
             "deployment-test",
             "default",
