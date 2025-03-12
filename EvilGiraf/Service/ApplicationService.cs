@@ -7,9 +7,9 @@ namespace EvilGiraf.Service;
 
 public class ApplicationService(DatabaseService databaseService) : IApplicationService
 {
-    public async Task<Application> CreateApplication(ApplicationCreateDto application)
+    public async Task<Application> CreateApplication(ApplicationCreateDto applicationDto)
     {
-        var result = databaseService.Applications.Add(application.ToModel());
+        var result = databaseService.Applications.Add(applicationDto.ToModel());
         await databaseService.SaveChangesAsync();
         return result.Entity;
     }
@@ -38,7 +38,8 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
         if (application is null)
             return null;
         var updatedApplication = new Application
-        {
+        {   
+            Id = application.Id,
             Name = applicationUpdateDto.Name ?? application.Name,
             Type = applicationUpdateDto.Type ?? application.Type,
             Link = applicationUpdateDto.Link ?? application.Link,

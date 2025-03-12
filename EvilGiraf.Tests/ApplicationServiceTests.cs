@@ -105,7 +105,8 @@ public class ApplicationServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.Name.Should().Be(updatedApplicationDto.Name);
+        result!.Id.Should().Be(createdApplication.Id);
+        result.Name.Should().Be(updatedApplicationDto.Name);
         result.Type.Should().Be(updatedApplicationDto.Type);
         result.Link.Should().Be(updatedApplicationDto.Link);
         result.Version.Should().Be(updatedApplicationDto.Version);
@@ -127,7 +128,8 @@ public class ApplicationServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.Name.Should().Be(applicationDto.Name);
+        result!.Id.Should().Be(createdApplication.Id);
+        result.Name.Should().Be(applicationDto.Name);
         result.Type.Should().Be(applicationDto.Type);
         result.Link.Should().Be(applicationDto.Link);
         result.Version.Should().Be(applicationDto.Version);
