@@ -9,14 +9,14 @@ public class Application
     
     [Required]
     [MaxLength(255)]
-    public required string Name { get; init; }
+    public required string Name { get; set; }
     
-    public ApplicationType Type { get; init; }
+    public ApplicationType Type { get; set; }
     
     [Required]
     [MaxLength(255)]
-    public required string Link { get; init; }
+    public required string Link { get; set; }
     
     [MaxLength(255)]
-    public string? Version { get; init; }
+    public string? Version { get; set; }
 }
