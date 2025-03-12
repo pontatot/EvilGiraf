@@ -9,7 +9,4 @@ public class DatabaseService : DbContext
 
     public DatabaseService(DbContextOptions<DatabaseService> options) : base(options)
     { }
-
-    public DatabaseService()
-    { }
 }
