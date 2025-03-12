@@ -34,14 +34,6 @@ jobs:
         with:
           useConfigFile: true
 
-      - name: Create Git Tag
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git config user.email "gitversion@evilgiraf.com"
-          git config user.name "GitVersion"
-          git tag -a v${{ steps.version.outputs.semVer }} -m "Release v${{ steps.version.outputs.semVer }}"
-          git push origin v${{ steps.version.outputs.semVer }}
-
       - name: Log into registry
         run: echo '${{ secrets.REGISTRY_PASSWORD }}' | docker login ${{ secrets.REGISTRY_URL }} -u '${{ secrets.REGISTRY_USERNAME }}' --password-stdin
 
@@ -62,3 +54,11 @@ jobs:
 
       - name: Push Docker image
         run: docker push -a '${{ secrets.REGISTRY_URL }}/evil-giraf'
+
+      - name: Create Git Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.email "gitversion@evilgiraf.com"
+          git config user.name "GitVersion"
+          git tag -a v${{ steps.version.outputs.semVer }} -m "Release v${{ steps.version.outputs.semVer }}"
+          git push origin v${{ steps.version.outputs.semVer }}
