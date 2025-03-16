@@ -29,4 +29,17 @@ public class ApplicationController(IApplicationService applicationService) : Con
 
         return Ok(application.ToDto());
     }
+
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(typeof(string), 404)]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var response = await applicationService.DeleteApplication(id);
+
+        if(response is null)
+            return NotFound($"Application {id} not found");
+
+        return NoContent();
+    }
 }

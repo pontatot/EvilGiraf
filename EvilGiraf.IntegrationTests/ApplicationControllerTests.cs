@@ -109,4 +109,54 @@ public class ApplicationControllerTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [Fact]
+    public async Task Delete_ShouldDeleteApplication()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "test-application",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-application:latest",
+            Version = "1.0.0"
+        };
+
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var response = await Client.DeleteAsync($"/application/{application!.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        response = await Client.GetAsync($"/application/{application.Id}");
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task DeleteWithNonExistingId_ShouldReturnNotFound()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "test-application",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-application:latest",
+            Version = "1.0.0"
+        };
+
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+
+        application = await _dbContext.Applications.FindAsync(application.Id);
+        application.Should().NotBeNull();
+
+        // Act
+        var response = await Client.DeleteAsync($"/application/{application!.Id + 1}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }
