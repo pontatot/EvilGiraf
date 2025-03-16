@@ -1,10 +1,12 @@
 using EvilGiraf.Dto;
 using EvilGiraf.Interface;
 using EvilGiraf.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EvilGiraf.Controller;
 
+[Authorize]
 [ApiController]
 [Route("")]
 public class DeploymentController(IDeploymentService deploymentService, IApplicationService applicationService) : ControllerBase
