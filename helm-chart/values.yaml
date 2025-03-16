@@ -119,3 +119,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+auth:
+  apiKey: '***'

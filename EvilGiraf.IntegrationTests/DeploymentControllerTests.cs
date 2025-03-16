@@ -12,7 +12,7 @@ using NSubstitute.ExceptionExtensions;
 
 namespace EvilGiraf.IntegrationTests;
 
-public class DeploymentControllerTests : IntegrationTestBase
+public class DeploymentControllerTests : AuthenticatedTestBase
 {
     private readonly DatabaseService _dbContext;
     private readonly IKubernetes _kubernetes;

@@ -51,4 +51,5 @@ jobs:
             --namespace evilgiraf \
             --create-namespace \
             --set image.tag=${{ steps.version.outputs.semVer }} \
+            --set auth.apiKey=${{ secrets.API_KEY }} \
             --wait --timeout 15m

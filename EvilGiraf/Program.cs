@@ -1,8 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
+using EvilGiraf.Authentication;
 using EvilGiraf.Interface;
 using EvilGiraf.Service;
 using k8s;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Npgsql;
 
 namespace EvilGiraf;
@@ -14,12 +16,39 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-
+        builder.Services.AddApiKeyAuth(options =>
+        {
+            options.ApiKey = builder.Configuration["ApiKey"]!;
+        });
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "EvilGiraf API", Version = "v1" });
+    
+            c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.ApiKey,
+                Name = "X-API-Key",
+                In = ParameterLocation.Header,
+                Description = "API Key authentication using the 'X-API-Key' header"
+            });
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "ApiKey"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
         builder.Services.AddSingleton<IKubernetes>(_ =>
         {
             var config = KubernetesClientConfiguration.IsInCluster() ?
@@ -42,6 +71,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();

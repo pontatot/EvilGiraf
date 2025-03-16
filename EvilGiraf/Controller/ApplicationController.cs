@@ -2,9 +2,11 @@ using EvilGiraf.Interface;
 using Microsoft.AspNetCore.Mvc;
 using EvilGiraf.Dto;
 using EvilGiraf.Extensions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EvilGiraf.Controller;
 
+[Authorize]
 [ApiController]
 [Route("application")]
 public class ApplicationController(IApplicationService applicationService) : ControllerBase

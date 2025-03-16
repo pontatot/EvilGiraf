@@ -7,7 +7,7 @@ using FluentAssertions;
 
 namespace EvilGiraf.IntegrationTests;
 
-public class ApplicationControllerTests : IntegrationTestBase
+public class ApplicationControllerTests : AuthenticatedTestBase
 {
     private readonly DatabaseService _dbContext;
 
