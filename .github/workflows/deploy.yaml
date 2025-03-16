@@ -47,9 +47,11 @@ jobs:
 
       - name: Deploy with Helm
         run: |
+          helm dependency update
           helm upgrade --install evilgiraf helm-chart \
             --namespace evilgiraf \
             --create-namespace \
-            --set image.tag=${{ steps.version.outputs.semVer }} \
-            --set auth.apiKey=${{ secrets.API_KEY }} \
+            --set app.image.tag=${{ steps.version.outputs.semVer }} \
+            --set app.auth.apiKey=${{ secrets.API_KEY }} \
+            --set postgresql.auth.password=${{ secrets.POSTGRES_PASSWORD }} \
             --wait --timeout 15m
