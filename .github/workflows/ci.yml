@@ -1,8 +1,8 @@
-name: Tests
+name: CI
 
 on:
   push:
-    branches: '**'
+    branches: ['**']
 
 jobs:
   tests:
@@ -23,3 +23,50 @@ jobs:
 
       - name: Run unit tests
         run: dotnet test
+
+  build:
+    name: Build
+    runs-on: github-runner-evilgiraf
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.1.11
+        with:
+          versionSpec: '6.0.x'
+
+      - name: Determine Version
+        id: version
+        uses: gittools/actions/gitversion/execute@v3.1.11
+        with:
+          useConfigFile: true
+
+      - name: Log into registry
+        run: echo '${{ secrets.REGISTRY_PASSWORD }}' | docker login ${{ secrets.REGISTRY_URL }} -u '${{ secrets.REGISTRY_USERNAME }}' --password-stdin
+
+      - name: Pull Docker image
+        run: docker pull '${{ secrets.REGISTRY_URL }}/evil-giraf:latest'
+
+      - name: Build Docker image
+        run: docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from '${{ secrets.REGISTRY_URL }}/evil-giraf:latest' -t evil-giraf .
+
+      - name: Tag main Docker image with 'latest'
+        if: github.ref == 'refs/heads/main'
+        run: docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:latest'
+
+      - name: Tag Docker image
+        run: |
+          docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:${{ steps.version.outputs.semVer }}'
+          docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:${{ github.sha }}'
+
+      - name: Push Docker image
+        run: docker push -a '${{ secrets.REGISTRY_URL }}/evil-giraf'

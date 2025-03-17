@@ -1,4 +1,4 @@
-name: Deploy
+name: CD
 
 on:
   workflow_run:
@@ -6,6 +6,9 @@ on:
     types:
       - completed
     branches: [ main ]
+
+permissions:
+  contents: write
 
 jobs:
   deploy:
@@ -34,6 +37,13 @@ jobs:
         with:
           useConfigFile: true
 
+      - name: Create Git Tag
+        run: |
+          git config user.email "gitversion@evilgiraf.com"
+          git config user.name "GitVersion"
+          git tag -a v${{ steps.version.outputs.semVer }} -m "Release v${{ steps.version.outputs.semVer }}"
+          git push origin v${{ steps.version.outputs.semVer }}
+
       - name: Setup Kubernetes config
         run: |
           mkdir -p ~/.kube
@@ -47,7 +57,7 @@ jobs:
 
       - name: Deploy with Helm
         run: |
-          helm dependency update
+          helm dependency update helm-chart
           helm upgrade --install evilgiraf helm-chart \
             --namespace evilgiraf \
             --create-namespace \
