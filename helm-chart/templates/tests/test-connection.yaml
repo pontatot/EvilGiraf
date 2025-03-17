@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "evil-giraf.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "evil-giraf.fullname" . }}:{{ .Values.app.service.port }}']
   restartPolicy: Never

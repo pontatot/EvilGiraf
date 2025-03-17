@@ -21,6 +21,7 @@ public class Program
             options.ApiKey = builder.Configuration["ApiKey"]!;
         });
         builder.Services.AddControllers();
+        builder.Services.AddHealthChecks();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
@@ -75,6 +76,7 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
+        app.MapHealthChecks("/health");
 
         app.Run();
     }
