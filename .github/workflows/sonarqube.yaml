@@ -1,4 +1,4 @@
-name: SonarQube
+name: CI
 
 on:
   push:
