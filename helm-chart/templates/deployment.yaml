@@ -39,8 +39,8 @@ spec:
             - name: PGPASSWORD
               value: {{ .Values.postgresql.auth.password }}
         - name: ef-migrations
-          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag | default .Chart.AppVersion }}"
-          command: ['dotnet', 'ef', 'database', 'update', '--project EvilGiraf']
+          image: "{{ .Values.app.baseImage.repository }}:{{ .Values.app.baseImage.tag | default .Chart.AppVersion }}"
+          command: ['dotnet', 'ef', 'database', 'update']
           env:
             - name: POSTGRES__HOST
               value: {{ .Release.Name }}-postgresql
