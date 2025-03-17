@@ -44,4 +44,17 @@ public class ApplicationController(IApplicationService applicationService) : Con
 
         return NoContent();
     }
+
+    [HttpPatch("{id:int}")]
+    [ProducesResponseType(typeof(ApplicationResultDto), 200)]
+    [ProducesResponseType(typeof(string), 404)]
+    public async Task<IActionResult> Update(int id, [FromBody] ApplicationUpdateDto request)
+    {
+        var application = await applicationService.UpdateApplication(id, request);
+
+        if(application is null)
+            return NotFound($"Application {id} not found");
+
+        return Ok(application.ToDto());
+    }
 }
