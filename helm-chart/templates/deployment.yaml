@@ -40,7 +40,7 @@ spec:
               value: {{ .Values.postgresql.auth.password }}
         - name: ef-migrations
           image: "{{ .Values.app.baseImage.repository }}:{{ .Values.app.baseImage.tag | default .Chart.AppVersion }}"
-          command: ['~/.dotnet/tools/dotnet-ef', 'database', 'update']
+          command: ['/root/.dotnet/tools/dotnet-ef', 'database', 'update']
           env:
             - name: POSTGRES__HOST
               value: {{ .Release.Name }}-postgresql
