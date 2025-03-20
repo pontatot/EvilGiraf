@@ -144,4 +144,105 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
+
+    [Fact]
+    public async Task Update_ShouldUpdateApplication()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "test-application",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-application:latest",
+            Version = "1.0.0"
+        };
+
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+
+        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0");
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/application/{application.Id}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updatedApplication = await response.Content.ReadFromJsonAsync<Application>();
+        
+        updatedApplication.Should().NotBeNull();
+
+        updatedApplication!.Name.Should().Be(updateRequest.Name);
+        updatedApplication.Type.Should().Be(updateRequest.Type);
+        updatedApplication.Link.Should().Be(updateRequest.Link);
+        updatedApplication.Version.Should().Be(updateRequest.Version);
+        updatedApplication.Id.Should().Be(application.Id);
+
+        // Verify the application was updated in the database
+        response = await Client.GetAsync($"/application/{application.Id}");
+        var savedApplication = await response.Content.ReadFromJsonAsync<Application>();
+
+        savedApplication.Should().NotBeNull();
+
+        savedApplication!.Name.Should().Be(updateRequest.Name);
+        savedApplication.Type.Should().Be(updateRequest.Type);
+        savedApplication.Link.Should().Be(updateRequest.Link);
+        savedApplication.Version.Should().Be(updateRequest.Version);
+    }
+
+    [Fact]
+    public async Task UpdateWithNonExistingId_ShouldReturnNotFound()
+    {
+        // Arrange
+        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0");
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/application/{999}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task UpdateWithNullBody_ShouldReturnApplication()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "test-application",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-application:latest",
+            Version = "1.0.0"
+        };
+
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+
+        var updateRequest = new ApplicationUpdateDto(null, null, null, null);
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/application/{application.Id}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var updatedApplication = await response.Content.ReadFromJsonAsync<Application>();
+
+        updatedApplication.Should().NotBeNull();
+        updatedApplication!.Name.Should().Be(application.Name);
+        updatedApplication.Type.Should().Be(application.Type);
+        updatedApplication.Link.Should().Be(application.Link);
+        updatedApplication.Version.Should().Be(application.Version);
+        updatedApplication.Id.Should().Be(application.Id);
+
+        // Verify the application was updated in the database
+        response = await Client.GetAsync($"/application/{application.Id}");
+        var savedApplication = await response.Content.ReadFromJsonAsync<Application>();
+
+        savedApplication.Should().NotBeNull();
+
+        savedApplication!.Name.Should().Be(application.Name);
+        savedApplication.Type.Should().Be(application.Type);
+        savedApplication.Link.Should().Be(application.Link);
+        savedApplication.Version.Should().Be(application.Version);
+    }
 }
