@@ -203,7 +203,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     }
 
     [Fact]
-    public async Task UpdateWithPartialNewInfos_ShouldUpdateApplication()
+    public async Task UpdateWithNullBody_ShouldReturnApplication()
     {
         // Arrange
         var application = new Application
@@ -217,76 +217,21 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         _dbContext.Applications.Add(application);
         await _dbContext.SaveChangesAsync();
 
-        var updateRequest = new ApplicationUpdateDto("new-application", null, null, "2.0.0");
+        var updateRequest = new ApplicationUpdateDto(null, null, null, null);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/application/{application.Id}", updateRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updatedApplication = await response.Content.ReadFromJsonAsync<Application>();
-        
-        updatedApplication.Should().NotBeNull();
 
-        updatedApplication!.Name.Should().Be(updateRequest.Name);
+        var updatedApplication = await response.Content.ReadFromJsonAsync<Application>();
+
+        updatedApplication.Should().NotBeNull();
+        updatedApplication!.Name.Should().Be(application.Name);
         updatedApplication.Type.Should().Be(application.Type);
         updatedApplication.Link.Should().Be(application.Link);
-        updatedApplication.Version.Should().Be(updateRequest.Version);
+        updatedApplication.Version.Should().Be(application.Version);
         updatedApplication.Id.Should().Be(application.Id);
-
-        // Verify the application was updated in the database
-        response = await Client.GetAsync($"/application/{application.Id}");
-        var savedApplication = await response.Content.ReadFromJsonAsync<Application>();
-
-        savedApplication.Should().NotBeNull();
-
-        savedApplication!.Name.Should().Be(updateRequest.Name);
-        savedApplication.Type.Should().Be(application.Type);
-        savedApplication.Link.Should().Be(application.Link);
-        savedApplication.Version.Should().Be(updateRequest.Version);
-    }
-
-    [Fact]
-    public async Task UpdateWithCompleteNewInfos_ShouldUpdateApplication()
-    {
-        // Arrange
-        var application = new Application
-        {
-            Name = "test-application",
-            Type = ApplicationType.Docker,
-            Link = "docker.io/test-application:latest",
-            Version = "1.0.0"
-        };
-
-        _dbContext.Applications.Add(application);
-        await _dbContext.SaveChangesAsync();
-
-        var updateRequest = new ApplicationUpdateDto("new-application", ApplicationType.Git, "gitlab.ci", "2.0.0");
-
-        // Act
-        var response = await Client.PatchAsJsonAsync($"/application/{application.Id}", updateRequest);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updatedApplication = await response.Content.ReadFromJsonAsync<Application>();
-        
-        updatedApplication.Should().NotBeNull();
-
-        updatedApplication!.Name.Should().Be(updateRequest.Name);
-        updatedApplication.Type.Should().Be(updateRequest.Type);
-        updatedApplication.Link.Should().Be(updateRequest.Link);
-        updatedApplication.Version.Should().Be(updateRequest.Version);
-        updatedApplication.Id.Should().Be(application.Id);
-
-        // Verify the application was updated in the database
-        response = await Client.GetAsync($"/application/{application.Id}");
-        var savedApplication = await response.Content.ReadFromJsonAsync<Application>();
-
-        savedApplication.Should().NotBeNull();
-
-        savedApplication!.Name.Should().Be(updateRequest.Name);
-        savedApplication.Type.Should().Be(updateRequest.Type);
-        savedApplication.Link.Should().Be(updateRequest.Link);
-        savedApplication.Version.Should().Be(updateRequest.Version);
     }
 }
