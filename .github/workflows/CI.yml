@@ -50,26 +50,50 @@ jobs:
         with:
           useConfigFile: true
 
-      - name: Log into registry
-        run: echo '${{ secrets.REGISTRY_PASSWORD }}' | docker login ${{ secrets.REGISTRY_URL }} -u '${{ secrets.REGISTRY_USERNAME }}' --password-stdin
+      - name: Login to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Pull Docker image
-        run: docker pull '${{ secrets.REGISTRY_URL }}/evil-giraf:latest'
-
-      - name: Build Docker image
-        run: docker build --build-arg BUILDKIT_INLINE_CACHE=1 --cache-from '${{ secrets.REGISTRY_URL }}/evil-giraf:latest' -t evil-giraf .
-
-      - name: Tag main Docker image with 'latest'
-        if: github.ref == 'refs/heads/main'
-        run: docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:latest'
-
-      - name: Tag Docker image
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Pull images for cache
         run: |
+          docker pull '${{ secrets.REGISTRY_URL }}/evil-giraf-base:latest'
+          docker pull '${{ secrets.REGISTRY_URL }}/evil-giraf:latest'
+      
+      - name: Build docker images
+        run: |
+          docker build \
+            --cache-to type=inline \
+            --cache-from 'type=registry,ref=${{ secrets.REGISTRY_URL }}/evil-giraf-base:latest' \
+            -t evil-giraf-base EvilGiraf
+          
+          docker build \
+            --cache-to type=inline \
+            --cache-from 'type=registry,ref=${{ secrets.REGISTRY_URL }}/evil-giraf:latest' \
+            -t evil-giraf .
+
+      - name: Tag main docker images with 'latest'
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker tag evil-giraf-base '${{ secrets.REGISTRY_URL }}/evil-giraf-base:latest'
+          docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:latest'
+
+      - name: Tag docker images
+        run: |
+          docker tag evil-giraf-base '${{ secrets.REGISTRY_URL }}/evil-giraf-base:${{ steps.version.outputs.semVer }}'
+          docker tag evil-giraf-base '${{ secrets.REGISTRY_URL }}/evil-giraf-base:${{ github.sha }}'
           docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:${{ steps.version.outputs.semVer }}'
           docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:${{ github.sha }}'
 
-      - name: Push Docker image
-        run: docker push -a '${{ secrets.REGISTRY_URL }}/evil-giraf'
+      - name: Push docker images
+        run: |
+          docker push -a '${{ secrets.REGISTRY_URL }}/evil-giraf-base'
+          docker push -a '${{ secrets.REGISTRY_URL }}/evil-giraf'
 
   sonarqube:
     name: SonarQube analysis

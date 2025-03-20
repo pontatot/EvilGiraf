@@ -6,6 +6,10 @@ app:
     repository: harbor.pyxis.dopolytech.fr/main/evil-giraf
     pullPolicy: Always
     tag: "latest"
+  baseImage:
+    repository: harbor.pyxis.dopolytech.fr/main/evil-giraf-base
+    pullPolicy: Always
+    tag: "latest"
   imagePullSecrets: []
   
   serviceAccount:

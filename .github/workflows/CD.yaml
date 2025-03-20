@@ -62,6 +62,7 @@ jobs:
             --namespace evilgiraf \
             --create-namespace \
             --set app.image.tag=${{ steps.version.outputs.semVer }} \
+            --set app.baseImage.tag=${{ steps.version.outputs.semVer }} \
             --set app.auth.apiKey=${{ secrets.API_KEY }} \
             --set postgresql.auth.password=${{ secrets.POSTGRES_PASSWORD }} \
             --wait --timeout 15m
