@@ -233,5 +233,16 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         updatedApplication.Link.Should().Be(application.Link);
         updatedApplication.Version.Should().Be(application.Version);
         updatedApplication.Id.Should().Be(application.Id);
+
+        // Verify the application was updated in the database
+        response = await Client.GetAsync($"/application/{application.Id}");
+        var savedApplication = await response.Content.ReadFromJsonAsync<Application>();
+
+        savedApplication.Should().NotBeNull();
+
+        savedApplication!.Name.Should().Be(application.Name);
+        savedApplication.Type.Should().Be(application.Type);
+        savedApplication.Link.Should().Be(application.Link);
+        savedApplication.Version.Should().Be(application.Version);
     }
 }
