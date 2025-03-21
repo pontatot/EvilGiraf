@@ -21,7 +21,7 @@ public class ApiKeyAuthHandler(
         }
 
         var providedApiKey = apiKeyHeaderValues.FirstOrDefault();
-        if (apiKeyHeaderValues.Count == 0 || string.IsNullOrWhiteSpace(providedApiKey))
+        if (string.IsNullOrWhiteSpace(providedApiKey))
         {
             return Task.FromResult(AuthenticateResult.Fail("API Key was not provided"));
         }
