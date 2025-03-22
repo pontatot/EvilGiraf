@@ -63,6 +63,7 @@ public class Program
                 .Get<NpgsqlConnectionStringBuilder>()?.ConnectionString));
         builder.Services.AddSingleton<IDeploymentService, DeploymentService>();
         builder.Services.AddScoped<IApplicationService, ApplicationService>();
+        builder.Services.AddScoped<IKubernetesService, KubernetesService>();
 
         var app = builder.Build();
 

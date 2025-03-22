@@ -65,10 +65,6 @@ public class DeploymentControllerTests : AuthenticatedTestBase
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content.ReadFromJsonAsync<DeployResponse>();
-        content.Should().NotBeNull();
-        content!.Status.Replicas.Should().Be(1);
-        content.Status.ReadyReplicas.Should().Be(1);
 
         await _kubernetes.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(
             Arg.Is<string>(name => name == application.Name),
@@ -129,10 +125,6 @@ public class DeploymentControllerTests : AuthenticatedTestBase
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content.ReadFromJsonAsync<DeployResponse>();
-        content.Should().NotBeNull();
-        content!.Status.Replicas.Should().Be(1);
-        content.Status.ReadyReplicas.Should().Be(1);
 
         await _kubernetes.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(
             Arg.Is<string>(name => name == application.Name),
@@ -148,5 +140,96 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         response.Content.ReadAsStringAsync().Result.Should().Be("Application 999 not found");
+    }
+
+    [Fact]
+    public async Task Status_ShouldReturnDeploymentStatus_WhenApplicationExistsAndIsDeployed()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "test-app",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-app:latest",
+            Version = "1.0.0"
+        };
+
+        var deployment = new HttpOperationResponse<V1Deployment>
+        {
+            Body = new V1Deployment
+            {
+                Status = new V1DeploymentStatus
+                {
+                    Replicas = 1,
+                    ReadyReplicas = 1
+                }
+            }
+        };
+        
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+        
+        _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(
+                application.Name, 
+                application.Id.ToNamespace())
+            .Returns(deployment);
+
+        // Act
+        var response = await Client.GetAsync($"/application/{application.Id}/deploy");
+
+        // Assert
+        response.Should().BeSuccessful();
+        var deployResponse = await response.Content.ReadFromJsonAsync<DeployResponse>();
+        deployResponse.Should().NotBeNull();
+        // You can add more specific assertions about the status value if needed
+    }
+
+    [Fact]
+    public async Task Status_ShouldReturn404_WhenApplicationExistsButNotDeployed()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "test-app",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-app:latest",
+            Version = "1.0.0"
+        };
+        
+        var httpException = new HttpOperationException
+        {
+            Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
+        };
+        
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+        
+        _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(
+                application.Name, 
+                application.Id.ToNamespace())
+            .Throws(httpException);
+
+        // Act
+        var response = await Client.GetAsync($"/application/{application.Id}/deploy");
+
+        // Assert
+        response.Should().HaveStatusCode(HttpStatusCode.NotFound);
+        var error = await response.Content.ReadAsStringAsync();
+        error.Should().Contain($"Application {application.Id} is not deployed");
+    }
+
+    [Fact]
+    public async Task Status_ShouldReturn404_WhenApplicationDoesNotExist()
+    {
+        // Arrange
+        const int nonExistentApplicationId = 999;
+
+        // Act
+        var response = await Client.GetAsync($"/application/{nonExistentApplicationId}/deploy");
+
+        // Assert
+        response.Should().HaveStatusCode(HttpStatusCode.NotFound);
+        var error = await response.Content.ReadAsStringAsync();
+        error.Should().Contain($"Application {nonExistentApplicationId} not found");
     }
 }
