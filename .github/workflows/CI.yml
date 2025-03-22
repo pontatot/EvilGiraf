@@ -18,6 +18,8 @@ jobs:
         with:
           dotnet-version: '8.0.x'
           cache: true
+        env:
+          DOTNET_ROOT: ${{ runner.temp }}/dotnet
 
       - name: Install dependencies
         run: dotnet restore --locked-mode
@@ -118,6 +120,8 @@ jobs:
         with:
           dotnet-version: '8.0.x'
           cache: true
+        env:
+          DOTNET_ROOT: ${{ runner.temp }}/dotnet
 
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v3.1.11
