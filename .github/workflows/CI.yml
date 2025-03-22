@@ -14,12 +14,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+          cache: true
 
       - name: Install dependencies
-        run: dotnet restore
+        run: dotnet restore --locked-mode
 
       - name: Run unit tests
         run: dotnet test
@@ -113,9 +114,10 @@ jobs:
           distribution: 'zulu'
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+          cache: true
 
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v3.1.11
@@ -158,6 +160,9 @@ jobs:
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
             /d:sonar.scanner.scanAll=true
+
+      - name: Install dependencies
+        run: dotnet restore --locked-mode
 
       - name: Build Project
         run: dotnet build
