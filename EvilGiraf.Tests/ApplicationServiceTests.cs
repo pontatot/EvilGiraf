@@ -135,17 +135,61 @@ public class ApplicationServiceTests
         result.Version.Should().Be(applicationDto.Version);
     }
     
-        [Fact]
-        public async Task UpdateApplication_ShouldReturnNull_WhenApplicationDoesNotExist()
+    [Fact]
+    public async Task UpdateApplication_ShouldReturnNull_WhenApplicationDoesNotExist()
+    {
+        // Arrange
+        var updatedApplicationDto = new ApplicationUpdateDto(
+            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0");
+
+        // Act
+        var result = await _applicationService.UpdateApplication(999, updatedApplicationDto);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ListApplications_ShouldReturnListOfApplications()
+    {
+        // Arrange
+        var applications = await _applicationService.ListApplications();
+        foreach (var app in applications)
         {
-            // Arrange
-            var updatedApplicationDto = new ApplicationUpdateDto(
-                "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0");
-    
-            // Act
-            var result = await _applicationService.UpdateApplication(999, updatedApplicationDto);
-    
-            // Assert
-            result.Should().BeNull();
+            await _applicationService.DeleteApplication(app.Id);
         }
+
+        var application1 = new ApplicationCreateDto("TestApp1", ApplicationType.Docker, "https://test.com", "1.0.0");
+        var application2 = new ApplicationCreateDto("TestApp2", ApplicationType.Docker, "https://test.com", "1.0.0");
+        var application3 = new ApplicationCreateDto("TestApp3", ApplicationType.Docker, "https://test.com", "1.0.0");
+
+        await _applicationService.CreateApplication(application1);
+        await _applicationService.CreateApplication(application2);
+        await _applicationService.CreateApplication(application3);
+
+        // Act
+        var result = await _applicationService.ListApplications();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().HaveCount(3);
+    }
+
+    [Fact]
+    public async Task ListApplications_ShouldReturnEmptyList()
+    {
+        // Arrange
+        var applications = await _applicationService.ListApplications();
+        foreach (var app in applications)
+        {
+            await _applicationService.DeleteApplication(app.Id);
+        }
+        
+        // Act
+        var result = await _applicationService.ListApplications();
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().HaveCount(0);
+    }
 }

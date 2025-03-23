@@ -4,6 +4,7 @@ using EvilGiraf.Dto;
 using EvilGiraf.Model;
 using EvilGiraf.Service;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 
 namespace EvilGiraf.IntegrationTests;
 
@@ -244,5 +245,76 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         savedApplication.Type.Should().Be(application.Type);
         savedApplication.Link.Should().Be(application.Link);
         savedApplication.Version.Should().Be(application.Version);
+    }
+
+    [Fact]
+    public async Task List_ShouldReturnListOfApplications()
+    {
+        // Arrange
+        var oldApplications = await _dbContext.Applications.ToListAsync();
+        _dbContext.Applications.RemoveRange(oldApplications);
+        await _dbContext.SaveChangesAsync();
+
+        var applications = new List<Application>
+        {
+            new()
+            {
+                Name = "test-application-1",
+                Type = ApplicationType.Docker,
+                Link = "docker.io/test-application-1:latest",
+                Version = "1.0.0"
+            },
+            new()
+            {
+                Name = "test-application-2",
+                Type = ApplicationType.Git,
+                Link = "k8s.io/test-application-2:latest",
+                Version = "2.0.0"
+            }
+        };
+
+        _dbContext.Applications.AddRange(applications);
+        await _dbContext.SaveChangesAsync();
+
+        // Act
+        var response = await Client.GetAsync("/application");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationDtos = await response.Content.ReadFromJsonAsync<List<Application>>();
+
+        applicationDtos.Should().NotBeNull();
+        applicationDtos.Should().HaveCount(2);
+
+        applicationDtos![0].Name.Should().Be(applications[0].Name);
+        applicationDtos[0].Type.Should().Be(applications[0].Type);
+        applicationDtos[0].Link.Should().Be(applications[0].Link);
+        applicationDtos[0].Version.Should().Be(applications[0].Version);
+        applicationDtos[0].Id.Should().Be(applications[0].Id);
+
+        applicationDtos[1].Name.Should().Be(applications[1].Name);
+        applicationDtos[1].Type.Should().Be(applications[1].Type);
+        applicationDtos[1].Link.Should().Be(applications[1].Link);
+        applicationDtos[1].Version.Should().Be(applications[1].Version);
+        applicationDtos[1].Id.Should().Be(applications[1].Id);
+    }
+
+    [Fact]
+    public async Task ListWithNoApplications_ShouldReturnEmptyList()
+    {
+        // Arrange
+        var oldApplications = await _dbContext.Applications.ToListAsync();
+        _dbContext.Applications.RemoveRange(oldApplications);
+        await _dbContext.SaveChangesAsync();
+        
+        // Act
+        var response = await Client.GetAsync("/application");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var applicationDtos = await response.Content.ReadFromJsonAsync<List<Application>>();
+
+        applicationDtos.Should().NotBeNull();
+        applicationDtos.Should().BeEmpty();
     }
 }

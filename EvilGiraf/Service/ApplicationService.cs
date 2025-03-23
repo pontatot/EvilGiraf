@@ -2,6 +2,7 @@ using EvilGiraf.Dto;
 using EvilGiraf.Extensions;
 using EvilGiraf.Interface;
 using EvilGiraf.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace EvilGiraf.Service;
 
@@ -47,5 +48,10 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
         var updatedApp = databaseService.Applications.Update(application).Entity;
         await databaseService.SaveChangesAsync();
         return updatedApp;
+    }
+
+    public async Task<List<Application>> ListApplications()
+    {
+        return await databaseService.Applications.ToListAsync();
     }
 }
