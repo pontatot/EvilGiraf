@@ -57,4 +57,13 @@ public class ApplicationController(IApplicationService applicationService) : Con
 
         return Ok(application.ToDto());
     }
+
+    [HttpGet("")]
+    [ProducesResponseType(typeof(List<ApplicationResultDto>), 200)]
+    public async Task<IActionResult> List()
+    {
+        var applications = await applicationService.ListApplications();
+
+        return Ok(applications.Select(a => a.ToDto()));
+    }
 }
