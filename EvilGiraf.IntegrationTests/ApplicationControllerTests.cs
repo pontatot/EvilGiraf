@@ -251,20 +251,20 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task List_ShouldReturnListOfApplications()
     {
         // Arrange
-        var old_applications = await _dbContext.Applications.ToListAsync();
-        _dbContext.Applications.RemoveRange(old_applications);
+        var oldApplications = await _dbContext.Applications.ToListAsync();
+        _dbContext.Applications.RemoveRange(oldApplications);
         await _dbContext.SaveChangesAsync();
 
         var applications = new List<Application>
         {
-            new Application
+            new()
             {
                 Name = "test-application-1",
                 Type = ApplicationType.Docker,
                 Link = "docker.io/test-application-1:latest",
                 Version = "1.0.0"
             },
-            new Application
+            new()
             {
                 Name = "test-application-2",
                 Type = ApplicationType.Git,
@@ -303,8 +303,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task ListWithNoApplications_ShouldReturnEmptyList()
     {
         // Arrange
-        var old_applications = await _dbContext.Applications.ToListAsync();
-        _dbContext.Applications.RemoveRange(old_applications);
+        var oldApplications = await _dbContext.Applications.ToListAsync();
+        _dbContext.Applications.RemoveRange(oldApplications);
         await _dbContext.SaveChangesAsync();
         
         // Act

@@ -153,8 +153,8 @@ public class ApplicationServiceTests
     public async Task ListApplications_ShouldReturnListOfApplications()
     {
         // Arrange
-        var appalications = await _applicationService.ListApplications();
-        foreach (var app in appalications)
+        var applications = await _applicationService.ListApplications();
+        foreach (var app in applications)
         {
             await _applicationService.DeleteApplication(app.Id);
         }
@@ -179,8 +179,8 @@ public class ApplicationServiceTests
     public async Task ListApplications_ShouldReturnEmptyList()
     {
         // Arrange
-        var appalications = await _applicationService.ListApplications();
-        foreach (var app in appalications)
+        var applications = await _applicationService.ListApplications();
+        foreach (var app in applications)
         {
             await _applicationService.DeleteApplication(app.Id);
         }
