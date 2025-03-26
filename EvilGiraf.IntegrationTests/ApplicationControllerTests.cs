@@ -21,7 +21,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task Create_ShouldCreateApplication()
     {
         // Arrange
-        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0");
+        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22]);
 
         // Act
         var response = await Client.PostAsJsonAsync("/application", createRequest);
@@ -36,6 +36,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         application.Link.Should().Be(createRequest.Link);
         application.Version.Should().Be(createRequest.Version);
         application.Id.Should().NotBe(0);
+        application.Ports.Should().BeEquivalentTo(createRequest.Ports);
 
         // Verify the application was saved to the database
         var savedApplication = await _dbContext.Applications.FindAsync(application.Id);
@@ -44,13 +45,14 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         savedApplication.Type.Should().Be(createRequest.Type);
         savedApplication.Link.Should().Be(createRequest.Link);
         savedApplication.Version.Should().Be(createRequest.Version);
+        savedApplication.Ports.Should().BeEquivalentTo(createRequest.Ports);
     }
 
     [Fact]
     public async Task CreateWithWrongBody_ShouldReturnBadRequest()
     {
         // Arrange
-        var createRequest = new ApplicationCreateDto(null!, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0");
+        var createRequest = new ApplicationCreateDto(null!, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22]);
 
         // Act
         var response = await Client.PostAsJsonAsync("/application", createRequest);
@@ -68,7 +70,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
             Name = "test-application",
             Type = ApplicationType.Docker,
             Link = "docker.io/test-application:latest",
-            Version = "1.0.0"
+            Version = "1.0.0",
+            Ports = [22]
         };
 
         _dbContext.Applications.Add(application);
@@ -87,6 +90,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         applicationDto.Link.Should().Be(application.Link);
         applicationDto.Version.Should().Be(application.Version);
         applicationDto.Id.Should().Be(application.Id);
+        applicationDto.Ports.Should().BeEquivalentTo(application.Ports);
     }
 
     [Fact]
@@ -98,7 +102,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
             Name = "test-application",
             Type = ApplicationType.Docker,
             Link = "docker.io/test-application:latest",
-            Version = "1.0.0"
+            Version = "1.0.0",
+            Ports = [22]
         };
 
         _dbContext.Applications.Add(application);
@@ -120,7 +125,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
             Name = "test-application",
             Type = ApplicationType.Docker,
             Link = "docker.io/test-application:latest",
-            Version = "1.0.0"
+            Version = "1.0.0",
+            Ports = [22]
         };
 
         _dbContext.Applications.Add(application);
@@ -155,13 +161,14 @@ public class ApplicationControllerTests : AuthenticatedTestBase
             Name = "test-application",
             Type = ApplicationType.Docker,
             Link = "docker.io/test-application:latest",
-            Version = "1.0.0"
+            Version = "1.0.0",
+            Ports = [22]
         };
 
         _dbContext.Applications.Add(application);
         await _dbContext.SaveChangesAsync();
 
-        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0");
+        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0", [23]);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/application/{application.Id}", updateRequest);
@@ -177,6 +184,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         updatedApplication.Link.Should().Be(updateRequest.Link);
         updatedApplication.Version.Should().Be(updateRequest.Version);
         updatedApplication.Id.Should().Be(application.Id);
+        updatedApplication.Ports.Should().BeEquivalentTo(updateRequest.Ports);
 
         // Verify the application was updated in the database
         response = await Client.GetAsync($"/application/{application.Id}");
@@ -188,13 +196,14 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         savedApplication.Type.Should().Be(updateRequest.Type);
         savedApplication.Link.Should().Be(updateRequest.Link);
         savedApplication.Version.Should().Be(updateRequest.Version);
+        savedApplication.Ports.Should().BeEquivalentTo(updateRequest.Ports);
     }
 
     [Fact]
     public async Task UpdateWithNonExistingId_ShouldReturnNotFound()
     {
         // Arrange
-        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0");
+        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0", [22]);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/application/{999}", updateRequest);
@@ -212,13 +221,14 @@ public class ApplicationControllerTests : AuthenticatedTestBase
             Name = "test-application",
             Type = ApplicationType.Docker,
             Link = "docker.io/test-application:latest",
-            Version = "1.0.0"
+            Version = "1.0.0",
+            Ports = [22]
         };
 
         _dbContext.Applications.Add(application);
         await _dbContext.SaveChangesAsync();
 
-        var updateRequest = new ApplicationUpdateDto(null, null, null, null);
+        var updateRequest = new ApplicationUpdateDto(null, null, null, null, null);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/application/{application.Id}", updateRequest);
@@ -234,6 +244,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         updatedApplication.Link.Should().Be(application.Link);
         updatedApplication.Version.Should().Be(application.Version);
         updatedApplication.Id.Should().Be(application.Id);
+        updatedApplication.Ports.Should().BeEquivalentTo(application.Ports);
 
         // Verify the application was updated in the database
         response = await Client.GetAsync($"/application/{application.Id}");
@@ -245,6 +256,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         savedApplication.Type.Should().Be(application.Type);
         savedApplication.Link.Should().Be(application.Link);
         savedApplication.Version.Should().Be(application.Version);
+        savedApplication.Ports.Should().BeEquivalentTo(application.Ports);
     }
 
     [Fact]
@@ -262,14 +274,16 @@ public class ApplicationControllerTests : AuthenticatedTestBase
                 Name = "test-application-1",
                 Type = ApplicationType.Docker,
                 Link = "docker.io/test-application-1:latest",
-                Version = "1.0.0"
+                Version = "1.0.0",
+                Ports = [22]
             },
             new()
             {
                 Name = "test-application-2",
                 Type = ApplicationType.Git,
                 Link = "k8s.io/test-application-2:latest",
-                Version = "2.0.0"
+                Version = "2.0.0",
+                Ports = [22]
             }
         };
 
@@ -291,12 +305,14 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         applicationDtos[0].Link.Should().Be(applications[0].Link);
         applicationDtos[0].Version.Should().Be(applications[0].Version);
         applicationDtos[0].Id.Should().Be(applications[0].Id);
+        applicationDtos[0].Ports.Should().BeEquivalentTo(applications[0].Ports);
 
         applicationDtos[1].Name.Should().Be(applications[1].Name);
         applicationDtos[1].Type.Should().Be(applications[1].Type);
         applicationDtos[1].Link.Should().Be(applications[1].Link);
         applicationDtos[1].Version.Should().Be(applications[1].Version);
         applicationDtos[1].Id.Should().Be(applications[1].Id);
+        applicationDtos[1].Ports.Should().BeEquivalentTo(applications[1].Ports);
     }
 
     [Fact]
