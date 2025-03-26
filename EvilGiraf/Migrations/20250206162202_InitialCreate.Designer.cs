@@ -46,6 +46,9 @@ namespace EvilGiraf.Migrations
                     b.Property<string>("Version")
                         .HasColumnType("text");
 
+                    b.Property<int[]>("Ports")
+                        .HasColumnType("integer[]");
+
                     b.HasKey("Id");
 
                     b.ToTable("Applications");

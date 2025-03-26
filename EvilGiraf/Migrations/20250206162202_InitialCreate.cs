@@ -22,7 +22,8 @@ namespace EvilGiraf.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     Link = table.Column<string>(type: "text", nullable: false),
-                    Version = table.Column<string>(type: "text", nullable: true)
+                    Version = table.Column<string>(type: "text", nullable: true),
+                    Ports = table.Column<int[]>(type: "integer[]", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -12,7 +12,8 @@ public static class ApplicationExtensions
             application.Name,
             application.Type,
             application.Link,
-            application.Version
+            application.Version,
+            application.Ports
         );
     }
 
@@ -23,7 +24,8 @@ public static class ApplicationExtensions
             Name = applicationDto.Name,
             Type = applicationDto.Type,
             Link = applicationDto.Link,
-            Version = applicationDto.Version
+            Version = applicationDto.Version,
+            Ports = applicationDto.Ports
         };
     }
 }

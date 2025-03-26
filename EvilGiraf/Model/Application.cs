@@ -19,4 +19,6 @@ public class Application
     
     [MaxLength(255)]
     public string? Version { get; set; }
+
+    public int[]? Ports { get; set; }
 }

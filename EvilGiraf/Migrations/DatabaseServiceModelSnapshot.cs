@@ -46,6 +46,9 @@ namespace EvilGiraf.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
+                    b.Property<int[]>("Ports")
+                        .HasColumnType("integer[]");
+
                     b.HasKey("Id");
 
                     b.ToTable("Applications");
