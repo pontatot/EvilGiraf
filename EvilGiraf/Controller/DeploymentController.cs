@@ -8,10 +8,10 @@ namespace EvilGiraf.Controller;
 
 [Authorize]
 [ApiController]
-[Route("")]
+[Route("deploy")]
 public class DeploymentController(IDeploymentService deploymentService, IApplicationService applicationService, IKubernetesService kubernetesService) : ControllerBase
 {
-    [HttpPost("application/{id:int}/deploy")]
+    [HttpPost("{id:int}")]
     [ProducesResponseType(201)]
     [ProducesResponseType(typeof(string), 404)]
     public async  Task<IActionResult> Deploy(int id)
@@ -22,10 +22,10 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
         
         _ = kubernetesService.Deploy(app);
         
-        return Created($"application/{id:int}/deploy", null);
+        return Created($"deploy/{id:int}", null);
     }
     
-    [HttpGet("application/{id:int}/deploy")]
+    [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(DeployResponse), 200)]
     [ProducesResponseType(typeof(string), 404)]
     public async  Task<IActionResult> Status(int id)
