@@ -61,7 +61,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(deployment);
 
         // Act
-        var response = await Client.PostAsync($"/application/{application.Id}/deploy", null);
+        var response = await Client.PostAsync($"/deploy/{application.Id}", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -121,7 +121,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>());
         
         // Act
-        var response = await Client.PostAsync($"/application/{application.Id}/deploy", null);
+        var response = await Client.PostAsync($"/deploy/{application.Id}", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -135,7 +135,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
     public async Task Deploy_ShouldReturn404_WhenApplicationDoesNotExist()
     {
         // Act
-        var response = await Client.PostAsync("/application/999/deploy", null);
+        var response = await Client.PostAsync("/deploy/999", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -175,7 +175,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(deployment);
 
         // Act
-        var response = await Client.GetAsync($"/application/{application.Id}/deploy");
+        var response = await Client.GetAsync($"/deploy/{application.Id}");
 
         // Assert
         response.Should().BeSuccessful();
@@ -210,7 +210,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Throws(httpException);
 
         // Act
-        var response = await Client.GetAsync($"/application/{application.Id}/deploy");
+        var response = await Client.GetAsync($"/deploy/{application.Id}");
 
         // Assert
         response.Should().HaveStatusCode(HttpStatusCode.NotFound);
@@ -225,7 +225,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         const int nonExistentApplicationId = 999;
 
         // Act
-        var response = await Client.GetAsync($"/application/{nonExistentApplicationId}/deploy");
+        var response = await Client.GetAsync($"/deploy/{nonExistentApplicationId}");
 
         // Assert
         response.Should().HaveStatusCode(HttpStatusCode.NotFound);
