@@ -232,4 +232,64 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         var error = await response.Content.ReadAsStringAsync();
         error.Should().Contain($"Application {nonExistentApplicationId} not found");
     }
+    
+    [Fact]
+    public async Task ListDeployments_ShouldReturnListOfDeployments()
+    {
+        // Arrange
+        var deployments = new List<V1Deployment>
+        {
+            new()
+            {
+                Metadata = new V1ObjectMeta
+                {
+                    Name = "test-app",
+                    NamespaceProperty = "default"
+                }
+            }
+        };
+        
+        _kubernetes.AppsV1.ListNamespacedDeploymentWithHttpMessagesAsync("default")
+            .Returns(new HttpOperationResponse<V1DeploymentList>
+            {
+                Body = new V1DeploymentList
+                {
+                    Items = deployments
+                }
+            });
+
+        // Act
+        var response = await Client.GetAsync("/list/default");
+
+        // Assert
+        response.Should().BeSuccessful();
+        var result = await response.Content.ReadFromJsonAsync<List<V1Deployment>>();
+        result.Should().NotBeNull();
+        result.Should().HaveCount(1);
+        result[0].Metadata.Name.Should().Be("test-app");
+        result[0].Metadata.NamespaceProperty.Should().Be("default");
+    }
+    
+    [Fact]
+    public async Task ListDeployments_ShouldReturnEmptyList_WhenNoDeploymentsExist()
+    {
+        // Arrange
+        _kubernetes.AppsV1.ListNamespacedDeploymentWithHttpMessagesAsync("default")
+            .Returns(new HttpOperationResponse<V1DeploymentList>
+            {
+                Body = new V1DeploymentList
+                {
+                    Items = new List<V1Deployment>()
+                }
+            });
+
+        // Act
+        var response = await Client.GetAsync("/list/default");
+
+        // Assert
+        response.Should().BeSuccessful();
+        var result = await response.Content.ReadFromJsonAsync<List<V1Deployment>>();
+        result.Should().NotBeNull();
+        result.Should().BeEmpty();
+    }
 }

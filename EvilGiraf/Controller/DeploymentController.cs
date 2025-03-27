@@ -40,4 +40,11 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
         
         return Ok(new DeployResponse(deployment.Status));
     }
+    
+    [HttpGet("list/{namespace}")]
+    public async Task<IActionResult> ListDeployments(string @namespace)
+    {
+        var deployments = await deploymentService.ListDeployments(@namespace);
+        return Ok(deployments);
+    }
 }
