@@ -32,7 +32,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Name = "test-app",
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
-            Version = "1.0.0"
+            Version = "1.0.0",
+            Ports = [22]
         };
         var deployment = new HttpOperationResponse<V1Deployment>
         {
@@ -85,7 +86,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Name = "test-app",
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
-            Version = "1.0.0"
+            Version = "1.0.0",
+            Ports = [22]
         };
 
         var deployment = new HttpOperationResponse<V1Deployment>
@@ -151,7 +153,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Name = "test-app",
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
-            Version = "1.0.0"
+            Version = "1.0.0",
+            Ports = [22]
         };
 
         var deployment = new HttpOperationResponse<V1Deployment>
@@ -193,7 +196,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Name = "test-app",
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
-            Version = "1.0.0"
+            Version = "1.0.0",
+            Ports = [22]
         };
         
         var httpException = new HttpOperationException

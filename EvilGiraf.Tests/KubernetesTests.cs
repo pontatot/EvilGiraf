@@ -25,7 +25,8 @@ public class KubernetesTests
         Name = "test-app",
         Type = ApplicationType.Docker,
         Link = "docker.io/test:latest",
-        Version = "1.0.0"
+        Version = "1.0.0",
+        Ports = [22]
     };
 
     [Fact]
