@@ -47,6 +47,7 @@ namespace EvilGiraf.Migrations
                         .HasColumnType("character varying(255)");
 
                     b.Property<int[]>("Ports")
+                        .IsRequired()
                         .HasColumnType("integer[]");
 
                     b.HasKey("Id");
