@@ -333,4 +333,66 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         applicationDtos.Should().NotBeNull();
         applicationDtos.Should().BeEmpty();
     }
+
+    [Fact]
+    public async Task CreateWithNoPorts_ShouldReturnApplication()
+    {
+        // Arrange
+        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", []);
+
+        // Act
+        var response = await Client.PostAsJsonAsync("/application", createRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var application = await response.Content.ReadFromJsonAsync<Application>();
+        
+        application.Should().NotBeNull();
+        application!.Name.Should().Be(createRequest.Name);
+        application.Type.Should().Be(createRequest.Type);
+        application.Link.Should().Be(createRequest.Link);
+        application.Version.Should().Be(createRequest.Version);
+        application.Id.Should().NotBe(0);
+        application.Ports.Should().BeEmpty();
+
+        // Verify the application was saved to the database
+        var savedApplication = await _dbContext.Applications.FindAsync(application.Id);
+        savedApplication.Should().NotBeNull();
+        savedApplication!.Name.Should().Be(createRequest.Name);
+        savedApplication.Type.Should().Be(createRequest.Type);
+        savedApplication.Link.Should().Be(createRequest.Link);
+        savedApplication.Version.Should().Be(createRequest.Version);
+        savedApplication.Ports.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CreateWithMultiplePorts_ShouldReturnApplication()
+    {
+        // Arrange
+        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22, 80]);
+
+        // Act
+        var response = await Client.PostAsJsonAsync("/application", createRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var application = await response.Content.ReadFromJsonAsync<Application>();
+        
+        application.Should().NotBeNull();
+        application!.Name.Should().Be(createRequest.Name);
+        application.Type.Should().Be(createRequest.Type);
+        application.Link.Should().Be(createRequest.Link);
+        application.Version.Should().Be(createRequest.Version);
+        application.Id.Should().NotBe(0);
+        application.Ports.Should().BeEquivalentTo(createRequest.Ports);
+
+        // Verify the application was saved to the database
+        var savedApplication = await _dbContext.Applications.FindAsync(application.Id);
+        savedApplication.Should().NotBeNull();
+        savedApplication!.Name.Should().Be(createRequest.Name);
+        savedApplication.Type.Should().Be(createRequest.Type);
+        savedApplication.Link.Should().Be(createRequest.Link);
+        savedApplication.Version.Should().Be(createRequest.Version);
+        savedApplication.Ports.Should().BeEquivalentTo(createRequest.Ports);
+    }
 }
