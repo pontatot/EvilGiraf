@@ -7,7 +7,7 @@ public record ApplicationCreateDto(
     ApplicationType Type,
     string Link,
     string? Version,
-    int[] Ports
+    int[]? Ports
 );
 
 public record ApplicationResultDto(

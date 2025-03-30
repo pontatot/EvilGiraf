@@ -47,6 +47,7 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
             application.Version = applicationUpdateDto.Version;
         if (applicationUpdateDto.Ports is not null)
             application.Ports = applicationUpdateDto.Ports;
+
         var updatedApp = databaseService.Applications.Update(application).Entity;
         await databaseService.SaveChangesAsync();
         return updatedApp;

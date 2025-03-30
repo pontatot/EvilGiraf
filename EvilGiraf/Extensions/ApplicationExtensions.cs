@@ -1,5 +1,6 @@
 using EvilGiraf.Model;
 using EvilGiraf.Dto;
+using Npgsql.Replication;
 
 namespace EvilGiraf.Extensions;
 
@@ -25,7 +26,7 @@ public static class ApplicationExtensions
             Type = applicationDto.Type,
             Link = applicationDto.Link,
             Version = applicationDto.Version,
-            Ports = applicationDto.Ports
+            Ports = applicationDto.Ports is not null ? applicationDto.Ports : Array.Empty<int>()
         };
     }
 }
