@@ -13,5 +13,4 @@ public interface IDeploymentService
     
     public Task<V1Status?> DeleteDeployment(string name, string @namespace);
     
-    Task<IList<V1Deployment>> ListDeployments(string @namespace);
 }

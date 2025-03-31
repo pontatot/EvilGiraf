@@ -7,6 +7,7 @@ using FluentAssertions;
 using k8s;
 using k8s.Autorest;
 using k8s.Models;
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -234,62 +235,92 @@ public class DeploymentControllerTests : AuthenticatedTestBase
     }
     
     [Fact]
-    public async Task ListDeployments_ShouldReturnListOfDeployments()
+public async Task ListDeployments_ShouldReturnOkResult_WithEmptyList_WhenNoApplications()
+{
+    // Arrange
+    var oldApplications = await _dbContext.Applications.ToListAsync();
+    _dbContext.Applications.RemoveRange(oldApplications);
+    await _dbContext.SaveChangesAsync();
+
+    // Act
+    var response = await Client.GetAsync("/deploy");
+
+    // Assert
+    response.StatusCode.Should().Be(HttpStatusCode.OK);
+    var deployResponses = await response.Content.ReadFromJsonAsync<List<DeployResponse>>();
+    deployResponses.Should().NotBeNull();
+    deployResponses.Should().BeEmpty();
+}
+
+[Fact]
+public async Task ListDeployments_ShouldReturnOkResult_WithEmptyList_WhenNoDeployments()
+{
+    // Arrange
+    var oldApplications = await _dbContext.Applications.ToListAsync();
+    _dbContext.Applications.RemoveRange(oldApplications);
+    await _dbContext.SaveChangesAsync();
+
+    var applications = new List<Application>
     {
-        // Arrange
-        var deployments = new List<V1Deployment>
-        {
-            new()
-            {
-                Metadata = new V1ObjectMeta
-                {
-                    Name = "test-app",
-                    NamespaceProperty = "default"
-                }
-            }
-        };
-        
-        _kubernetes.AppsV1.ListNamespacedDeploymentWithHttpMessagesAsync("default")
-            .Returns(new HttpOperationResponse<V1DeploymentList>
-            {
-                Body = new V1DeploymentList
-                {
-                    Items = deployments
-                }
-            });
+        new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0" },
+        new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0" }
+    };
 
-        // Act
-        var response = await Client.GetAsync("/list/default");
-
-        // Assert
-        response.Should().BeSuccessful();
-        var result = await response.Content.ReadFromJsonAsync<List<V1Deployment>>();
-        result.Should().NotBeNull();
-        result.Should().HaveCount(1);
-        result[0].Metadata.Name.Should().Be("test-app");
-        result[0].Metadata.NamespaceProperty.Should().Be("default");
-    }
+    _dbContext.Applications.AddRange(applications);
+    await _dbContext.SaveChangesAsync();
     
-    [Fact]
-    public async Task ListDeployments_ShouldReturnEmptyList_WhenNoDeploymentsExist()
+    var httpException = new HttpOperationException
     {
-        // Arrange
-        _kubernetes.AppsV1.ListNamespacedDeploymentWithHttpMessagesAsync("default")
-            .Returns(new HttpOperationResponse<V1DeploymentList>
-            {
-                Body = new V1DeploymentList
-                {
-                    Items = new List<V1Deployment>()
-                }
-            });
+        Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
+    };
+    
+    _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>())
+        .Throws(httpException);
+    // Act
+    var response = await Client.GetAsync("/deploy");
 
-        // Act
-        var response = await Client.GetAsync("/list/default");
+    // Assert
+    response.StatusCode.Should().Be(HttpStatusCode.OK);
+    var deployResponses = await response.Content.ReadFromJsonAsync<List<DeployResponse>>();
+    deployResponses.Should().NotBeNull();
+    deployResponses.Should().BeEmpty();
+}
 
-        // Assert
-        response.Should().BeSuccessful();
-        var result = await response.Content.ReadFromJsonAsync<List<V1Deployment>>();
-        result.Should().NotBeNull();
-        result.Should().BeEmpty();
-    }
+[Fact]
+public async Task ListDeployments_ShouldReturnOkResult_WithDeployments()
+{
+    // Arrange
+    var oldApplications = await _dbContext.Applications.ToListAsync();
+    _dbContext.Applications.RemoveRange(oldApplications);
+    await _dbContext.SaveChangesAsync();
+
+    var applications = new List<Application>
+    {
+        new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0" },
+        new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0" }
+    };
+
+    _dbContext.Applications.AddRange(applications);
+    await _dbContext.SaveChangesAsync();
+
+    var deployment = new V1Deployment
+    {
+        Status = new V1DeploymentStatus { Replicas = 1 }
+    };
+
+    _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>())
+        .Returns(new HttpOperationResponse<V1Deployment> { Body = deployment });
+
+    // Act
+    var response = await Client.GetAsync("/deploy");
+
+    // Assert
+    response.StatusCode.Should().Be(HttpStatusCode.OK);
+    var deployResponses = await response.Content.ReadFromJsonAsync<List<DeployResponse>>();
+    deployResponses.Should().NotBeNull();
+    deployResponses.Should().HaveCount(2);
+
+    deployResponses![0].Status.Replicas.Should().Be(deployment.Status.Replicas);
+    deployResponses[1].Status.Replicas.Should().Be(deployment.Status.Replicas);
+}
 }

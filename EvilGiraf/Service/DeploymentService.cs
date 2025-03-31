@@ -58,10 +58,4 @@ public class DeploymentService(IKubernetes client) : IDeploymentService
             return null;
         }
     }
-    
-    public async Task<IList<V1Deployment>> ListDeployments(string @namespace)
-    {
-        var deployments = await client.AppsV1.ListNamespacedDeploymentAsync(@namespace);
-        return deployments.Items;
-    }
 }
