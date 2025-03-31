@@ -185,7 +185,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
     }
 
     [Fact]
-    public async Task Status_ShouldReturn404_WhenApplicationExistsButNotDeployed()
+    public async Task Status_ShouldReturn201_WhenApplicationExistsButNotDeployed()
     {
         // Arrange
         var application = new Application
@@ -213,9 +213,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         var response = await Client.GetAsync($"/deploy/{application.Id}");
 
         // Assert
-        response.Should().HaveStatusCode(HttpStatusCode.NotFound);
-        var error = await response.Content.ReadAsStringAsync();
-        error.Should().Contain($"Application {application.Id} is not deployed");
+        response.Should().HaveStatusCode(HttpStatusCode.NoContent);
     }
 
     [Fact]

@@ -36,7 +36,7 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
 
         var deployment = await deploymentService.ReadDeployment(app.Name, app.Id.ToNamespace());
         if (deployment is null)
-            return NotFound($"Application {id} is not deployed");
+            return NoContent();
         
         return Ok(new DeployResponse(deployment.Status));
     }
