@@ -6,7 +6,8 @@ public record ApplicationCreateDto(
     string Name,
     ApplicationType Type,
     string Link,
-    string? Version
+    string? Version,
+    int[]? Ports
 );
 
 public record ApplicationResultDto(
@@ -14,12 +15,14 @@ public record ApplicationResultDto(
     string Name,
     ApplicationType Type,
     string Link,
-    string? Version
+    string? Version,
+    int[] Ports
 );
 
 public record ApplicationUpdateDto(
     string? Name,
     ApplicationType? Type,
     string? Link,
-    string? Version
+    string? Version,
+    int[]? Ports
 );
