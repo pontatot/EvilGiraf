@@ -338,7 +338,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task CreateWithNoPorts_ShouldReturnApplication()
     {
         // Arrange
-        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", []);
+        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", null);
 
         // Act
         var response = await Client.PostAsJsonAsync("/application", createRequest);
