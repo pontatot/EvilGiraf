@@ -1,6 +1,5 @@
 using EvilGiraf.Model;
 using EvilGiraf.Dto;
-using Npgsql.Replication;
 
 namespace EvilGiraf.Extensions;
 
