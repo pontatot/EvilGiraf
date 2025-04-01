@@ -1,9 +1,11 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Applications } from './pages/Applications';
 import { ApplicationDetails } from './pages/ApplicationDetails';
+import { ApiKeyInput } from './components/ApiKeyInput';
+import Cookies from 'js-cookie';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,6 +17,23 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const [apiKey, setApiKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedApiKey = Cookies.get('apiKey');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
+
+  if (!apiKey) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <ApiKeyInput onApiKeySet={setApiKey} />
+      </div>
+    );
+  }
+  
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
