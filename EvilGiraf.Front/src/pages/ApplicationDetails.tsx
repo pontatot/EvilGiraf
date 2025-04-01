@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Trash2 } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
@@ -34,18 +34,44 @@ export function ApplicationDetails() {
     }
   );
 
+  const deleteMutation = useMutation(
+    () => api.applications.delete(Number(id)),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['applications']);
+        navigate('/');
+      },
+    }
+  );
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this application? This action cannot be undone.')) {
+      deleteMutation.mutate();
+    }
+  };
+
   if (isLoadingApp) return <LoadingSpinner />;
   if (appError) return <div className="text-red-500">Error: {(appError as Error).message}</div>;
 
   return (
     <div>
-      <button
-        onClick={() => navigate('/')}
-        className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-800"
-      >
-        <ArrowLeft className="h-5 w-5" />
-        Back to Applications
-      </button>
+      <div className="flex justify-between items-center mb-6">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          Back to Applications
+        </button>
+        <button
+          onClick={handleDelete}
+          disabled={deleteMutation.isLoading}
+          className="flex items-center gap-2 text-red-500 hover:text-red-700 disabled:opacity-50"
+        >
+          <Trash2 className="h-5 w-5" />
+          {deleteMutation.isLoading ? 'Deleting...' : 'Delete Application'}
+        </button>
+      </div>
 
       <div className="bg-white rounded-lg shadow p-6">
         <h1 className="text-2xl font-bold mb-6">{application?.name || 'Unnamed Application'}</h1>
