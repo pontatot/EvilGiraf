@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Link } from 'react-router-dom';
-import { Plus, Trash2, ExternalLink } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ApplicationType, ApplicationCreateDto } from '../types/api';
@@ -11,7 +11,6 @@ export function Applications() {
   const [isCreating, setIsCreating] = useState(false);
   const [newApp, setNewApp] = useState<ApplicationCreateDto>({
     name: '',
-    type: ApplicationType.Type0,
     link: '',
     version: '',
   });
@@ -27,7 +26,7 @@ export function Applications() {
       onSuccess: () => {
         queryClient.invalidateQueries('applications');
         setIsCreating(false);
-        setNewApp({ name: '', type: ApplicationType.Type0, link: '', version: '' });
+        setNewApp({ name: '', link: '', version: '' });
       },
     }
   );
@@ -72,11 +71,11 @@ export function Applications() {
               <label className="block text-sm font-medium text-gray-700">Type</label>
               <select
                 value={newApp.type}
-                onChange={(e) => setNewApp({ ...newApp, type: Number(e.target.value) })}
+                onChange={(e) => setNewApp({ ...newApp, type: e.target.value as ApplicationType })}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               >
-                <option value={ApplicationType.Type0}>Type 0</option>
-                <option value={ApplicationType.Type1}>Type 1</option>
+                <option value={ApplicationType.Docker}>Docker</option>
+                <option value={ApplicationType.Git}>Git</option>
               </select>
             </div>
             <div>
@@ -129,18 +128,10 @@ export function Applications() {
               </button>
             </div>
             <div className="mt-2 space-y-2">
-              <p className="text-gray-600">Type: {app.type === 0 ? 'Type 0' : 'Type 1'}</p>
+              <p className="text-gray-600">Type: {app.type.toString()}</p>
               <p className="text-gray-600">Version: {app.version || 'N/A'}</p>
               {app.link && (
-                <a
-                  href={app.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:text-blue-600 flex items-center gap-1"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  View Link
-                </a>
+                <p className="text-gray-600">Link: {app.link}</p>
               )}
             </div>
             <Link

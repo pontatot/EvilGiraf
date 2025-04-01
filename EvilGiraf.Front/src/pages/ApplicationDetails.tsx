@@ -1,10 +1,8 @@
-import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { ApplicationType } from '../types/api';
 
 export function ApplicationDetails() {
   const { id } = useParams<{ id: string }>();
@@ -61,7 +59,7 @@ export function ApplicationDetails() {
               </p>
               <p>
                 <span className="font-medium">Type:</span>{' '}
-                {application?.type === ApplicationType.Type0 ? 'Type 0' : 'Type 1'}
+                {application?.type.toString()}
               </p>
               <p>
                 <span className="font-medium">Version:</span> {application?.version || 'N/A'}
@@ -69,14 +67,7 @@ export function ApplicationDetails() {
               {application?.link && (
                 <p>
                   <span className="font-medium">Link:</span>{' '}
-                  <a
-                    href={application.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:text-blue-600"
-                  >
-                    {application.link}
-                  </a>
+                  {application.link}
                 </p>
               )}
             </div>

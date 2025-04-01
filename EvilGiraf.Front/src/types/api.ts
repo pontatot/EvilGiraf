@@ -1,6 +1,6 @@
 export interface ApplicationCreateDto {
   name?: string;
-  type: ApplicationType;
+  type?: ApplicationType;
   link?: string;
   version?: string;
 }
@@ -14,8 +14,8 @@ export interface ApplicationResultDto {
 }
 
 export enum ApplicationType {
-  Type0 = 0,
-  Type1 = 1,
+  Docker = 'Docker',
+  Git = 'Git',
 }
 
 export interface DeployResponse {
