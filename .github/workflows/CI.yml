@@ -18,6 +18,19 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Install EF Core tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Check for pending model changes
+        run: |
+          if ~/.dotnet/tools/dotnet-ef migrations has-pending-model-changes --project EvilGiraf; then
+            echo "No pending model changes found"
+          else
+            echo "ERROR: There are pending model changes that need to be migrated"
+            echo "use the command 'dotnet ef migrations --project EvilGiraf add {MigrationName}' to create a new migration"
+            exit 1
+          fi
+
       - name: Install dependencies
         run: dotnet restore
 
