@@ -27,6 +27,7 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
     
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(DeployResponse), 200)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(string), 404)]
     public async  Task<IActionResult> Status(int id)
     {
