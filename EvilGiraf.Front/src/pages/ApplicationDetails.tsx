@@ -88,21 +88,25 @@ export function ApplicationDetails() {
               <LoadingSpinner />
             ) : statusError ? (
               <div className="text-red-500">Error loading status: {(statusError as Error).message}</div>
+            ) : !deployStatus ? (
+              <div className="text-gray-600">
+                <p>This application is not currently deployed.</p>
+              </div>
             ) : (
               <div className="space-y-2">
                 <p>
                   <span className="font-medium">Available Replicas:</span>{' '}
-                  {deployStatus?.status.availableReplicas || 0}
+                  {deployStatus.status.availableReplicas || 0}
                 </p>
                 <p>
                   <span className="font-medium">Ready Replicas:</span>{' '}
-                  {deployStatus?.status.readyReplicas || 0}
+                  {deployStatus.status.readyReplicas || 0}
                 </p>
                 <p>
                   <span className="font-medium">Total Replicas:</span>{' '}
-                  {deployStatus?.status.replicas || 0}
+                  {deployStatus.status.replicas || 0}
                 </p>
-                {deployStatus?.status.conditions?.map((condition, index) => (
+                {deployStatus.status.conditions?.map((condition, index) => (
                   <div key={index} className="mt-2">
                     <p className="font-medium">{condition.type}</p>
                     <p className="text-sm text-gray-600">{condition.message}</p>
