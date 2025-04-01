@@ -5,7 +5,7 @@ on:
     branches: ['**']
 
 jobs:
-  tests:
+  tests-api:
     name: Tests
     runs-on: github-runner-evilgiraf
 
@@ -37,7 +37,7 @@ jobs:
       - name: Run unit tests
         run: dotnet test
 
-  build:
+  build-api:
     name: Build
     runs-on: github-runner-evilgiraf
     
@@ -93,8 +93,8 @@ jobs:
       - name: Tag main docker images with 'latest'
         if: github.ref == 'refs/heads/main'
         run: |
-          docker tag evil-giraf-base '${{ secrets.REGISTRY_URL }}/evil-giraf-base:latest'
-          docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:latest'
+          docker tag evil-giraf-base '${{ secrets.REGISTRY_URL }}/evil-giraf-base:latest' || true
+          docker tag evil-giraf '${{ secrets.REGISTRY_URL }}/evil-giraf:latest' || true
 
       - name: Tag docker images
         run: |
@@ -107,6 +107,90 @@ jobs:
         run: |
           docker push -a '${{ secrets.REGISTRY_URL }}/evil-giraf-base'
           docker push -a '${{ secrets.REGISTRY_URL }}/evil-giraf'
+
+  lint-front:
+    name: Lint Frontend
+    runs-on: github-runner-evilgiraf
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'EvilGiraf.Front/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: EvilGiraf.Front
+        run: npm ci
+
+      - name: Run linting
+        working-directory: EvilGiraf.Front
+        run: npm run lint
+
+  build-front:
+    name: Build Frontend
+    runs-on: github-runner-evilgiraf
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.1.11
+        with:
+          versionSpec: '6.0.x'
+
+      - name: Determine Version
+        id: version
+        uses: gittools/actions/gitversion/execute@v3.1.11
+        with:
+          useConfigFile: true
+
+      - name: Login to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Pull images for cache
+        run: |
+          docker pull '${{ secrets.REGISTRY_URL }}/evil-giraf-front:latest' || true
+
+      - name: Build frontend docker image
+        run: |
+          docker build \
+            --cache-to type=inline \
+            --cache-from 'type=registry,ref=${{ secrets.REGISTRY_URL }}/evil-giraf-front:latest' \
+            -t evil-giraf-front EvilGiraf.Front
+
+      - name: Tag frontend docker image with 'latest'
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker tag evil-giraf-front '${{ secrets.REGISTRY_URL }}/evil-giraf-front:latest'
+
+      - name: Tag frontend docker image
+        run: |
+          docker tag evil-giraf-front '${{ secrets.REGISTRY_URL }}/evil-giraf-front:${{ steps.version.outputs.semVer }}'
+          docker tag evil-giraf-front '${{ secrets.REGISTRY_URL }}/evil-giraf-front:${{ github.sha }}'
+
+      - name: Push frontend docker images
+        run: |
+          docker push -a '${{ secrets.REGISTRY_URL }}/evil-giraf-front'
 
   sonarqube:
     name: SonarQube analysis
