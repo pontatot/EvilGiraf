@@ -3,11 +3,12 @@ import Cookies from 'js-cookie';
 
 interface ApiKeyInputProps {
   onApiKeySet: (apiKey: string) => void;
+  error: string | null;
 }
 
-export function ApiKeyInput({ onApiKeySet }: ApiKeyInputProps) {
+export function ApiKeyInput({ onApiKeySet, error }: ApiKeyInputProps) {
   const [apiKey, setApiKey] = useState('');
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
 
   useEffect(() => {
     const savedApiKey = Cookies.get('apiKey');
@@ -20,12 +21,12 @@ export function ApiKeyInput({ onApiKeySet }: ApiKeyInputProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!apiKey.trim()) {
-      setError('Please enter an API key');
+      setLocalError('Please enter an API key');
       return;
     }
     Cookies.set('apiKey', apiKey, { expires: 7 }); // Cookie expires in 7 days
     onApiKeySet(apiKey);
-    setError('');
+    setLocalError('');
   };
 
   return (
@@ -44,7 +45,9 @@ export function ApiKeyInput({ onApiKeySet }: ApiKeyInputProps) {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             placeholder="Enter your API key"
           />
-          {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+          {(localError || error) && (
+            <p className="mt-1 text-sm text-red-600">{localError || error}</p>
+          )}
         </div>
         <button
           type="submit"
