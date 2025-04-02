@@ -41,4 +41,22 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
         
         return Ok(new DeployResponse(deployment.Status));
     }
+    
+    [HttpGet("deploy")]
+    [ProducesResponseType(typeof(List<DeployResponse>), 200)]
+    public async Task<IActionResult> ListDeployments()
+    {
+        var applications = await applicationService.ListApplications();
+        var listDeployResponses = new List<DeployResponse>();
+        foreach (var app in applications)
+        {
+            var deployment = await deploymentService.ReadDeployment(app.Name, app.Id.ToNamespace());
+            if (deployment is not null)
+            {
+                listDeployResponses.Add(new DeployResponse(deployment.Status));
+            }
+                
+        }
+        return Ok(listDeployResponses);
+    }
 }
