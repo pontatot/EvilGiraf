@@ -269,13 +269,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         _dbContext.Applications.AddRange(applications);
         await _dbContext.SaveChangesAsync();
         
-        var httpException = new HttpOperationException
-        {
-            Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
-        };
-        
         _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>())
-            .Throws(httpException);
+            .Returns(new HttpOperationResponse<V1Deployment>());
         // Act
         var response = await Client.GetAsync("/deploy");
 
