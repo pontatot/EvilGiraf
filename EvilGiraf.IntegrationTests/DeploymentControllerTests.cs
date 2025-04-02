@@ -264,8 +264,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
 
         var applications = new List<Application>
         {
-            new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0" },
-            new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0" }
+            new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0", Ports = [22] },
+            new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0", Ports = [] }
         };
 
         _dbContext.Applications.AddRange(applications);
@@ -293,8 +293,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
 
         var applications = new List<Application>
         {
-            new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0" },
-            new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0" }
+            new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0", Ports = [22] },
+            new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0", Ports = [] }
         };
 
         _dbContext.Applications.AddRange(applications);
