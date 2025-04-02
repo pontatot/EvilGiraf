@@ -42,6 +42,7 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
     }
     
     [HttpGet("deploy")]
+    [ProducesResponseType(typeof(List<DeployResponse>), 200)]
     public async Task<IActionResult> ListDeployments()
     {
         var applications = await applicationService.ListApplications();
