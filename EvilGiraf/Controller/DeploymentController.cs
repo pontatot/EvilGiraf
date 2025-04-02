@@ -42,7 +42,7 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
         return Ok(new DeployResponse(deployment.Status));
     }
     
-    [HttpGet("deploy")]
+    [HttpGet("")]
     [ProducesResponseType(typeof(List<DeployResponse>), 200)]
     public async Task<IActionResult> ListDeployments()
     {
