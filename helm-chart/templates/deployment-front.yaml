@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "evil-giraf.fullname" . }}
+  name: {{ include "evil-giraf.fullname" . }}-front
   labels:
     {{- include "evil-giraf.front.labels" . | nindent 4 }}
 spec:

@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "evil-giraf.fullname" . }}
+  name: {{ include "evil-giraf.fullname" . }}-front
   labels:
     {{- include "evil-giraf.front.labels" . | nindent 4 }}
   {{- with .Values.front.ingress.annotations }}
@@ -35,7 +35,7 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ include "evil-giraf.fullname" $ }}
+                name: {{ include "evil-giraf.fullname" $ }}-front
                 port:
                   number: {{ $.Values.front.service.port }}
           {{- end }}
