@@ -3,14 +3,14 @@ kind: Deployment
 metadata:
   name: {{ include "evil-giraf.fullname" . }}
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.front.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.front.autoscaling.enabled }}
   replicas: {{ .Values.front.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "evil-giraf.selectorLabels" . | nindent 6 }}
+      {{- include "evil-giraf.front.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.front.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "evil-giraf.labels" . | nindent 8 }}
+        {{- include "evil-giraf.front.labels" . | nindent 8 }}
         {{- with .Values.front.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,31 +27,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "evil-giraf.serviceAccountName" . }}
+      serviceAccountName: {{ include "evil-giraf.front.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.front.podSecurityContext | nindent 8 }}
-      initContainers:
-        - name: wait-for-db
-          image: postgres:16
-          command: ['sh', '-c',
-                    'until pg_isready -h {{ .Release.Name }}-postgresql -p 5432 -U {{ .Values.postgresql.auth.username }}; do echo waiting for database; sleep 2; done;']
-          env:
-            - name: PGPASSWORD
-              value: {{ .Values.postgresql.auth.password }}
-        - name: ef-migrations
-          image: "{{ .Values.front.baseImage.repository }}:{{ .Values.front.baseImage.tag | default .Chart.AppVersion }}"
-          command: ['/root/.dotnet/tools/dotnet-ef', 'database', 'update']
-          env:
-            - name: POSTGRES__HOST
-              value: {{ .Release.Name }}-postgresql
-            - name: POSTGRES__PORT
-              value: "5432"
-            - name: POSTGRES__DATABASE
-              value: {{ .Values.postgresql.auth.database }}
-            - name: POSTGRES__USERNAME
-              value: {{ .Values.postgresql.auth.username }}
-            - name: POSTGRES__PASSWORD
-              value: {{ .Values.postgresql.auth.password }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -62,19 +40,6 @@ spec:
             - name: http
               containerPort: {{ .Values.front.service.port }}
               protocol: TCP
-          env:
-            - name: ApiKey
-              value: {{ .Values.front.auth.apiKey }}
-            - name: POSTGRES__HOST
-              value: {{ .Release.Name }}-postgresql
-            - name: POSTGRES__PORT
-              value: "5432"
-            - name: POSTGRES__DATABASE
-              value: {{ .Values.postgresql.auth.database }}
-            - name: POSTGRES__USERNAME
-              value: {{ .Values.postgresql.auth.username }}
-            - name: POSTGRES__PASSWORD
-              value: {{ .Values.postgresql.auth.password }}
           livenessProbe:
             {{- toYaml .Values.front.livenessProbe | nindent 12 }}
           readinessProbe:

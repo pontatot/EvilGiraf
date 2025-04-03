@@ -4,7 +4,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "evil-giraf.fullname" . }}
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.front.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

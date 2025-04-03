@@ -3,7 +3,7 @@ kind: ClusterRole
 metadata:
   name: {{ include "evil-giraf.fullname" . }}-role
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.api.labels" . | nindent 4 }}
 rules:
   - apiGroups: [""]
     resources: ["namespaces"]
@@ -23,10 +23,10 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ include "evil-giraf.fullname" . }}-rolebinding
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.api.labels" . | nindent 4 }}
 subjects:
 - kind: ServiceAccount
-  name: {{ include "evil-giraf.serviceAccountName" . }}
+  name: {{ include "evil-giraf.api.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole

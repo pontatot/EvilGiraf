@@ -105,6 +105,9 @@ front:
   
   serviceAccount:
     create: false
+    automount: true
+    annotations: {}
+    name: ""
   
   podAnnotations: {}
   podLabels: {}

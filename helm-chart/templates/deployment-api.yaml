@@ -3,14 +3,14 @@ kind: Deployment
 metadata:
   name: {{ include "evil-giraf.fullname" . }}
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.api.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.api.autoscaling.enabled }}
   replicas: {{ .Values.api.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "evil-giraf.selectorLabels" . | nindent 6 }}
+      {{- include "evil-giraf.api.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.api.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "evil-giraf.labels" . | nindent 8 }}
+        {{- include "evil-giraf.api.labels" . | nindent 8 }}
         {{- with .Values.api.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,7 +27,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "evil-giraf.serviceAccountName" . }}
+      serviceAccountName: {{ include "evil-giraf.api.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.api.podSecurityContext | nindent 8 }}
       initContainers:

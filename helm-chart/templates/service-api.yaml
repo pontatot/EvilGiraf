@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "evil-giraf.fullname" . }}
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.api.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.api.service.type }}
   ports:
@@ -12,4 +12,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "evil-giraf.selectorLabels" . | nindent 4 }}
+    {{- include "evil-giraf.api.selectorLabels" . | nindent 4 }}

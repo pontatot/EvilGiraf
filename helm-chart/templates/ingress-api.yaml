@@ -4,7 +4,7 @@ kind: Ingress
 metadata:
   name: {{ include "evil-giraf.fullname" . }}
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.api.labels" . | nindent 4 }}
   {{- with .Values.api.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -37,7 +37,7 @@ spec:
               service:
                 name: {{ include "evil-giraf.fullname" $ }}
                 port:
-                  number: {{ $.Values.app.service.port }}
+                  number: {{ $.Values.api.service.port }}
           {{- end }}
     {{- end }}
 {{- end }}
