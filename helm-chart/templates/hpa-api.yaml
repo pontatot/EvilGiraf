@@ -1,4 +1,4 @@
-{{- if .Values.app.autoscaling.enabled }}
+{{- if .Values.api.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -10,23 +10,23 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "evil-giraf.fullname" . }}
-  minReplicas: {{ .Values.app.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.app.autoscaling.maxReplicas }}
+  minReplicas: {{ .Values.api.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.api.autoscaling.maxReplicas }}
   metrics:
-    {{- if .Values.app.autoscaling.targetCPUUtilizationPercentage }}
+    {{- if .Values.api.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.app.autoscaling.targetCPUUtilizationPercentage }}
+          averageUtilization: {{ .Values.api.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
-    {{- if .Values.app.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- if .Values.api.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ .Values.app.autoscaling.targetMemoryUtilizationPercentage }}
+          averageUtilization: {{ .Values.api.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}

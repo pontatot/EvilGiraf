@@ -5,9 +5,9 @@ metadata:
   labels:
     {{- include "evil-giraf.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.app.service.type }}
+  type: {{ .Values.front.service.type }}
   ports:
-    - port: {{ .Values.app.service.port }}
+    - port: {{ .Values.front.service.port }}
       targetPort: http
       protocol: TCP
       name: http

@@ -5,31 +5,31 @@ metadata:
   labels:
     {{- include "evil-giraf.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.app.autoscaling.enabled }}
-  replicas: {{ .Values.app.replicaCount }}
+  {{- if not .Values.front.autoscaling.enabled }}
+  replicas: {{ .Values.front.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
       {{- include "evil-giraf.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.app.podAnnotations }}
+      {{- with .Values.front.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         {{- include "evil-giraf.labels" . | nindent 8 }}
-        {{- with .Values.app.podLabels }}
+        {{- with .Values.front.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.app.imagePullSecrets }}
+      {{- with .Values.front.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "evil-giraf.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.app.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.front.podSecurityContext | nindent 8 }}
       initContainers:
         - name: wait-for-db
           image: postgres:16
@@ -39,7 +39,7 @@ spec:
             - name: PGPASSWORD
               value: {{ .Values.postgresql.auth.password }}
         - name: ef-migrations
-          image: "{{ .Values.app.baseImage.repository }}:{{ .Values.app.baseImage.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.front.baseImage.repository }}:{{ .Values.front.baseImage.tag | default .Chart.AppVersion }}"
           command: ['/root/.dotnet/tools/dotnet-ef', 'database', 'update']
           env:
             - name: POSTGRES__HOST
@@ -55,16 +55,16 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.app.securityContext | nindent 12 }}
-          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+            {{- toYaml .Values.front.securityContext | nindent 12 }}
+          image: "{{ .Values.front.image.repository }}:{{ .Values.front.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.front.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.app.service.port }}
+              containerPort: {{ .Values.front.service.port }}
               protocol: TCP
           env:
             - name: ApiKey
-              value: {{ .Values.app.auth.apiKey }}
+              value: {{ .Values.front.auth.apiKey }}
             - name: POSTGRES__HOST
               value: {{ .Release.Name }}-postgresql
             - name: POSTGRES__PORT
@@ -76,28 +76,28 @@ spec:
             - name: POSTGRES__PASSWORD
               value: {{ .Values.postgresql.auth.password }}
           livenessProbe:
-            {{- toYaml .Values.app.livenessProbe | nindent 12 }}
+            {{- toYaml .Values.front.livenessProbe | nindent 12 }}
           readinessProbe:
-            {{- toYaml .Values.app.readinessProbe | nindent 12 }}
+            {{- toYaml .Values.front.readinessProbe | nindent 12 }}
           resources:
-            {{- toYaml .Values.app.resources | nindent 12 }}
-          {{- with .Values.app.volumeMounts }}
+            {{- toYaml .Values.front.resources | nindent 12 }}
+          {{- with .Values.front.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with .Values.app.volumes }}
+      {{- with .Values.front.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.app.nodeSelector }}
+      {{- with .Values.front.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.app.affinity }}
+      {{- with .Values.front.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.app.tolerations }}
+      {{- with .Values.front.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

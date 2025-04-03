@@ -1,0 +1,32 @@
+{{- if .Values.front.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "evil-giraf.fullname" . }}
+  labels:
+    {{- include "evil-giraf.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "evil-giraf.fullname" . }}
+  minReplicas: {{ .Values.front.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.front.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.front.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.front.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.front.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.front.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}
