@@ -8,7 +8,7 @@ namespace EvilGiraf.Controller;
 
 [Authorize]
 [ApiController]
-[Route("application")]
+[Route("api/application")]
 public class ApplicationController(IApplicationService applicationService) : ControllerBase
 {
     [HttpPost("")]

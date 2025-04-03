@@ -63,7 +63,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(deployment);
 
         // Act
-        var response = await Client.PostAsync($"/deploy/{application.Id}", null);
+        var response = await Client.PostAsync($"/api/deploy/{application.Id}", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -124,7 +124,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>());
         
         // Act
-        var response = await Client.PostAsync($"/deploy/{application.Id}", null);
+        var response = await Client.PostAsync($"/api/deploy/{application.Id}", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -138,7 +138,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
     public async Task Deploy_ShouldReturn404_WhenApplicationDoesNotExist()
     {
         // Act
-        var response = await Client.PostAsync("/deploy/999", null);
+        var response = await Client.PostAsync("/api/deploy/999", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -179,7 +179,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(deployment);
 
         // Act
-        var response = await Client.GetAsync($"/deploy/{application.Id}");
+        var response = await Client.GetAsync($"/api/deploy/{application.Id}");
 
         // Assert
         response.Should().BeSuccessful();
@@ -215,7 +215,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Throws(httpException);
 
         // Act
-        var response = await Client.GetAsync($"/deploy/{application.Id}");
+        var response = await Client.GetAsync($"/api/deploy/{application.Id}");
 
         // Assert
         response.Should().HaveStatusCode(HttpStatusCode.NoContent);
@@ -228,7 +228,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         const int nonExistentApplicationId = 999;
 
         // Act
-        var response = await Client.GetAsync($"/deploy/{nonExistentApplicationId}");
+        var response = await Client.GetAsync($"/api/deploy/{nonExistentApplicationId}");
 
         // Assert
         response.Should().HaveStatusCode(HttpStatusCode.NotFound);
@@ -245,7 +245,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var response = await Client.GetAsync("/deploy");
+        var response = await Client.GetAsync("/api/deploy");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -274,7 +274,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>())
             .Returns(new HttpOperationResponse<V1Deployment>());
         // Act
-        var response = await Client.GetAsync("/deploy");
+        var response = await Client.GetAsync("/api/deploy");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -309,7 +309,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(new HttpOperationResponse<V1Deployment> { Body = deployment });
 
         // Act
-        var response = await Client.GetAsync("/deploy");
+        var response = await Client.GetAsync("/api/deploy");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

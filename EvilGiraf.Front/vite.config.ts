@@ -9,10 +9,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {
+      '/dev': {
         target: 'http://localhost:5255',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/dev/, ''),
       },
     },
   },
