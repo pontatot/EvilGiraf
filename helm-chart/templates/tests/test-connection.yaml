@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: "{{ include "evil-giraf.fullname" . }}-test-connection"
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.api.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
 spec:
@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "evil-giraf.fullname" . }}:{{ .Values.api.service.port }}']
+      args: ['{{ include "evil-giraf.fullname" . }}-api:{{ .Values.api.service.port }}']
   restartPolicy: Never
