@@ -61,8 +61,9 @@ jobs:
           helm upgrade --install evilgiraf helm-chart \
             --namespace evilgiraf \
             --create-namespace \
-            --set app.image.tag=${{ steps.version.outputs.semVer }} \
-            --set app.baseImage.tag=${{ steps.version.outputs.semVer }} \
-            --set app.auth.apiKey=${{ secrets.API_KEY }} \
+            --set api.image.tag=${{ steps.version.outputs.semVer }} \
+            --set api.baseImage.tag=${{ steps.version.outputs.semVer }} \
+            --set front.image.tag=${{ steps.version.outputs.semVer }} \
+            --set api.auth.apiKey=${{ secrets.API_KEY }} \
             --set postgresql.auth.password=${{ secrets.POSTGRES_PASSWORD }} \
             --wait --timeout 15m

@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "evil-giraf.name" -}}
-{{- default .Chart.Name .Values.app.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- .Chart.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -11,15 +11,11 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "evil-giraf.fullname" -}}
-{{- if .Values.app.fullnameOverride }}
-{{- .Values.app.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else }}
-{{- $name := default .Chart.Name .Values.app.nameOverride }}
+{{- $name := .Chart.Name }}
 {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
-{{- end }}
 {{- end }}
 {{- end }}
 
@@ -33,9 +29,17 @@ Create chart name and version as used by the chart label.
 {{/*
 Common labels
 */}}
-{{- define "evil-giraf.labels" -}}
+{{- define "evil-giraf.api.labels" -}}
 helm.sh/chart: {{ include "evil-giraf.chart" . }}
-{{ include "evil-giraf.selectorLabels" . }}
+{{ include "evil-giraf.api.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+{{- define "evil-giraf.front.labels" -}}
+helm.sh/chart: {{ include "evil-giraf.chart" . }}
+{{ include "evil-giraf.front.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,18 +49,29 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "evil-giraf.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "evil-giraf.name" . }}
+{{- define "evil-giraf.api.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "evil-giraf.name" . }}-api
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+{{- define "evil-giraf.front.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "evil-giraf.name" . }}-front
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "evil-giraf.serviceAccountName" -}}
-{{- if .Values.app.serviceAccount.create }}
-{{- default (include "evil-giraf.fullname" .) .Values.app.serviceAccount.name }}
+{{- define "evil-giraf.api.serviceAccountName" -}}
+{{- if .Values.api.serviceAccount.create }}
+{{- default (printf "%s-api" (include "evil-giraf.fullname" .)) .Values.api.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.app.serviceAccount.name }}
+{{- default "default" .Values.api.serviceAccount.name }}
+{{- end }}
+{{- end }}
+{{- define "evil-giraf.front.serviceAccountName" -}}
+{{- if .Values.api.serviceAccount.create }}
+{{- default (printf "%s-front" (include "evil-giraf.fullname" .)) .Values.api.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.api.serviceAccount.name }}
 {{- end }}
 {{- end }}

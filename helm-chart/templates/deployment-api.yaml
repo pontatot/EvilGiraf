@@ -1,35 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "evil-giraf.fullname" . }}
+  name: {{ include "evil-giraf.fullname" . }}-api
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.api.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.app.autoscaling.enabled }}
-  replicas: {{ .Values.app.replicaCount }}
+  {{- if not .Values.api.autoscaling.enabled }}
+  replicas: {{ .Values.api.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "evil-giraf.selectorLabels" . | nindent 6 }}
+      {{- include "evil-giraf.api.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.app.podAnnotations }}
+      {{- with .Values.api.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "evil-giraf.labels" . | nindent 8 }}
-        {{- with .Values.app.podLabels }}
+        {{- include "evil-giraf.api.labels" . | nindent 8 }}
+        {{- with .Values.api.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.app.imagePullSecrets }}
+      {{- with .Values.api.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "evil-giraf.serviceAccountName" . }}
+      serviceAccountName: {{ include "evil-giraf.api.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.app.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.api.podSecurityContext | nindent 8 }}
       initContainers:
         - name: wait-for-db
           image: postgres:16
@@ -39,7 +39,7 @@ spec:
             - name: PGPASSWORD
               value: {{ .Values.postgresql.auth.password }}
         - name: ef-migrations
-          image: "{{ .Values.app.baseImage.repository }}:{{ .Values.app.baseImage.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.api.baseImage.repository }}:{{ .Values.api.baseImage.tag | default .Chart.AppVersion }}"
           command: ['/root/.dotnet/tools/dotnet-ef', 'database', 'update']
           env:
             - name: POSTGRES__HOST
@@ -55,16 +55,16 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.app.securityContext | nindent 12 }}
-          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+            {{- toYaml .Values.api.securityContext | nindent 12 }}
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.app.service.port }}
+              containerPort: {{ .Values.api.service.port }}
               protocol: TCP
           env:
             - name: ApiKey
-              value: {{ .Values.app.auth.apiKey }}
+              value: {{ .Values.api.auth.apiKey }}
             - name: POSTGRES__HOST
               value: {{ .Release.Name }}-postgresql
             - name: POSTGRES__PORT
@@ -76,28 +76,28 @@ spec:
             - name: POSTGRES__PASSWORD
               value: {{ .Values.postgresql.auth.password }}
           livenessProbe:
-            {{- toYaml .Values.app.livenessProbe | nindent 12 }}
+            {{- toYaml .Values.api.livenessProbe | nindent 12 }}
           readinessProbe:
-            {{- toYaml .Values.app.readinessProbe | nindent 12 }}
+            {{- toYaml .Values.api.readinessProbe | nindent 12 }}
           resources:
-            {{- toYaml .Values.app.resources | nindent 12 }}
-          {{- with .Values.app.volumeMounts }}
+            {{- toYaml .Values.api.resources | nindent 12 }}
+          {{- with .Values.api.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with .Values.app.volumes }}
+      {{- with .Values.api.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.app.nodeSelector }}
+      {{- with .Values.api.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.app.affinity }}
+      {{- with .Values.api.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.app.tolerations }}
+      {{- with .Values.api.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

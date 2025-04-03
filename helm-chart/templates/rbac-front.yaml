@@ -1,9 +1,9 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "evil-giraf.fullname" . }}-role
+  name: {{ include "evil-giraf.fullname" . }}-role-front
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.front.labels" . | nindent 4 }}
 rules:
   - apiGroups: [""]
     resources: ["namespaces"]
@@ -21,14 +21,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "evil-giraf.fullname" . }}-rolebinding
+  name: {{ include "evil-giraf.fullname" . }}-rolebinding-front
   labels:
-    {{- include "evil-giraf.labels" . | nindent 4 }}
+    {{- include "evil-giraf.front.labels" . | nindent 4 }}
 subjects:
 - kind: ServiceAccount
-  name: {{ include "evil-giraf.serviceAccountName" . }}
+  name: {{ include "evil-giraf.front.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ include "evil-giraf.fullname" . }}-role
+  name: {{ include "evil-giraf.fullname" . }}-role-front
   apiGroup: rbac.authorization.k8s.io
