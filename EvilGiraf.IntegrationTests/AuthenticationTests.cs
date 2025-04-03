@@ -12,7 +12,7 @@ public class AuthenticationTests(CustomWebApplicationFactory factory) : Integrat
         using var client = Factory.CreateClient(); // Create new client without auth headers
 
         // Act
-        var response = await client.GetAsync("/application/1");
+        var response = await client.GetAsync("/api/application/1");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -26,7 +26,7 @@ public class AuthenticationTests(CustomWebApplicationFactory factory) : Integrat
         client.DefaultRequestHeaders.Add("X-API-Key", "wrong-api-key");
 
         // Act
-        var response = await client.GetAsync("/application/1");
+        var response = await client.GetAsync("/api/application/1");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -40,7 +40,7 @@ public class AuthenticationTests(CustomWebApplicationFactory factory) : Integrat
         client.DefaultRequestHeaders.Add("X-API-Key", ["", ""]); 
 
         // Act
-        var response = await client.GetAsync("/application/1");
+        var response = await client.GetAsync("/api/application/1");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

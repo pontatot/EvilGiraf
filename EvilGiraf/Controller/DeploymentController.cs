@@ -8,7 +8,7 @@ namespace EvilGiraf.Controller;
 
 [Authorize]
 [ApiController]
-[Route("deploy")]
+[Route("api/deploy")]
 public class DeploymentController(IDeploymentService deploymentService, IApplicationService applicationService, IKubernetesService kubernetesService) : ControllerBase
 {
     [HttpPost("{id:int}")]

@@ -2,7 +2,7 @@ import { ApplicationCreateDto, ApplicationResultDto, DeployResponse } from '../t
 import Cookies from 'js-cookie';
 
 const API_URL = import.meta.env.DEV
-  ? '/api'
+  ? '/dev'
   : import.meta.env.VITE_API_URL;
 
 function getHeaders() {

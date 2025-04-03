@@ -24,7 +24,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22]);
 
         // Act
-        var response = await Client.PostAsJsonAsync("/application", createRequest);
+        var response = await Client.PostAsJsonAsync("/api/application", createRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -55,7 +55,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var createRequest = new ApplicationCreateDto(null!, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22]);
 
         // Act
-        var response = await Client.PostAsJsonAsync("/application", createRequest);
+        var response = await Client.PostAsJsonAsync("/api/application", createRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -78,7 +78,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var response = await Client.GetAsync($"/application/{application.Id}");
+        var response = await Client.GetAsync($"/api/application/{application.Id}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -110,7 +110,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var response = await Client.GetAsync($"/application/{application.Id + 1}");
+        var response = await Client.GetAsync($"/api/application/{application.Id + 1}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -133,12 +133,12 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var response = await Client.DeleteAsync($"/application/{application.Id}");
+        var response = await Client.DeleteAsync($"/api/application/{application.Id}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var checkresponse = await Client.GetAsync($"/application/{application.Id}");
+        var checkresponse = await Client.GetAsync($"/api/application/{application.Id}");
         checkresponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -146,7 +146,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task DeleteWithNonExistingId_ShouldReturnNotFound()
     {
         // Act
-        var response = await Client.DeleteAsync($"/application/{999}");
+        var response = await Client.DeleteAsync($"/api/application/{999}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -171,7 +171,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0", [23]);
 
         // Act
-        var response = await Client.PatchAsJsonAsync($"/application/{application.Id}", updateRequest);
+        var response = await Client.PatchAsJsonAsync($"/api/application/{application.Id}", updateRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -187,7 +187,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         updatedApplication.Ports.Should().BeEquivalentTo(updateRequest.Ports);
 
         // Verify the application was updated in the database
-        response = await Client.GetAsync($"/application/{application.Id}");
+        response = await Client.GetAsync($"/api/application/{application.Id}");
         var savedApplication = await response.Content.ReadFromJsonAsync<Application>();
 
         savedApplication.Should().NotBeNull();
@@ -206,7 +206,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0", [22]);
 
         // Act
-        var response = await Client.PatchAsJsonAsync($"/application/{999}", updateRequest);
+        var response = await Client.PatchAsJsonAsync($"/api/application/{999}", updateRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -231,7 +231,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var updateRequest = new ApplicationUpdateDto(null, null, null, null, null);
 
         // Act
-        var response = await Client.PatchAsJsonAsync($"/application/{application.Id}", updateRequest);
+        var response = await Client.PatchAsJsonAsync($"/api/application/{application.Id}", updateRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -247,7 +247,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         updatedApplication.Ports.Should().BeEquivalentTo(application.Ports);
 
         // Verify the application was updated in the database
-        response = await Client.GetAsync($"/application/{application.Id}");
+        response = await Client.GetAsync($"/api/application/{application.Id}");
         var savedApplication = await response.Content.ReadFromJsonAsync<Application>();
 
         savedApplication.Should().NotBeNull();
@@ -291,7 +291,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var response = await Client.GetAsync("/application");
+        var response = await Client.GetAsync("/api/application");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -324,7 +324,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         await _dbContext.SaveChangesAsync();
         
         // Act
-        var response = await Client.GetAsync("/application");
+        var response = await Client.GetAsync("/api/application");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -341,7 +341,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", null);
 
         // Act
-        var response = await Client.PostAsJsonAsync("/application", createRequest);
+        var response = await Client.PostAsJsonAsync("/api/application", createRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -372,7 +372,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22, 80]);
 
         // Act
-        var response = await Client.PostAsJsonAsync("/application", createRequest);
+        var response = await Client.PostAsJsonAsync("/api/application", createRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
