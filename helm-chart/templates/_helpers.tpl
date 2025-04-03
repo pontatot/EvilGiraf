@@ -69,9 +69,9 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 {{- define "evil-giraf.front.serviceAccountName" -}}
-{{- if .Values.api.serviceAccount.create }}
-{{- default (printf "%s-front" (include "evil-giraf.fullname" .)) .Values.api.serviceAccount.name }}
+{{- if .Values.front.serviceAccount.create }}
+{{- default (printf "%s-front" (include "evil-giraf.fullname" .)) .Values.front.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.api.serviceAccount.name }}
+{{- default "default" .Values.front.serviceAccount.name }}
 {{- end }}
 {{- end }}
