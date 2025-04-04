@@ -13,12 +13,12 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
         if (deployment is null)
         {
             await deploymentService.CreateDeployment(new DeploymentModel(app.Name, app.Id.ToNamespace(), 1,
-                app.Link, []));
+                app.Link, app.Ports));
         }
         else
         {
             await deploymentService.UpdateDeployment(new DeploymentModel(app.Name, app.Id.ToNamespace(), 1,
-                app.Link, []));
+                app.Link, app.Ports));
         }
     }
 }
