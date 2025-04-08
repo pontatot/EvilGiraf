@@ -59,4 +59,33 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
         }
         return Ok(listDeployResponses);
     }
+    
+    [HttpDelete("application/{id:int}/delete")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(typeof(string), 400)]
+    [ProducesResponseType(typeof(string), 404)]
+    public async Task<IActionResult> Undeploy(int id)
+    {
+        var application = await applicationService.GetApplication(id);
+        if (application == null)
+        {
+            return NotFound($"Application with ID {id} not found.");
+        }
+
+        try
+        {
+            var result = await deploymentService.DeleteDeployment(application.Name, application.Id.ToNamespace());
+            if (result == null)
+            {
+                return NotFound($"Deployment for application {id} not found.");
+            }
+
+            return NoContent();
+        }
+        catch(Exception ex)
+        {
+            return BadRequest($"Error deleting deployment: {ex.Message}");
+            
+        }
+    }
 }
