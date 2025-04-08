@@ -68,6 +68,7 @@ public class Program
         builder.Services.AddScoped<IApplicationService, ApplicationService>();
         builder.Services.AddScoped<IKubernetesService, KubernetesService>();
         builder.Services.AddScoped<IServiceService, ServiceService>();
+        builder.Services.AddScoped<IGitBuildService, GitBuildService>();
 
         var app = builder.Build();
 
