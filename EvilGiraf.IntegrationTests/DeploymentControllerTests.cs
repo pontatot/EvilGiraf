@@ -320,4 +320,81 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         deployResponses![0].Status.Replicas.Should().Be(deployment.Status.Replicas);
         deployResponses[1].Status.Replicas.Should().Be(deployment.Status.Replicas);
     }
+    
+    [Fact]
+    public async Task Undeploy_ShouldReturn204_WhenDeploymentIsDeleted()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "test-app",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-app:latest",
+            Version = "1.0.0",
+            Ports = [22]
+        };
+
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+
+        _kubernetes.AppsV1.DeleteNamespacedDeploymentWithHttpMessagesAsync(
+            application.Name,
+            application.Id.ToNamespace())
+            .Returns(new HttpOperationResponse<V1Status> { Body = new V1Status() });
+
+        // Act
+        var response = await Client.DeleteAsync($"/api/deploy/{application.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        await _kubernetes.AppsV1.Received(1).DeleteNamespacedDeploymentWithHttpMessagesAsync(
+            Arg.Is<string>(name => name == application.Name),
+            Arg.Is<string>(ns => ns == application.Id.ToNamespace()));
+    }
+
+    [Fact]
+    public async Task Undeploy_ShouldReturn404_WhenApplicationDoesNotExist()
+    {
+        // Act
+        var response = await Client.DeleteAsync("/api/deploy/999");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var error = await response.Content.ReadAsStringAsync();
+        error.Should().Be("Application with ID 999 not found.");
+    }
+
+    [Fact]
+    public async Task Undeploy_ShouldReturn404_WhenDeploymentDoesNotExist()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "test-app",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-app:latest",
+            Version = "1.0.0",
+            Ports = [22]
+        };
+
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+
+        var httpException = new HttpOperationException
+        {
+            Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
+        };
+
+        _kubernetes.AppsV1.DeleteNamespacedDeploymentWithHttpMessagesAsync(
+            application.Name,
+            application.Id.ToNamespace())
+            .Throws(httpException);
+
+        var response = await Client.DeleteAsync($"api/deploy/{application.Id}");
+        
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var error = await response.Content.ReadAsStringAsync();
+        error.Should().Be($"Deployment for application {application.Id} not found.");
+    }
 }
