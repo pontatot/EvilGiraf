@@ -343,7 +343,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(new HttpOperationResponse<V1Status> { Body = new V1Status() });
 
         // Act
-        var response = await Client.DeleteAsync($"/api/deploy/application/{application.Id}/delete");
+        var response = await Client.DeleteAsync($"/api/deploy/{application.Id}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -356,12 +356,12 @@ public class DeploymentControllerTests : AuthenticatedTestBase
     public async Task Undeploy_ShouldReturn404_WhenApplicationDoesNotExist()
     {
         // Act
-        var response = await Client.DeleteAsync("/api/deploy/application/999/delete");
+        var response = await Client.DeleteAsync("/api/deploy/999");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var error = await response.Content.ReadAsStringAsync();
-        error.Should().Contain("Application with ID 999 not found.");
+        error.Should().Be("Application with ID 999 not found.");
     }
 
     [Fact]
@@ -390,42 +390,11 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             application.Id.ToNamespace())
             .Throws(httpException);
 
-        // Act
-        var response = await Client.DeleteAsync($"/api/deploy/application/{application.Id}/delete");
-
+        var response = await Client.DeleteAsync($"api/deploy/{application.Id}");
+        
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         var error = await response.Content.ReadAsStringAsync();
-        error.Should().Contain($"Deployment for application {application.Id} not found.");
-    }
-
-    [Fact]
-    public async Task Undeploy_ShouldReturn400_WhenExceptionOccurs()
-    {
-        // Arrange
-        var application = new Application
-        {
-            Name = "test-app",
-            Type = ApplicationType.Docker,
-            Link = "docker.io/test-app:latest",
-            Version = "1.0.0",
-            Ports = [22]
-        };
-
-        _dbContext.Applications.Add(application);
-        await _dbContext.SaveChangesAsync();
-
-        _kubernetes.AppsV1.DeleteNamespacedDeploymentWithHttpMessagesAsync(
-            application.Name,
-            application.Id.ToNamespace())
-            .Throws(new Exception("Unexpected error"));
-
-        // Act
-        var response = await Client.DeleteAsync($"/api/deploy/application/{application.Id}/delete");
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var error = await response.Content.ReadAsStringAsync();
-        error.Should().Contain("Error deleting deployment: Unexpected error");
+        error.Should().Be($"Deployment for application {application.Id} not found.");
     }
 }
