@@ -2,43 +2,31 @@ using k8s.Models;
 
 namespace EvilGiraf.Model;
 
-public class ServiceModel
-{
-    public required string Name { get; set; }
-    
-    public required string Namespace { get; set; }
-    
-    public required string Type { get; set; }
-    
-    public required int[] Ports { get; set; }
-    
-    public required string TargetPort { get; set; }
-    
-    public required string Protocol { get; set; }
-    
-    public required string Selector { get; set; }
-    
-    public V1Service ToService()
+public record ServiceModel(string Name, string Namespace, string Type, int[] Ports, string Protocol, string Selector);
+
+public static class ServiceModelExtensions
+{   
+    public static V1Service ToService(this ServiceModel model)
     {
         return new V1Service
         {
             Metadata = new V1ObjectMeta
             {
-                Name = Name,
-                NamespaceProperty = Namespace
+                Name = model.Name,
+                NamespaceProperty = model.Namespace
             },
             Spec = new V1ServiceSpec
             {
-                Type = Type,
-                Ports = Ports.Select(p => new V1ServicePort
+                Type = model.Type,
+                Ports = model.Ports.Select(p => new V1ServicePort
                 {
                     Port = p,
-                    TargetPort = TargetPort,
-                    Protocol = Protocol
+                    TargetPort = p,
+                    Protocol = model.Protocol
                 }).ToList(),
                 Selector = new Dictionary<string, string>
                 {
-                    { "app", Selector }
+                    { "app", model.Selector }
                 }
             }
         };

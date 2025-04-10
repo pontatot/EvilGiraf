@@ -4,7 +4,7 @@ using EvilGiraf.Model;
 
 namespace EvilGiraf.Service;
 
-public class KubernetesService(IDeploymentService deploymentService, INamespaceService namespaceService) : IKubernetesService
+public class KubernetesService(IDeploymentService deploymentService, INamespaceService namespaceService, ServiceService serviceService) : IKubernetesService
 {
     public async Task Deploy(Application app)
     {
@@ -14,6 +14,12 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
         {
             await deploymentService.CreateDeployment(new DeploymentModel(app.Name, app.Id.ToNamespace(), 1,
                 app.Link, app.Ports));
+
+            if(app.Ports.Length > 0)
+            {
+                await serviceService.CreateService(new ServiceModel(app.Name, app.Id.ToNamespace(), "ClusterIP",
+                    app.Ports, "TCP", app.Name));
+            }
         }
         else
         {
