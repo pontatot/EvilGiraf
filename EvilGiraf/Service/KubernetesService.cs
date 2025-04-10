@@ -25,6 +25,21 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
         {
             await deploymentService.UpdateDeployment(new DeploymentModel(app.Name, app.Id.ToNamespace(), 1,
                 app.Link, app.Ports));
+
+            if (app.Ports.Length > 0)
+            {
+                var service = await serviceService.ReadService(app.Name, app.Id.ToNamespace());
+                if (service is null)
+                {
+                    await serviceService.CreateService(new ServiceModel(app.Name, app.Id.ToNamespace(), "ClusterIP",
+                        app.Ports, "TCP", app.Name));
+                }
+                else
+                {
+                    await serviceService.UpdateService(new ServiceModel(app.Name, app.Id.ToNamespace(), "ClusterIP",
+                        app.Ports, "TCP", app.Name));
+                }
+            }
         }
     }
 }
