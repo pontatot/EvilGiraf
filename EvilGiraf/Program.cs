@@ -1,7 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using EvilGiraf.Authentication;
 using EvilGiraf.Interface;
+using EvilGiraf.Interface.Kubernetes;
 using EvilGiraf.Service;
+using EvilGiraf.Service.Kubernetes;
 using k8s;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -62,6 +64,7 @@ public class Program
                 builder.Configuration.GetSection("Postgres")
                 .Get<NpgsqlConnectionStringBuilder>()?.ConnectionString));
         builder.Services.AddSingleton<IDeploymentService, DeploymentService>();
+        builder.Services.AddSingleton<INamespaceService, NamespaceService>();
         builder.Services.AddScoped<IApplicationService, ApplicationService>();
         builder.Services.AddScoped<IKubernetesService, KubernetesService>();
 
