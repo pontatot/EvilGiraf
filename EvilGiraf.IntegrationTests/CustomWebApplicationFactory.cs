@@ -15,8 +15,7 @@ namespace EvilGiraf.IntegrationTests;
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer;
-    private readonly IKubernetes _kubernetesClient;
-    public const string TestApiKey = "test-api-key";
+    private const string TestApiKey = "test-api-key";
 
     public CustomWebApplicationFactory()
     {
@@ -25,8 +24,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
             .WithUsername("test_user")
             .WithPassword("test_password")
             .Build();
-
-        _kubernetesClient = Substitute.For<IKubernetes>();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -42,15 +39,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll(typeof(IKubernetes));
-            services.AddSingleton(_kubernetesClient);
+            services.AddSingleton(Substitute.For<IKubernetes>());
             
             services.RemoveAll(typeof(DatabaseService));
             services.AddDbContext<DatabaseService>(options =>
                 options.UseNpgsql(_dbContainer.GetConnectionString()));
         });
     }
-
-    public IKubernetes GetKubernetesClient() => _kubernetesClient;
 
     public async Task InitializeAsync()
     {

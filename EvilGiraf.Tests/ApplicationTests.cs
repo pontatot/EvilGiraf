@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EvilGiraf.Tests;
 
-public class ApplicationServiceTests
+public class ApplicationTests
 {
     private readonly ApplicationService _applicationService;
 
-    public ApplicationServiceTests()
+    public ApplicationTests()
     {
         var databaseService = new DatabaseService(new DbContextOptionsBuilder<DatabaseService>().UseInMemoryDatabase("TestDb").Options);
         _applicationService = new ApplicationService(databaseService);

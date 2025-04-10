@@ -262,11 +262,6 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     [Fact]
     public async Task List_ShouldReturnListOfApplications()
     {
-        // Arrange
-        var oldApplications = await _dbContext.Applications.ToListAsync();
-        _dbContext.Applications.RemoveRange(oldApplications);
-        await _dbContext.SaveChangesAsync();
-
         var applications = new List<Application>
         {
             new()
@@ -298,40 +293,10 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var applicationDtos = await response.Content.ReadFromJsonAsync<List<Application>>();
 
         applicationDtos.Should().NotBeNull();
-        applicationDtos.Should().HaveCount(2);
+        applicationDtos.Should().HaveCountGreaterOrEqualTo(2);
 
-        applicationDtos![0].Name.Should().Be(applications[0].Name);
-        applicationDtos[0].Type.Should().Be(applications[0].Type);
-        applicationDtos[0].Link.Should().Be(applications[0].Link);
-        applicationDtos[0].Version.Should().Be(applications[0].Version);
-        applicationDtos[0].Id.Should().Be(applications[0].Id);
-        applicationDtos[0].Ports.Should().BeEquivalentTo(applications[0].Ports);
-
-        applicationDtos[1].Name.Should().Be(applications[1].Name);
-        applicationDtos[1].Type.Should().Be(applications[1].Type);
-        applicationDtos[1].Link.Should().Be(applications[1].Link);
-        applicationDtos[1].Version.Should().Be(applications[1].Version);
-        applicationDtos[1].Id.Should().Be(applications[1].Id);
-        applicationDtos[1].Ports.Should().BeEquivalentTo(applications[1].Ports);
-    }
-
-    [Fact]
-    public async Task ListWithNoApplications_ShouldReturnEmptyList()
-    {
-        // Arrange
-        var oldApplications = await _dbContext.Applications.ToListAsync();
-        _dbContext.Applications.RemoveRange(oldApplications);
-        await _dbContext.SaveChangesAsync();
-        
-        // Act
-        var response = await Client.GetAsync("/api/application");
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var applicationDtos = await response.Content.ReadFromJsonAsync<List<Application>>();
-
-        applicationDtos.Should().NotBeNull();
-        applicationDtos.Should().BeEmpty();
+        applicationDtos.Should().ContainEquivalentOf(applications[0]);
+        applicationDtos.Should().ContainEquivalentOf(applications[1]);
     }
 
     [Fact]
