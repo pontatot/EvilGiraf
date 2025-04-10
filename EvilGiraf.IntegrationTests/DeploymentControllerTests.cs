@@ -55,6 +55,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
                 application.Id.ToNamespace())
             .Returns(deployment);
         
+        _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace() });
+        
         _kubernetes.AppsV1.ReplaceNamespacedDeploymentWithHttpMessagesAsync(
                 Arg.Any<V1Deployment>(),
                 application.Name, 
@@ -62,19 +64,19 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(deployment);
 
         // Act
-        var response = await Client.PostAsync($"/api/deploy/{application.Id}", null);
+        var response = await Client.PostAsync($"/api/deploy/{application.Id}?isAsync=false", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         await _kubernetes.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(
-            Arg.Is<string>(name => name == application.Name),
-            Arg.Is<string>(ns => ns == application.Id.ToNamespace()));
+            application.Name,
+            application.Id.ToNamespace());
 
         await _kubernetes.AppsV1.Received().ReplaceNamespacedDeploymentWithHttpMessagesAsync(
             Arg.Any<V1Deployment>(),
-            Arg.Is<string>(name => name == application.Name),
-            Arg.Is<string>(ns => ns == application.Id.ToNamespace()));
+            application.Name,
+            application.Id.ToNamespace());
     }
 
     [Fact]
@@ -120,17 +122,17 @@ public class DeploymentControllerTests : AuthenticatedTestBase
                 application.Id.ToNamespace())
             .Returns(deployment);
         
-        _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>());
+        _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace()});
         
         // Act
-        var response = await Client.PostAsync($"/api/deploy/{application.Id}", null);
+        var response = await Client.PostAsync($"/api/deploy/{application.Id}?isAsync=false", null);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         await _kubernetes.AppsV1.Received().ReadNamespacedDeploymentWithHttpMessagesAsync(
-            Arg.Is<string>(name => name == application.Name),
-            Arg.Is<string>(ns => ns == application.Id.ToNamespace()));
+            application.Name,
+            application.Id.ToNamespace());
     }
 
     [Fact]
