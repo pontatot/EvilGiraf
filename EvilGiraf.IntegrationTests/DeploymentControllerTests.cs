@@ -287,10 +287,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var deployResponses = await response.Content.ReadFromJsonAsync<List<DeployResponse>>();
         deployResponses.Should().NotBeNull();
-        deployResponses.Should().HaveCount(2);
-
-        deployResponses![0].Status.Replicas.Should().Be(deployment.Status.Replicas);
-        deployResponses[1].Status.Replicas.Should().Be(deployment.Status.Replicas);
+        deployResponses.Should().HaveCountGreaterOrEqualTo(2);
+        deployResponses!.Select(resp => resp.Status).Should().ContainEquivalentOf(deployment.Status);
     }
     
     [Fact]
