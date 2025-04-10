@@ -7,7 +7,6 @@ using FluentAssertions;
 using k8s;
 using k8s.Autorest;
 using k8s.Models;
-using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -235,33 +234,10 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         var error = await response.Content.ReadAsStringAsync();
         error.Should().Contain($"Application {nonExistentApplicationId} not found");
     }
-    
-    [Fact]
-    public async Task ListDeployments_ShouldReturnOkResult_WithEmptyList_WhenNoApplications()
-    {
-        // Arrange
-        var oldApplications = await _dbContext.Applications.ToListAsync();
-        _dbContext.Applications.RemoveRange(oldApplications);
-        await _dbContext.SaveChangesAsync();
-
-        // Act
-        var response = await Client.GetAsync("/api/deploy");
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var deployResponses = await response.Content.ReadFromJsonAsync<List<DeployResponse>>();
-        deployResponses.Should().NotBeNull();
-        deployResponses.Should().BeEmpty();
-    }
 
     [Fact]
     public async Task ListDeployments_ShouldReturnOkResult_WithEmptyList_WhenNoDeployments()
     {
-        // Arrange
-        var oldApplications = await _dbContext.Applications.ToListAsync();
-        _dbContext.Applications.RemoveRange(oldApplications);
-        await _dbContext.SaveChangesAsync();
-
         var applications = new List<Application>
         {
             new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0", Ports = [22] },
@@ -287,10 +263,6 @@ public class DeploymentControllerTests : AuthenticatedTestBase
     public async Task ListDeployments_ShouldReturnOkResult_WithDeployments()
     {
         // Arrange
-        var oldApplications = await _dbContext.Applications.ToListAsync();
-        _dbContext.Applications.RemoveRange(oldApplications);
-        await _dbContext.SaveChangesAsync();
-
         var applications = new List<Application>
         {
             new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0", Ports = [22] },

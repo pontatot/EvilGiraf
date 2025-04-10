@@ -18,9 +18,8 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
     }
 
     protected DatabaseService GetDatabaseService()
-    {
-        return Scope.ServiceProvider.GetRequiredService<DatabaseService>();
-    }
+        => Scope.ServiceProvider.GetRequiredService<DatabaseService>();
 
-    public IKubernetes GetKubernetesClient() => Factory.GetKubernetesClient();
+    protected IKubernetes GetKubernetesClient()
+        => Factory.Services.GetRequiredService<IKubernetes>();
 }
