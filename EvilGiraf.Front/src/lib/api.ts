@@ -95,9 +95,15 @@ export const api = {
       }
     },
     
-    status: async (id: number): Promise<DeployResponse> => {
+    status: async (id: number): Promise<DeployResponse | null> => {
       const response = await fetch(`${API_URL}/deploy/${id}`, { headers: getHeaders() });
-      return handleResponse(response);
+      if (!response.ok) {
+        throw new ApiError(response.status, await response.text());
+      }
+      if (response.status === 204) {
+        return null;
+      }
+      return response.json();
     },
   },
 };
