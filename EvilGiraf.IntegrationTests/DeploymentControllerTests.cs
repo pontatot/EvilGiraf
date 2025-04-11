@@ -46,6 +46,10 @@ public class DeploymentControllerTests : AuthenticatedTestBase
                 }
             }
         };
+        var service = new HttpOperationResponse<V1Service>
+        {
+            Body = new V1Service()
+        };
         
         _dbContext.Applications.Add(application);
         await _dbContext.SaveChangesAsync();
@@ -54,6 +58,11 @@ public class DeploymentControllerTests : AuthenticatedTestBase
                 application.Name, 
                 application.Id.ToNamespace())
             .Returns(deployment);
+        
+        _kubernetes.CoreV1.ReadNamespacedServiceWithHttpMessagesAsync(
+                application.Name, 
+                application.Id.ToNamespace())
+            .Returns(service);
         
         _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace() });
         
@@ -103,6 +112,10 @@ public class DeploymentControllerTests : AuthenticatedTestBase
                 }
             }
         };
+        var service = new HttpOperationResponse<V1Service>
+        {
+            Body = new V1Service()
+        };
         
         var httpException = new HttpOperationException
         {
@@ -121,6 +134,11 @@ public class DeploymentControllerTests : AuthenticatedTestBase
                 Arg.Any<V1Deployment>(),
                 application.Id.ToNamespace())
             .Returns(deployment);
+        
+        _kubernetes.CoreV1.CreateNamespacedServiceWithHttpMessagesAsync(
+                Arg.Any<V1Service>(), 
+                application.Id.ToNamespace())
+            .Returns(service);
         
         _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace()});
         
