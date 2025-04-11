@@ -18,8 +18,8 @@ public class ApplicationController(IApplicationService applicationService) : Con
     {
         var application = await applicationService.CreateApplication(request);
         
-        if (application.Name.Any(char.IsWhiteSpace))
-            return BadRequest("Application name cannot contain spaces");
+        if (string.IsNullOrEmpty(application.Name) || application.Name.Any(char.IsWhiteSpace))
+            return BadRequest("Application name cannot be null, empty, or contain spaces");
 
         return Created($"", application.ToDto());
     }
@@ -59,8 +59,8 @@ public class ApplicationController(IApplicationService applicationService) : Con
         if(application is null)
             return NotFound($"Application {id} not found");
         
-        if (application.Name.Any(char.IsWhiteSpace))
-            return BadRequest("Application name cannot contain spaces");
+        if (string.IsNullOrEmpty(application.Name) || application.Name.Any(char.IsWhiteSpace))
+            return BadRequest("Application name cannot be null, empty, or contain spaces");
 
         return Ok(application.ToDto());
     }
