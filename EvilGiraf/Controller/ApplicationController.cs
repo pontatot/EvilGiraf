@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using EvilGiraf.Dto;
 using EvilGiraf.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace EvilGiraf.Controller;
 
@@ -16,6 +17,9 @@ public class ApplicationController(IApplicationService applicationService) : Con
     public async  Task<IActionResult> Create([FromBody] ApplicationCreateDto request)
     {
         var application = await applicationService.CreateApplication(request);
+        
+        if (application.Name.Any(char.IsWhiteSpace))
+            return BadRequest("Application name cannot contain spaces");
 
         return Created($"", application.ToDto());
     }
@@ -54,6 +58,9 @@ public class ApplicationController(IApplicationService applicationService) : Con
 
         if(application is null)
             return NotFound($"Application {id} not found");
+        
+        if (application.Name.Any(char.IsWhiteSpace))
+            return BadRequest("Application name cannot contain spaces");
 
         return Ok(application.ToDto());
     }

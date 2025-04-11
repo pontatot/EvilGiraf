@@ -60,6 +60,19 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+    
+    [Fact]
+    public async Task CreateWithNameContainingSpaces_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var createRequest = new ApplicationCreateDto("test application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22]);
+
+        // Act
+        var response = await Client.PostAsJsonAsync("/api/application", createRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
 
     [Fact]
     public async Task Get_ShouldReturnApplication()
@@ -152,6 +165,31 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    [Fact]
+    public async Task UpdateNameAppWithSpaces_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "valid-name",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/valid-name:latest",
+            Version = "1.0.0",
+            Ports = [22]
+        };
+
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+
+        var updateRequest = new ApplicationUpdateDto("invalid name", ApplicationType.Git, "k8s.io/invalid-name:latest", "2.0.0", [23]);
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/api/application/{application.Id}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+    
     [Fact]
     public async Task Update_ShouldUpdateApplication()
     {
