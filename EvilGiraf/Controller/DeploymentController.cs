@@ -14,6 +14,7 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
 {
     [HttpPost("{id:int}")]
     [ProducesResponseType(201)]
+    [ProducesResponseType(202)]
     [ProducesResponseType(typeof(string), 404)]
     public async  Task<IActionResult> Deploy(int id, [FromQuery] bool isAsync = true)
     {
@@ -22,10 +23,11 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
             return NotFound($"Application {id} not found");
         
         if (isAsync)
+        {
             _ = kubernetesService.Deploy(app);
-        else
-            await kubernetesService.Deploy(app);
-        
+            return Accepted($"deploy/{id:int}", null);
+        }
+        await kubernetesService.Deploy(app);
         return Created($"deploy/{id:int}", null);
     }
     
@@ -75,11 +77,7 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
             return NotFound($"Application with ID {id} not found.");
         }
         
-        var result = await deploymentService.DeleteDeployment(application.Name, application.Id.ToNamespace());
-        if (result == null)
-        {
-            return NotFound($"Deployment for application {id} not found.");
-        }
+        await kubernetesService.Undeploy(application);
 
         return NoContent();
     }
