@@ -4,7 +4,7 @@ using k8s;
 using k8s.Autorest;
 using k8s.Models;
 
-namespace EvilGiraf.Service;
+namespace EvilGiraf.Service.Kubernetes;
 
 public class ServiceService(IKubernetes client) : IServiceService
 {
@@ -57,5 +57,12 @@ public class ServiceService(IKubernetes client) : IServiceService
         {
             return null;
         }
+    }
+
+    public async Task<V1Service> CreateIfNotExistsService(ServiceModel model)
+    {
+        if (await ReadService(model.Name, model.Namespace) is { } service)
+            return service;
+        return await CreateService(model);
     }
 }

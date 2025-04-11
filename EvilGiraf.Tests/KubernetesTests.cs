@@ -1,4 +1,5 @@
 using EvilGiraf.Interface.Kubernetes;
+using EvilGiraf.Interface;
 using EvilGiraf.Model;
 using EvilGiraf.Service;
 using FluentAssertions;
@@ -16,7 +17,7 @@ public class KubernetesTests
     public KubernetesTests()
     {
         _deploymentService = Substitute.For<IDeploymentService>();
-        _kubernetesService = new KubernetesService(_deploymentService, Substitute.For<INamespaceService>());
+        _kubernetesService = new KubernetesService(_deploymentService, Substitute.For<INamespaceService>(), Substitute.For<IServiceService>());
     }
 
     private static Application CreateTestApplication() => new()
