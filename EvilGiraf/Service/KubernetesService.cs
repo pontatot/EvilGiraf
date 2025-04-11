@@ -33,4 +33,9 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
             }
         }
     }
+    
+    public async Task Undeploy(Application app)
+    {
+        await namespaceService.DeleteNamespace(app.Id.ToNamespace());
+    }
 }

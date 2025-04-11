@@ -24,6 +24,18 @@ public class NamespaceService(IKubernetes client) : INamespaceService
         }
     }
 
+    public async Task<V1Status?> DeleteNamespace(string name)
+    {
+        try
+        {
+            return await client.CoreV1.DeleteNamespaceAsync(name);
+        }
+        catch (HttpOperationException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+    }
+
     public async Task<V1Namespace?> CreateIfNotExistsNamespace(string name)
     {
         if (await ReadNamespace(name) is { } @namespace)
