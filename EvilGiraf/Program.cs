@@ -67,6 +67,7 @@ public class Program
         builder.Services.AddSingleton<INamespaceService, NamespaceService>();
         builder.Services.AddScoped<IApplicationService, ApplicationService>();
         builder.Services.AddScoped<IKubernetesService, KubernetesService>();
+        builder.Services.AddScoped<IServiceService, ServiceService>();
 
         var app = builder.Build();
 
