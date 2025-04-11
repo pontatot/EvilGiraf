@@ -43,7 +43,14 @@ public static class DeploymentModelExtensions
                             {
                                 Name = model.Name,
                                 Image = model.Image,
-                                Ports = model.Ports.Select(x => new V1ContainerPort(x)).ToList()
+                                Ports = model.Ports.Select(x => new V1ContainerPort(x)).ToList(),
+                                
+                                //Env = model.EnvironmentVariables?.Select(x => new V1EnvVar)
+                                    //new List<V1EnvVar>
+                                // {
+                                //     new V1EnvVar(name: "PORT", value: "80"),
+                                // }
+                                
                             }
                         }
                     }

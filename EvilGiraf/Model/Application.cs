@@ -21,4 +21,6 @@ public class Application
     public string? Version { get; set; }
 
     public required int[] Ports { get; set; }
+    
+    public required Dictionary<string, string>? EnvironmentVariables { get; set; }
 }

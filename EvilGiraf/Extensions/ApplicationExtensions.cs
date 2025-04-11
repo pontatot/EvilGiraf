@@ -13,7 +13,8 @@ public static class ApplicationExtensions
             application.Type,
             application.Link,
             application.Version,
-            application.Ports
+            application.Ports,
+            application.EnvironmentVariables
         );
     }
 
@@ -25,7 +26,8 @@ public static class ApplicationExtensions
             Type = applicationDto.Type,
             Link = applicationDto.Link,
             Version = applicationDto.Version,
-            Ports = applicationDto.Ports is not null ? applicationDto.Ports : Array.Empty<int>()
+            Ports = applicationDto.Ports is not null ? applicationDto.Ports : Array.Empty<int>(),
+            EnvironmentVariables = applicationDto.EnvironmentVariables
         };
     }
 }
