@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { ArrowLeft, RefreshCw, Trash2, Edit2, Save, X } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Trash2, Edit2, Save, X, Power } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ApplicationCreateDto, ApplicationType } from '../types/api';
@@ -31,6 +31,15 @@ export function ApplicationDetails() {
 
   const deployMutation = useMutation(
     () => api.deployments.deploy(Number(id)),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['deployStatus', id]);
+      },
+    }
+  );
+
+  const undeployMutation = useMutation(
+    () => api.deployments.undeploy(Number(id)),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(['deployStatus', id]);
@@ -248,6 +257,14 @@ export function ApplicationDetails() {
             ) : !deployStatus ? (
               <div className="text-gray-600">
                 <p>This application is not currently deployed.</p>
+                <button
+                  onClick={() => deployMutation.mutate()}
+                  disabled={deployMutation.isLoading}
+                  className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-5 w-5 ${deployMutation.isLoading ? 'animate-spin' : ''}`} />
+                  {deployMutation.isLoading ? 'Deploying...' : 'Deploy'}
+                </button>
               </div>
             ) : (
               <div className="space-y-2">
@@ -272,17 +289,26 @@ export function ApplicationDetails() {
                     </p>
                   </div>
                 ))}
+                <div className="flex gap-2 mt-4">
+                  <button
+                    onClick={() => deployMutation.mutate()}
+                    disabled={deployMutation.isLoading}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`h-5 w-5 ${deployMutation.isLoading ? 'animate-spin' : ''}`} />
+                    {deployMutation.isLoading ? 'Deploying...' : 'Redeploy'}
+                  </button>
+                  <button
+                    onClick={() => undeployMutation.mutate()}
+                    disabled={undeployMutation.isLoading}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-red-600 disabled:opacity-50"
+                  >
+                    <Power className={`h-5 w-5 ${undeployMutation.isLoading ? 'animate-spin' : ''}`} />
+                    {undeployMutation.isLoading ? 'Undeploying...' : 'Undeploy'}
+                  </button>
+                </div>
               </div>
             )}
-
-            <button
-              onClick={() => deployMutation.mutate()}
-              disabled={deployMutation.isLoading}
-              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 disabled:opacity-50"
-            >
-              <RefreshCw className={`h-5 w-5 ${deployMutation.isLoading ? 'animate-spin' : ''}`} />
-              {deployMutation.isLoading ? 'Deploying...' : 'Deploy'}
-            </button>
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { ApplicationCreateDto, ApplicationResultDto, DeployResponse } from '../t
 import Cookies from 'js-cookie';
 
 const API_URL = import.meta.env.DEV
-  ? '/dev'
+  ? '/api'
   : import.meta.env.VITE_API_URL;
 
 function getHeaders() {
@@ -78,6 +78,16 @@ export const api = {
     deploy: async (id: number): Promise<void> => {
       const response = await fetch(`${API_URL}/deploy/${id}`, {
         method: 'POST',
+        headers: getHeaders(),
+      });
+      if (!response.ok) {
+        throw new ApiError(response.status, await response.text());
+      }
+    },
+    
+    undeploy: async (id: number): Promise<void> => {
+      const response = await fetch(`${API_URL}/deploy/${id}`, {
+        method: 'DELETE',
         headers: getHeaders(),
       });
       if (!response.ok) {
