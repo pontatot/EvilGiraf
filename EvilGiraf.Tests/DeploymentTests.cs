@@ -1,7 +1,7 @@
 using System.Net;
-using EvilGiraf.Interface;
+using EvilGiraf.Interface.Kubernetes;
 using EvilGiraf.Model;
-using EvilGiraf.Service;
+using EvilGiraf.Service.Kubernetes;
 using FluentAssertions;
 using k8s;
 using k8s.Autorest;

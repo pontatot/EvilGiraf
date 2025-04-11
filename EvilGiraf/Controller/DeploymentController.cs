@@ -1,5 +1,6 @@
 using EvilGiraf.Dto;
 using EvilGiraf.Interface;
+using EvilGiraf.Interface.Kubernetes;
 using EvilGiraf.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,13 +15,16 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
     [HttpPost("{id:int}")]
     [ProducesResponseType(201)]
     [ProducesResponseType(typeof(string), 404)]
-    public async  Task<IActionResult> Deploy(int id)
+    public async  Task<IActionResult> Deploy(int id, [FromQuery] bool isAsync = true)
     {
         var app = await applicationService.GetApplication(id);
         if (app is null)
             return NotFound($"Application {id} not found");
         
-        _ = kubernetesService.Deploy(app);
+        if (isAsync)
+            _ = kubernetesService.Deploy(app);
+        else
+            await kubernetesService.Deploy(app);
         
         return Created($"deploy/{id:int}", null);
     }
