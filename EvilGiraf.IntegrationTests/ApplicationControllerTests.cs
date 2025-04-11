@@ -69,7 +69,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         foreach (var name in invalidNames)
         {   
             // Arrange
-            var createRequest = new ApplicationCreateDto("test application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22]);
+            var createRequest = new ApplicationCreateDto(name, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22]);
 
             // Act
             var response = await Client.PostAsJsonAsync("/api/application", createRequest);
