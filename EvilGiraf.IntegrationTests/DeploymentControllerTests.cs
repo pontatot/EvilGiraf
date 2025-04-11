@@ -24,6 +24,62 @@ public class DeploymentControllerTests : AuthenticatedTestBase
     }
 
     [Fact]
+    public async Task Deploy_Async_ShouldCreateNewDeployment_WhenApplicationExists()
+    {
+        // Arrange
+        var application = new Application
+        {
+            Name = "test-app",
+            Type = ApplicationType.Docker,
+            Link = "docker.io/test-app:latest",
+            Version = "1.0.0",
+            Ports = [22]
+        };
+        var deployment = new HttpOperationResponse<V1Deployment>
+        {
+            Body = new V1Deployment
+            {
+                Status = new V1DeploymentStatus
+                {
+                    Replicas = 1,
+                    ReadyReplicas = 1
+                }
+            }
+        };
+        var service = new HttpOperationResponse<V1Service>
+        {
+            Body = new V1Service()
+        };
+        
+        _dbContext.Applications.Add(application);
+        await _dbContext.SaveChangesAsync();
+        
+        _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(
+                application.Name, 
+                application.Id.ToNamespace())
+            .Returns(deployment);
+        
+        _kubernetes.CoreV1.ReadNamespacedServiceWithHttpMessagesAsync(
+                application.Name, 
+                application.Id.ToNamespace())
+            .Returns(service);
+        
+        _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace() });
+        
+        _kubernetes.AppsV1.ReplaceNamespacedDeploymentWithHttpMessagesAsync(
+                Arg.Any<V1Deployment>(),
+                application.Name, 
+                application.Id.ToNamespace())
+            .Returns(deployment);
+
+        // Act
+        var response = await Client.PostAsync($"/api/deploy/{application.Id}?isAsync=true", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
     public async Task Deploy_ShouldCreateNewDeployment_WhenApplicationExists()
     {
         // Arrange
