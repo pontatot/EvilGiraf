@@ -32,8 +32,18 @@ export function ApplicationDetails() {
   const deployMutation = useMutation(
     () => api.deployments.deploy(Number(id)),
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['deployStatus', id]);
+      onSuccess: async () => {
+        let attempts = 0;
+        const maxAttempts = 30;
+        while (attempts < maxAttempts) {
+          await queryClient.invalidateQueries(['deployStatus', id]);
+          const status = await api.deployments.status(Number(id));
+          if (status !== null) {
+            break;
+          }
+          attempts++;
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       },
     }
   );
@@ -41,8 +51,18 @@ export function ApplicationDetails() {
   const undeployMutation = useMutation(
     () => api.deployments.undeploy(Number(id)),
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(['deployStatus', id]);
+      onSuccess: async () => {
+        let attempts = 0;
+        const maxAttempts = 30;
+        while (attempts < maxAttempts) {
+          await queryClient.invalidateQueries(['deployStatus', id]);
+          const status = await api.deployments.status(Number(id));
+          if (status === null) {
+            break;
+          }
+          attempts++;
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
       },
     }
   );
