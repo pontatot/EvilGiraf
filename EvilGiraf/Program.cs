@@ -63,8 +63,8 @@ public class Program
             opt.UseNpgsql(
                 builder.Configuration.GetSection("Postgres")
                 .Get<NpgsqlConnectionStringBuilder>()?.ConnectionString));
-        builder.Services.AddSingleton<IDeploymentService, DeploymentService>();
-        builder.Services.AddSingleton<INamespaceService, NamespaceService>();
+        builder.Services.AddScoped<IDeploymentService, DeploymentService>();
+        builder.Services.AddScoped<INamespaceService, NamespaceService>();
         builder.Services.AddScoped<IApplicationService, ApplicationService>();
         builder.Services.AddScoped<IKubernetesService, KubernetesService>();
         builder.Services.AddScoped<IServiceService, ServiceService>();

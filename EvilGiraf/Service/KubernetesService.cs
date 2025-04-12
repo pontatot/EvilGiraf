@@ -6,7 +6,7 @@ namespace EvilGiraf.Service;
 
 public class KubernetesService(IDeploymentService deploymentService, INamespaceService namespaceService, IServiceService serviceService, IGitBuildService gitBuildService) : IKubernetesService
 {
-    public async Task Deploy(Application app)
+    public async Task Deploy(Application app, int timeoutSeconds = 600)
     {
         await namespaceService.CreateIfNotExistsNamespace(app.Id.ToNamespace());
         
@@ -14,18 +14,15 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
         
         if (app.Type == ApplicationType.Git)
         {
-            if (await gitBuildService.BuildAndPushFromGitAsync(app) is {} link)
+            if (await gitBuildService.BuildAndPushFromGitAsync(app, timeoutSeconds) is {} link)
                 imageLink = link;
             else
             {
-                Console.WriteLine("Failed to build and push image");
+                Console.WriteLine($"Failed to build and push image for app {app.Id}");
                 return;
             }
         }
-        else
-        {
-            imageLink = app.Link;
-        }
+        else imageLink = app.Link;
 
         var deployment = await deploymentService.ReadDeployment(app.Name, app.Id.ToNamespace());
         if (deployment is null)

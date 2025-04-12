@@ -16,21 +16,21 @@ public class GitBuildService(
     private readonly string? _registryUsername = configuration["DockerRegistry:Username"];
     private readonly string? _registryPassword = configuration["DockerRegistry:Password"];
 
-    public async Task<string?> BuildAndPushFromGitAsync(Application app)
+    public async Task<string?> BuildAndPushFromGitAsync(Application app, int timeoutSeconds = 600)
     {
-        var jobName = $"docker-build-{app.Id}";
+        var jobName = $"docker-build-{app.Id}-{Guid.NewGuid()}";
         var secret = await EnsureRegistrySecretExistsAsync(app.Id.ToNamespace());
         
         var job = CreateBuildJob(jobName, app, secret);
         await kubernetes.BatchV1.CreateNamespacedJobAsync(job, app.Id.ToNamespace());
-        var completedJob = await WaitForJobCompletionAsync(jobName, app.Id.ToNamespace());
+        var completedJob = await WaitForJobCompletionAsync(jobName, app.Id.ToNamespace(), timeoutSeconds);
 
-        return IsJobSuccessful(completedJob) ? $"{_registryUrl}/{app.Name}:{app.Version ?? "latest"}" : null;
+        return IsJobSuccessful(completedJob) ? $"{_registryUrl}/evilgiraf-{app.Id}:{app.Version ?? "latest"}" : null;
     }
 
     private V1Job CreateBuildJob(string jobName, Application app, bool secret)
     {
-        var fullImageName = $"{_registryUrl}/{app.Name}:{app.Version ?? "latest"}";
+        var fullImageName = $"{_registryUrl}/evilgiraf-{app.Id}:{app.Version ?? "latest"}";
         var fullGitUrl = "git://" + app.Link + (string.IsNullOrEmpty(app.Version) ? "" : $"#{app.Version}");
         
         return new V1Job
@@ -57,6 +57,7 @@ public class GitBuildService(
                                 Args =
                                 [
                                     "--context=" + fullGitUrl,
+                                    // "--context-sub-path=EvilGiraf",
                                     "--destination=" + fullImageName,
                                     "--dockerfile=Dockerfile"
                                 ],
@@ -107,7 +108,6 @@ public class GitBuildService(
         }
         catch (HttpOperationException)
         {
-            // Secret doesn't exist, create it
             var auth = Convert.ToBase64String(
                 Encoding.UTF8.GetBytes($"{_registryUsername}:{_registryPassword}"));
             
@@ -118,6 +118,8 @@ public class GitBuildService(
                     {
                         _registryUrl, new
                         {
+                            username = _registryUsername,
+                            password = _registryPassword,
                             auth
                         }
                     }
@@ -125,8 +127,7 @@ public class GitBuildService(
             };
             
             var dockerConfigJson = JsonSerializer.Serialize(dockerConfig);
-            var dockerConfigJsonBase64 = Convert.ToBase64String(
-                Encoding.UTF8.GetBytes(dockerConfigJson));
+            var dockerConfigJsonBytes = Encoding.UTF8.GetBytes(dockerConfigJson);
             
             var secret = new V1Secret
             {
@@ -138,7 +139,7 @@ public class GitBuildService(
                 Type = "kubernetes.io/dockerconfigjson",
                 Data = new Dictionary<string, byte[]>
                 {
-                    { ".dockerconfigjson", Encoding.UTF8.GetBytes(dockerConfigJsonBase64) }
+                    { ".dockerconfigjson", dockerConfigJsonBytes }
                 }
             };
             

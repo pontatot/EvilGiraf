@@ -16,7 +16,7 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
     [ProducesResponseType(201)]
     [ProducesResponseType(202)]
     [ProducesResponseType(typeof(string), 404)]
-    public async  Task<IActionResult> Deploy(int id, [FromQuery] bool isAsync = true)
+    public async  Task<IActionResult> Deploy(int id, [FromQuery] bool isAsync = true, [FromQuery] int timeoutSeconds = 600)
     {
         var app = await applicationService.GetApplication(id);
         if (app is null)
@@ -24,10 +24,10 @@ public class DeploymentController(IDeploymentService deploymentService, IApplica
         
         if (isAsync)
         {
-            _ = kubernetesService.Deploy(app);
+            _ = kubernetesService.Deploy(app, timeoutSeconds);
             return Accepted($"deploy/{id:int}", null);
         }
-        await kubernetesService.Deploy(app);
+        await kubernetesService.Deploy(app, timeoutSeconds);
         return Created($"deploy/{id:int}", null);
     }
     
