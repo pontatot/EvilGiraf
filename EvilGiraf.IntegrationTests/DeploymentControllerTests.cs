@@ -89,7 +89,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
-            Port = 22
+            Port = 22,
+            DomainName = "test.com"
         };
         var deployment = new HttpOperationResponse<V1Deployment>
         {
@@ -127,6 +128,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
                 application.Name, 
                 application.Id.ToNamespace())
             .Returns(deployment);
+        
+        _kubernetes.NetworkingV1.ReadNamespacedIngressWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(new HttpOperationResponse<V1Ingress>{ Body = new V1Ingress() });
 
         // Act
         var response = await Client.PostAsync($"/api/deploy/{application.Id}?isAsync=false", null);
@@ -154,7 +157,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
-            Port = 22
+            Port = 22,
+            DomainName = "test.com"
         };
 
         var deployment = new HttpOperationResponse<V1Deployment>
@@ -197,6 +201,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(service);
         
         _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace()});
+        
+        _kubernetes.NetworkingV1.CreateNamespacedIngressWithHttpMessagesAsync(Arg.Any<V1Ingress>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Ingress>{ Body = new V1Ingress()});
         
         // Act
         var response = await Client.PostAsync($"/api/deploy/{application.Id}?isAsync=false", null);

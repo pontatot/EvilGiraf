@@ -10,15 +10,6 @@ public class ServiceService(IKubernetes client) : IServiceService
 {
     public async Task<V1Service> CreateService(ServiceModel model)
     {
-        try
-        {
-            await client.CoreV1.ReadNamespaceAsync(model.Namespace);
-        }
-        catch (HttpOperationException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            await client.CoreV1.CreateNamespaceAsync(new V1Namespace { Metadata = new V1ObjectMeta { Name = model.Namespace } });
-        }
-
         return await client.CoreV1.CreateNamespacedServiceAsync(model.ToService(), model.Namespace);
     }
 
@@ -26,8 +17,7 @@ public class ServiceService(IKubernetes client) : IServiceService
     {
         try
         {
-            var service = await client.CoreV1.ReadNamespacedServiceAsync(name, @namespace);
-            return service;
+            return await client.CoreV1.ReadNamespacedServiceAsync(name, @namespace);
         }
         catch (HttpOperationException ex) when (ex.Response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {

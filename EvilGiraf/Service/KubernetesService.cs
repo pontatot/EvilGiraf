@@ -4,47 +4,73 @@ using EvilGiraf.Model;
 
 namespace EvilGiraf.Service;
 
-public class KubernetesService(IDeploymentService deploymentService, INamespaceService namespaceService, IServiceService serviceService, IGitBuildService gitBuildService) : IKubernetesService
+public class KubernetesService(IDeploymentService deploymentService, INamespaceService namespaceService, IServiceService serviceService, IGitBuildService gitBuildService, IIngressService ingressService) : IKubernetesService
 {
     public async Task Deploy(Application app, int timeoutSeconds = 600)
     {
         await namespaceService.CreateIfNotExistsNamespace(app.Id.ToNamespace());
         
-        string imageLink;
-        
+        var imageLink = await GetImageLink(app, timeoutSeconds);
+        if (string.IsNullOrEmpty(imageLink))
+        {
+            Console.WriteLine($"Failed to get image link for app {app.Id}");
+            return;
+        }
+
+        var existed = await HandleDeployment(app, imageLink);
+        await HandleServiceAndIngress(app, existed);
+    }
+    
+    private async Task<string?> GetImageLink(Application app, int timeoutSeconds)
+    {
         if (app.Type == ApplicationType.Git)
         {
-            if (await gitBuildService.BuildAndPushFromGitAsync(app, timeoutSeconds) is {} link)
-                imageLink = link;
-            else
-            {
-                Console.WriteLine($"Failed to build and push image for app {app.Id}");
-                return;
-            }
+            return await gitBuildService.BuildAndPushFromGitAsync(app, timeoutSeconds);
         }
-        else imageLink = app.Link;
-
+        
+        return app.Link;
+    }
+    
+    private async Task<bool> HandleDeployment(Application app, string imageLink)
+    {
         var deployment = await deploymentService.ReadDeployment(app.Name, app.Id.ToNamespace());
+        var deploymentModel = new DeploymentModel(app.Name, app.Id.ToNamespace(), 1, imageLink, app.Port);
+        
         if (deployment is null)
         {
-            await deploymentService.CreateDeployment(new DeploymentModel(app.Name, app.Id.ToNamespace(), 1,
-                imageLink, app.Port));
-
-            if(app.Port is not null)
+            await deploymentService.CreateDeployment(deploymentModel);
+            return false;
+        }
+        await deploymentService.UpdateDeployment(deploymentModel);
+        return true;
+    }
+    
+    private async Task HandleServiceAndIngress(Application app, bool existed)
+    {
+        if (app.Port is null)
+            return;
+            
+        var serviceModel = new ServiceModel(app.Name, app.Id.ToNamespace(), app.Port.Value);
+        
+        if (existed)
+        {
+            await serviceService.CreateIfNotExistsService(serviceModel);
+            
+            if (app.DomainName is not null)
             {
-                await serviceService.CreateService(new ServiceModel(app.Name, app.Id.ToNamespace(),
-                    app.Port.Value));
+                var ingressModel = new IngressModel(app.Name, app.Id.ToNamespace(), app.DomainName, app.Port.Value, "/");
+                await ingressService.CreateIfNotExistsIngress(ingressModel);
             }
         }
         else
         {
-            await deploymentService.UpdateDeployment(new DeploymentModel(app.Name, app.Id.ToNamespace(), 1,
-                imageLink, app.Port));
-
-            if (app.Port is not null)
+            
+            await serviceService.CreateService(serviceModel);
+            
+            if (app.DomainName is not null)
             {
-                await serviceService.CreateIfNotExistsService(new ServiceModel(app.Name, app.Id.ToNamespace(),
-                    app.Port.Value));
+                var ingressModel = new IngressModel(app.Name, app.Id.ToNamespace(), app.DomainName, app.Port.Value, "/");
+                await ingressService.CreateIngress(ingressModel);
             }
         }
     }
