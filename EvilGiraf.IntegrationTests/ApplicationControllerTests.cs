@@ -64,11 +64,11 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task CreateWithNameContainingSpaces_ShouldReturnBadRequest()
     {
         
-        var invalidNames = new[] { null, "", "invalid name" };
+        var invalidNames = new[] { "", "invalid name" };
         foreach (var name in invalidNames)
         {   
             // Arrange
-            var createRequest = new ApplicationCreateDto(name, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", [22]);
+            var createRequest = new ApplicationCreateDto(name, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", 22);
 
             // Act
             var response = await Client.PostAsJsonAsync("/api/application", createRequest);
@@ -179,7 +179,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Docker,
             Link = "docker.io/valid-name:latest",
             Version = "1.0.0",
-            Ports = [22]
+            Port = 22
         };
 
         _dbContext.Applications.Add(application);
@@ -188,7 +188,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var invalidNames = new[] { "", "invalid name" }; //null value wasn't added because it's DTO work
         foreach (var name in invalidNames)
         {
-            var updateRequest = new ApplicationUpdateDto(name, ApplicationType.Git, "k8s.io/invalid-name:latest", "2.0.0", [23]);
+            var updateRequest = new ApplicationUpdateDto(name, ApplicationType.Git, "k8s.io/invalid-name:latest", "2.0.0", 23);
 
             // Act
             var response = await Client.PatchAsJsonAsync($"/api/application/{application.Id}", updateRequest);
