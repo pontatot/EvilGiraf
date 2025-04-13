@@ -16,6 +16,9 @@ public class ApplicationController(IApplicationService applicationService) : Con
     public async  Task<IActionResult> Create([FromBody] ApplicationCreateDto request)
     {
         var application = await applicationService.CreateApplication(request);
+        
+        if (string.IsNullOrEmpty(application.Name) || application.Name.Any(char.IsWhiteSpace))
+            return BadRequest("Application name cannot be null, empty, or contain spaces");
 
         return Created($"", application.ToDto());
     }
@@ -54,6 +57,9 @@ public class ApplicationController(IApplicationService applicationService) : Con
 
         if(application is null)
             return NotFound($"Application {id} not found");
+        
+        if (string.IsNullOrEmpty(application.Name) || application.Name.Any(char.IsWhiteSpace))
+            return BadRequest("Application name cannot be null, empty, or contain spaces");
 
         return Ok(application.ToDto());
     }
