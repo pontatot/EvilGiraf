@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using EvilGiraf.Dto;
 using EvilGiraf.Extensions;
 using Microsoft.AspNetCore.Authorization;
-using System.Linq;
 
 namespace EvilGiraf.Controller;
 
