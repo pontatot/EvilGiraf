@@ -21,4 +21,7 @@ public class Application
     public string? Version { get; set; }
 
     public int? Port { get; set; }
+
+    [MaxLength(255)]
+    public string? DomainName { get; set; }
 }

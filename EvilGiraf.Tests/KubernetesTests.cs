@@ -18,7 +18,7 @@ public class KubernetesTests
     {
         _deploymentService = Substitute.For<IDeploymentService>();
         var gitBuildService = Substitute.For<IGitBuildService>();
-        _kubernetesService = new KubernetesService(_deploymentService, Substitute.For<INamespaceService>(), Substitute.For<IServiceService>(), gitBuildService);
+        _kubernetesService = new KubernetesService(_deploymentService, Substitute.For<INamespaceService>(), Substitute.For<IServiceService>(), gitBuildService, Substitute.For<IIngressService>());
     }
 
     private static Application CreateTestApplication() => new()
@@ -28,7 +28,8 @@ public class KubernetesTests
         Type = ApplicationType.Docker,
         Link = "docker.io/test:latest",
         Version = "1.0.0",
-        Port = 22
+        Port = 22,
+        DomainName = null
     };
 
     [Fact]

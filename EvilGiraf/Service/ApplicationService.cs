@@ -50,6 +50,8 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
                 applicationUpdateDto.Port < 0 ?
                     null :
                     applicationUpdateDto.Port;
+        if (applicationUpdateDto.DomainName is not null)
+            application.DomainName = applicationUpdateDto.DomainName;
 
         var updatedApp = databaseService.Applications.Update(application).Entity;
         await databaseService.SaveChangesAsync();
