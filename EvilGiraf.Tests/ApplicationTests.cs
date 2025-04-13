@@ -116,6 +116,30 @@ public class ApplicationTests
     }
     
     [Fact]
+    public async Task UpdateApplication_NegativePort_ShouldSetNull()
+    {
+        // Arrange
+        var applicationDto = new ApplicationCreateDto(
+            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22);
+        var createdApplication = await _applicationService.CreateApplication(applicationDto);
+
+        var updatedApplicationDto = new ApplicationUpdateDto(
+            null, null, null, null, -1);
+
+        // Act
+        var result = await _applicationService.UpdateApplication(createdApplication.Id, updatedApplicationDto);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(createdApplication.Id);
+        result.Name.Should().Be(applicationDto.Name);
+        result.Type.Should().Be(applicationDto.Type);
+        result.Link.Should().Be(applicationDto.Link);
+        result.Version.Should().Be(applicationDto.Version);
+        result.Port.Should().BeNull();
+    }
+    
+    [Fact]
     public async Task UpdateApplication_ShouldReturnNotUpdatedApplication()
     {
         // Arrange

@@ -13,7 +13,7 @@ export function Applications() {
     name: '',
     link: '',
     version: '',
-    ports: [],
+    port: null,
   });
 
   const { data: applications, isLoading, error } = useQuery(
@@ -27,7 +27,7 @@ export function Applications() {
       onSuccess: () => {
         queryClient.invalidateQueries('applications');
         setIsCreating(false);
-        setNewApp({ name: '', link: '', version: '', ports: [] });
+        setNewApp({ name: '', link: '', version: '', port: null });
       },
     }
   );
@@ -98,18 +98,15 @@ export function Applications() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Ports (comma-separated)</label>
+              <label className="block text-sm font-medium text-gray-700">Port</label>
               <input
-                type="text"
-                value={newApp.ports?.join(', ') || ''}
+                type="number"
+                value={newApp.port || ''}
                 onChange={(e) => {
-                  const ports = e.target.value
-                    .split(',')
-                    .map(port => parseInt(port.trim()))
-                    .filter(port => !isNaN(port));
-                  setNewApp({ ...newApp, ports });
+                  const port = e.target.value ? parseInt(e.target.value) : null;
+                  setNewApp({ ...newApp, port });
                 }}
-                placeholder="e.g. 80, 443, 8080"
+                placeholder="e.g. 80"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
             </div>

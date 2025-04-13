@@ -101,7 +101,7 @@ export function ApplicationDetails() {
         type: application.type,
         link: application.link,
         version: application.version,
-        ports: application.ports,
+        port: application.port === null ? -1 : application.port,
       });
       setIsEditing(true);
     }
@@ -226,19 +226,16 @@ export function ApplicationDetails() {
                     />
                   </div>
                   <div>
-                    <span className="font-medium">Ports:</span>
+                    <span className="font-medium">Port:</span>
                     <input
-                      type="text"
-                      value={editedApp.ports?.join(', ') || ''}
+                      type="number"
+                      value={editedApp.port === -1 || editedApp.port === null || editedApp.port === undefined ? '' : editedApp.port.toString()}
                       onChange={(e) => {
-                        const ports = e.target.value
-                          .split(',')
-                          .map(port => parseInt(port.trim()))
-                          .filter(port => !isNaN(port));
-                        setEditedApp({ ...editedApp, ports });
+                        const port = e.target.value ? parseInt(e.target.value) : -1;
+                        setEditedApp({ ...editedApp, port });
                       }}
                       className="ml-2 p-1 border rounded"
-                      placeholder="e.g. 80, 443, 8080"
+                      placeholder="e.g. 80"
                     />
                   </div>
                 </>
@@ -258,10 +255,10 @@ export function ApplicationDetails() {
                     </p>
                   )}
                   <p>
-                    <span className="font-medium">Ports:</span>{' '}
-                    {application?.ports && application.ports.length > 0
-                      ? application.ports.join(', ')
-                      : 'No ports exposed'}
+                    <span className="font-medium">Port:</span>{' '}
+                    {application?.port !== null && application?.port !== undefined && application?.port !== -1
+                      ? application.port
+                      : 'No port exposed'}
                   </p>
                 </>
               )}
