@@ -13,8 +13,8 @@ namespace EvilGiraf.Tests;
 
 public class ServiceTests
 {
-    public IKubernetes Kubernetes { get; }
-    public IServiceService ServiceService { get; }
+    private IKubernetes Kubernetes { get; }
+    private IServiceService ServiceService { get; }
 
     public ServiceTests()
     {
@@ -50,10 +50,7 @@ public class ServiceTests
         var model = new ServiceModel(
             "service-test",
             "default",
-            "ClusterIP",
-            [80],
-            "TCP",
-            "app-test"
+            80
         );
         var result = await ServiceService.CreateService(model);
         result.Should().NotBeNull();
@@ -74,10 +71,7 @@ public class ServiceTests
         var model = new ServiceModel(
             "service-test",
             "default",
-            "ClusterIP",
-            [80],
-            "TCP",
-            "app-test"
+            80
         );
         var result = await ServiceService.CreateService(model);
         result.Should().NotBeNull();
@@ -164,10 +158,7 @@ public class ServiceTests
         var model = new ServiceModel(
             "service-test",
             "default",
-            "ClusterIP",
-            [80],
-            "TCP",
-            "app-test"
+            80
         );
         var result = await ServiceService.UpdateService(model);
         result.Should().NotBeNull();
@@ -181,10 +172,7 @@ public class ServiceTests
         var model = new ServiceModel(
             "service-test",
             "default",
-            "ClusterIP",
-            [80],
-            "TCP",
-            "app-test"
+            80
         );
         var httpException = new HttpOperationException
         {
@@ -202,10 +190,7 @@ public class ServiceTests
         var model = new ServiceModel(
             "service-test",
             "default",
-            "ClusterIP",
-            [80],
-            "TCP",
-            "app-test"
+            80
         );
         
         var existingService = new V1Service
@@ -236,10 +221,7 @@ public class ServiceTests
         var model = new ServiceModel(
             "service-test",
             "default",
-            "ClusterIP",
-            [80],
-            "TCP",
-            "app-test"
+            80
         );
         
         var httpException = new HttpOperationException

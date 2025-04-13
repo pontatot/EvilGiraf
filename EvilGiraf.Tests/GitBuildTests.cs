@@ -38,7 +38,7 @@ public class GitBuildTests
             Name = "test-app",
             Version = "1.0",
             Link = "github.com/test/repo",
-            Ports = [8080]
+            Port = 8080
         };
 
         var expectedImageUrl = $"{RegistryUrl}/evilgiraf-{app.Id}:{app.Version}";
@@ -83,7 +83,7 @@ public class GitBuildTests
             Name = "test-app",
             Version = "1.0",
             Link = "github.com/test/repo",
-            Ports = [8080]
+            Port = 8080
         };
         var ns = app.Id.ToNamespace();
 
@@ -120,7 +120,7 @@ public class GitBuildTests
             Name = "test-app",
             Version = "1.0",
             Link = "github.com/test/repo",
-            Ports = [8080]
+            Port = 8080
         };
         var ns = app.Id.ToNamespace();
 
@@ -162,7 +162,7 @@ public class GitBuildTests
             Name = "test-app",
             Version = "1.0",
             Link = "github.com/test/repo",
-            Ports = [8080]
+            Port = 8080
         };
 
         var createdJob = new V1Job();
@@ -209,7 +209,7 @@ public class GitBuildTests
             Name = "test-app",
             Version = "1.0",
             Link = "github.com/test/repo",
-            Ports = [8080]
+            Port = 8080
         };
 
         var createdJob = new V1Job();

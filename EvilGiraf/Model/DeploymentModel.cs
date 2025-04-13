@@ -2,7 +2,7 @@ using k8s.Models;
 
 namespace EvilGiraf.Model;
 
-public record DeploymentModel(string Name, string Namespace, int Replicas, string Image, int[] Ports);
+public record DeploymentModel(string Name, string Namespace, int Replicas, string Image, int? Port);
 
 public static class DeploymentModelExtensions
 {
@@ -43,7 +43,9 @@ public static class DeploymentModelExtensions
                             {
                                 Name = model.Name,
                                 Image = model.Image,
-                                Ports = model.Ports.Select(x => new V1ContainerPort(x)).ToList()
+                                Ports = model.Port is null ?
+                                    new List<V1ContainerPort>() :
+                                    new List<V1ContainerPort>{new(model.Port.Value)}
                             }
                         }
                     }

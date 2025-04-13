@@ -33,7 +33,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
-            Ports = [22]
+            Port = 22
         };
         var deployment = new HttpOperationResponse<V1Deployment>
         {
@@ -89,7 +89,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
-            Ports = [22]
+            Port = 22
         };
         var deployment = new HttpOperationResponse<V1Deployment>
         {
@@ -154,7 +154,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
-            Ports = [22]
+            Port = 22
         };
 
         var deployment = new HttpOperationResponse<V1Deployment>
@@ -230,7 +230,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
-            Ports = [22]
+            Port = 22
         };
 
         var deployment = new HttpOperationResponse<V1Deployment>
@@ -273,7 +273,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
-            Ports = [22]
+            Port = 22
         };
         
         var httpException = new HttpOperationException
@@ -316,8 +316,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
     {
         var applications = new List<Application>
         {
-            new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0", Ports = [22] },
-            new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0", Ports = [] }
+            new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0", Port = 22 },
+            new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0", Port = null }
         };
 
         _dbContext.Applications.AddRange(applications);
@@ -341,8 +341,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         // Arrange
         var applications = new List<Application>
         {
-            new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0", Ports = [22] },
-            new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0", Ports = [] }
+            new() { Name = "app1", Type = ApplicationType.Docker, Link = "docker.io/app1:latest", Version = "1.0.0", Port = 22 },
+            new() { Name = "app2", Type = ApplicationType.Git, Link = "k8s.io/app2:latest", Version = "2.0.0", Port = null }
         };
 
         _dbContext.Applications.AddRange(applications);
@@ -377,7 +377,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Docker,
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
-            Ports = [22]
+            Port = 22
         };
 
         _dbContext.Applications.Add(application);
@@ -418,7 +418,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Git, 
             Link = "https://github.com/example/repo.git", 
             Version = "1.0.0", 
-            Ports = [] 
+            Port = null
         };
         
         _dbContext.Applications.Add(gitApp);
@@ -480,7 +480,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Git, 
             Link = "https://github.com/example/repo.git", 
             Version = "1.0.0", 
-            Ports = [] 
+            Port = null
         };
         
         _dbContext.Applications.Add(gitApp);
@@ -547,7 +547,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Git, 
             Link = "https://github.com/example/repo.git", 
             Version = "1.0.0", 
-            Ports = [80] 
+            Port = 80
         };
         
         _dbContext.Applications.Add(gitApp);
@@ -581,8 +581,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         // Arrange
         var applications = new List<Application>
         {
-            new() { Name = "docker-app", Type = ApplicationType.Docker, Link = "docker.io/app:latest", Version = "1.0.0", Ports = [80] },
-            new() { Name = "git-app", Type = ApplicationType.Git, Link = "https://github.com/example/repo.git", Version = "1.0.0", Ports = [8080] }
+            new() { Name = "docker-app", Type = ApplicationType.Docker, Link = "docker.io/app:latest", Version = "1.0.0", Port = 80 },
+            new() { Name = "git-app", Type = ApplicationType.Git, Link = "https://github.com/example/repo.git", Version = "1.0.0", Port = 8080 }
         };
 
         _dbContext.Applications.AddRange(applications);
@@ -617,7 +617,7 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Type = ApplicationType.Git, 
             Link = "https://github.com/example/broken-repo.git", 
             Version = "1.0.0", 
-            Ports = [80] 
+            Port = 80
         };
         
         _dbContext.Applications.Add(gitApp);

@@ -20,7 +20,7 @@ public class ApplicationTests
     public async Task CreateApplication_ShouldCreateAndReturnNewApplication()
     {
         // Arrange
-        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", [22]);
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22);
 
         // Act
         var result = await _applicationService.CreateApplication(application);
@@ -31,14 +31,14 @@ public class ApplicationTests
         result.Type.Should().Be(application.Type);
         result.Link.Should().Be(application.Link);
         result.Version.Should().Be(application.Version);
-        result.Ports.Should().BeEquivalentTo(application.Ports);
+        result.Port.Should().Be(application.Port);
     }
 
     [Fact]
     public async Task GetApplication_ShouldReturnApplication()
     {
         // Arrange
-        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", [22]);
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22);
         var createdApplication = await _applicationService.CreateApplication(application);
 
         // Act
@@ -51,7 +51,7 @@ public class ApplicationTests
         result.Type.Should().Be(application.Type);
         result.Link.Should().Be(application.Link);
         result.Version.Should().Be(application.Version);
-        result.Ports.Should().BeEquivalentTo(application.Ports);
+        result.Port.Should().Be(application.Port);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class ApplicationTests
     public async Task DeleteApplication_ShouldDeleteApplication()
     {
         // Arrange
-        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", [22]);
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22);
         var createdApplication = await _applicationService.CreateApplication(application);
 
         // Act
@@ -96,11 +96,11 @@ public class ApplicationTests
     {
         // Arrange
         var applicationDto = new ApplicationCreateDto(
-            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", [22]);
+            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22);
         var createdApplication = await _applicationService.CreateApplication(applicationDto);
 
         var updatedApplicationDto = new ApplicationUpdateDto(
-            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0", [23]);
+            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0", 23);
 
         // Act
         var result = await _applicationService.UpdateApplication(createdApplication.Id, updatedApplicationDto);
@@ -112,7 +112,7 @@ public class ApplicationTests
         result.Type.Should().Be(updatedApplicationDto.Type);
         result.Link.Should().Be(updatedApplicationDto.Link);
         result.Version.Should().Be(updatedApplicationDto.Version);
-        result.Ports.Should().BeEquivalentTo(updatedApplicationDto.Ports);
+        result.Port.Should().Be(updatedApplicationDto.Port);
     }
     
     [Fact]
@@ -120,7 +120,7 @@ public class ApplicationTests
     {
         // Arrange
         var applicationDto = new ApplicationCreateDto(
-            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", [22]);
+            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22);
         var createdApplication = await _applicationService.CreateApplication(applicationDto);
 
         var updatedApplicationDto = new ApplicationUpdateDto(
@@ -136,7 +136,7 @@ public class ApplicationTests
         result.Type.Should().Be(applicationDto.Type);
         result.Link.Should().Be(applicationDto.Link);
         result.Version.Should().Be(applicationDto.Version);
-        result.Ports.Should().BeEquivalentTo(applicationDto.Ports);
+        result.Port.Should().Be(applicationDto.Port);
     }
     
     [Fact]
@@ -144,7 +144,7 @@ public class ApplicationTests
     {
         // Arrange
         var updatedApplicationDto = new ApplicationUpdateDto(
-            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0", [22]);
+            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0", 22);
 
         // Act
         var result = await _applicationService.UpdateApplication(999, updatedApplicationDto);
@@ -163,9 +163,9 @@ public class ApplicationTests
             await _applicationService.DeleteApplication(app.Id);
         }
 
-        var application1 = new ApplicationCreateDto("TestApp1", ApplicationType.Docker, "https://test.com", "1.0.0", [22]);
-        var application2 = new ApplicationCreateDto("TestApp2", ApplicationType.Docker, "https://test.com", "1.0.0", [22]);
-        var application3 = new ApplicationCreateDto("TestApp3", ApplicationType.Docker, "https://test.com", "1.0.0", [22]);
+        var application1 = new ApplicationCreateDto("TestApp1", ApplicationType.Docker, "https://test.com", "1.0.0", 22);
+        var application2 = new ApplicationCreateDto("TestApp2", ApplicationType.Docker, "https://test.com", "1.0.0", 22);
+        var application3 = new ApplicationCreateDto("TestApp3", ApplicationType.Docker, "https://test.com", "1.0.0", 22);
 
         await _applicationService.CreateApplication(application1);
         await _applicationService.CreateApplication(application2);
