@@ -13,7 +13,7 @@ public static class ApplicationExtensions
             application.Type,
             application.Link,
             application.Version,
-            application.Ports
+            application.Port
         );
     }
 
@@ -25,7 +25,7 @@ public static class ApplicationExtensions
             Type = applicationDto.Type,
             Link = applicationDto.Link,
             Version = applicationDto.Version,
-            Ports = applicationDto.Ports is not null ? applicationDto.Ports : Array.Empty<int>()
+            Port = applicationDto.Port
         };
     }
 }

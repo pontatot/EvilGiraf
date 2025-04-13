@@ -28,23 +28,23 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
         if (deployment is null)
         {
             await deploymentService.CreateDeployment(new DeploymentModel(app.Name, app.Id.ToNamespace(), 1,
-                imageLink, app.Ports));
+                imageLink, app.Port));
 
-            if(app.Ports.Length > 0)
+            if(app.Port is not null)
             {
-                await serviceService.CreateService(new ServiceModel(app.Name, app.Id.ToNamespace(), "ClusterIP",
-                    app.Ports, "TCP", app.Name));
+                await serviceService.CreateService(new ServiceModel(app.Name, app.Id.ToNamespace(),
+                    app.Port.Value));
             }
         }
         else
         {
             await deploymentService.UpdateDeployment(new DeploymentModel(app.Name, app.Id.ToNamespace(), 1,
-                imageLink, app.Ports));
+                imageLink, app.Port));
 
-            if (app.Ports.Length > 0)
+            if (app.Port is not null)
             {
-                await serviceService.CreateIfNotExistsService(new ServiceModel(app.Name, app.Id.ToNamespace(), "ClusterIP",
-                    app.Ports, "TCP", app.Name));
+                await serviceService.CreateIfNotExistsService(new ServiceModel(app.Name, app.Id.ToNamespace(),
+                    app.Port.Value));
             }
         }
     }

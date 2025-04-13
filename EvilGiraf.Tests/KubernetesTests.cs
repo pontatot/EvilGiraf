@@ -12,14 +12,13 @@ namespace EvilGiraf.Tests;
 public class KubernetesTests
 {
     private readonly IDeploymentService _deploymentService;
-    private readonly IGitBuildService _gitBuildService;
     private readonly KubernetesService _kubernetesService;
 
     public KubernetesTests()
     {
         _deploymentService = Substitute.For<IDeploymentService>();
-        _gitBuildService = Substitute.For<IGitBuildService>();
-        _kubernetesService = new KubernetesService(_deploymentService, Substitute.For<INamespaceService>(), Substitute.For<IServiceService>(), _gitBuildService);
+        var gitBuildService = Substitute.For<IGitBuildService>();
+        _kubernetesService = new KubernetesService(_deploymentService, Substitute.For<INamespaceService>(), Substitute.For<IServiceService>(), gitBuildService);
     }
 
     private static Application CreateTestApplication() => new()
@@ -29,7 +28,7 @@ public class KubernetesTests
         Type = ApplicationType.Docker,
         Link = "docker.io/test:latest",
         Version = "1.0.0",
-        Ports = [22]
+        Port = 22
     };
 
     [Fact]

@@ -2,7 +2,7 @@ using k8s.Models;
 
 namespace EvilGiraf.Model;
 
-public record ServiceModel(string Name, string Namespace, string Type, int[] Ports, string Protocol, string Selector);
+public record ServiceModel(string Name, string Namespace, int Port);
 
 public static class ServiceModelExtensions
 {   
@@ -17,16 +17,11 @@ public static class ServiceModelExtensions
             },
             Spec = new V1ServiceSpec
             {
-                Type = model.Type,
-                Ports = model.Ports.Select(p => new V1ServicePort
-                {
-                    Port = p,
-                    TargetPort = p,
-                    Protocol = model.Protocol
-                }).ToList(),
+                Type = "ClusterIP",
+                Ports = new List<V1ServicePort>{ new(model.Port)},
                 Selector = new Dictionary<string, string>
                 {
-                    { "app", model.Selector }
+                    { "app", model.Name }
                 }
             }
         };

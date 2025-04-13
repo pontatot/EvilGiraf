@@ -13,8 +13,8 @@ namespace EvilGiraf.Tests;
 
 public class DeploymentTests
 {
-    public IDeploymentService DeploymentService { get; }
-    public IKubernetes Client { get; }
+    private IDeploymentService DeploymentService { get; }
+    private IKubernetes Client { get; }
 
     public DeploymentTests()
     {
@@ -54,7 +54,7 @@ public class DeploymentTests
             "default",
             1,
             "nginx",
-            [80]
+            80
         );
         var result = await DeploymentService.CreateDeployment(model);
         result.Should().NotBeNull();
@@ -65,8 +65,10 @@ public class DeploymentTests
     [Fact]
     public async Task CreateDeployment_with_namespace_not_exist_Should_Return_Deployment()
     {
-        var response = new HttpOperationException();
-        response.Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty);
+        var response = new HttpOperationException
+        {
+            Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
+        };
         Client.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Throws(response);
         Client.CoreV1.CreateNamespaceWithHttpMessagesAsync(Arg.Any<V1Namespace>()).Returns(new HttpOperationResponse<V1Namespace>());
         
@@ -75,7 +77,7 @@ public class DeploymentTests
             "default",
             1,
             "nginx",
-            [80]
+            80
         );
         var result = await DeploymentService.CreateDeployment(model);
         result.Should().NotBeNull();
@@ -164,7 +166,7 @@ public class DeploymentTests
             "default",
             1,
             "nginx",
-            [80]
+            80
         );
         var result = await DeploymentService.UpdateDeployment(model);
         result.Should().NotBeNull();
@@ -180,7 +182,7 @@ public class DeploymentTests
             "default",
             1,
             "nginx",
-            [80]
+            80
         );
         var httpException = new HttpOperationException
         {
