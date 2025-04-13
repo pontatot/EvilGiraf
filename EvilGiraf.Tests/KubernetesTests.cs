@@ -12,12 +12,14 @@ namespace EvilGiraf.Tests;
 public class KubernetesTests
 {
     private readonly IDeploymentService _deploymentService;
+    private readonly IGitBuildService _gitBuildService;
     private readonly KubernetesService _kubernetesService;
 
     public KubernetesTests()
     {
         _deploymentService = Substitute.For<IDeploymentService>();
-        _kubernetesService = new KubernetesService(_deploymentService, Substitute.For<INamespaceService>(), Substitute.For<IServiceService>());
+        _gitBuildService = Substitute.For<IGitBuildService>();
+        _kubernetesService = new KubernetesService(_deploymentService, Substitute.For<INamespaceService>(), Substitute.For<IServiceService>(), _gitBuildService);
     }
 
     private static Application CreateTestApplication() => new()

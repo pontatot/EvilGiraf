@@ -36,7 +36,7 @@ public class NamespaceService(IKubernetes client) : INamespaceService
         }
     }
 
-    public async Task<V1Namespace?> CreateIfNotExistsNamespace(string name)
+    public async Task<V1Namespace> CreateIfNotExistsNamespace(string name)
     {
         if (await ReadNamespace(name) is { } @namespace)
             return @namespace;

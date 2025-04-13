@@ -407,4 +407,242 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         var error = await response.Content.ReadAsStringAsync();
         error.Should().Be("Application with ID 999 not found.");
     }
+    
+    [Fact]
+    public async Task Deploy_ShouldCreateDeployment_WithGitApplication()
+    {
+        // Arrange
+        var gitApp = new Application 
+        {
+            Name = "git-app", 
+            Type = ApplicationType.Git, 
+            Link = "https://github.com/example/repo.git", 
+            Version = "1.0.0", 
+            Ports = [] 
+        };
+        
+        _dbContext.Applications.Add(gitApp);
+        await _dbContext.SaveChangesAsync();
+        
+        _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace() });
+        
+        var successfulJob = new V1Job
+        {
+            Metadata = new V1ObjectMeta { Name = $"build-{gitApp.Name}" },
+            Status = new V1JobStatus { Succeeded = 1, CompletionTime = DateTime.UtcNow }
+        };
+        
+        _kubernetes.BatchV1.CreateNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<V1Job>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Job> { Body = successfulJob });
+        
+        _kubernetes.BatchV1.ReadNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<string>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Job> { Body = successfulJob });
+        
+        _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(
+            Arg.Any<string>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Deployment>());
+        _kubernetes.AppsV1.CreateNamespacedDeploymentWithHttpMessagesAsync(
+            Arg.Any<V1Deployment>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Deployment>{ Body = new V1Deployment() });
+        
+        _kubernetes.CoreV1.ReadNamespacedSecretWithHttpMessagesAsync(Arg.Any<string>(), gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Secret>());
+        // Act
+        var response = await Client.PostAsync($"/api/deploy/{gitApp.Id}?isAsync=false", null);
+        
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        await _kubernetes.BatchV1.Received(1).CreateNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<V1Job>(),
+            gitApp.Id.ToNamespace(),
+            null,
+            Arg.Any<string>());
+        
+        await _kubernetes.AppsV1.Received(1).CreateNamespacedDeploymentWithHttpMessagesAsync(
+            Arg.Any<V1Deployment>(),
+            gitApp.Id.ToNamespace(),
+            null,
+            Arg.Any<string>());
+    }
+    
+    [Fact]
+    public async Task Deploy_WithTimeoutBuildGitApplication()
+    {
+        // Arrange
+        var gitApp = new Application 
+        {
+            Name = "git-app", 
+            Type = ApplicationType.Git, 
+            Link = "https://github.com/example/repo.git", 
+            Version = "1.0.0", 
+            Ports = [] 
+        };
+        
+        _dbContext.Applications.Add(gitApp);
+        await _dbContext.SaveChangesAsync();
+        
+        _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace() });
+        
+        var successfulJob = new V1Job
+        {
+            Metadata = new V1ObjectMeta { Name = $"build-{gitApp.Name}" },
+            Status = new V1JobStatus { Succeeded = 1, CompletionTime = DateTime.UtcNow }
+        };
+        
+        _kubernetes.BatchV1.CreateNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<V1Job>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Job> { Body = successfulJob });
+        
+        _kubernetes.BatchV1.ReadNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<string>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Job> { Body = successfulJob });
+        
+        _kubernetes.BatchV1.DeleteNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<string>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Status>());
+        
+        _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(
+            Arg.Any<string>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Deployment>());
+        _kubernetes.AppsV1.CreateNamespacedDeploymentWithHttpMessagesAsync(
+            Arg.Any<V1Deployment>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Deployment>{ Body = new V1Deployment() });
+        
+        _kubernetes.CoreV1.ReadNamespacedSecretWithHttpMessagesAsync(Arg.Any<string>(), gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Secret>());
+        // Act
+        var response = await Client.PostAsync($"/api/deploy/{gitApp.Id}?isAsync=false&timeoutSeconds=0", null);
+        
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        await _kubernetes.BatchV1.Received(1).CreateNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<V1Job>(),
+            gitApp.Id.ToNamespace());
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        await _kubernetes.BatchV1.Received(1).DeleteNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<string>(),
+            gitApp.Id.ToNamespace());
+        
+        await _kubernetes.AppsV1.DidNotReceive().CreateNamespacedDeploymentWithHttpMessagesAsync(
+            Arg.Any<V1Deployment>(),
+            gitApp.Id.ToNamespace());
+    }
+
+    [Fact]
+    public async Task Status_ShouldReturnCorrectStatus_ForGitApplication()
+    {
+        // Arrange
+        var gitApp = new Application 
+        {
+            Name = "git-status-app", 
+            Type = ApplicationType.Git, 
+            Link = "https://github.com/example/repo.git", 
+            Version = "1.0.0", 
+            Ports = [80] 
+        };
+        
+        _dbContext.Applications.Add(gitApp);
+        await _dbContext.SaveChangesAsync();
+        
+        var deployment = new V1Deployment
+        {
+            Metadata = new V1ObjectMeta { Name = gitApp.Name },
+            Status = new V1DeploymentStatus { AvailableReplicas = 1, Replicas = 1 }
+        };
+        
+        _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(
+            gitApp.Name,
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Deployment> { Body = deployment });
+        
+        // Act
+        var response = await Client.GetAsync($"/api/deploy/{gitApp.Id}");
+        
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var deployStatus = await response.Content.ReadFromJsonAsync<DeployResponse>();
+        deployStatus.Should().NotBeNull();
+        deployStatus!.Status.Replicas.Should().Be(1);
+        deployStatus.Status.AvailableReplicas.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ListDeployments_ShouldIncludeGitApplications()
+    {
+        // Arrange
+        var applications = new List<Application>
+        {
+            new() { Name = "docker-app", Type = ApplicationType.Docker, Link = "docker.io/app:latest", Version = "1.0.0", Ports = [80] },
+            new() { Name = "git-app", Type = ApplicationType.Git, Link = "https://github.com/example/repo.git", Version = "1.0.0", Ports = [8080] }
+        };
+
+        _dbContext.Applications.AddRange(applications);
+        await _dbContext.SaveChangesAsync();
+
+        var deployment = new V1Deployment
+        {
+            Status = new V1DeploymentStatus { Replicas = 1, AvailableReplicas = 1 }
+        };
+
+        _kubernetes.AppsV1.ReadNamespacedDeploymentWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>())
+            .Returns(new HttpOperationResponse<V1Deployment> { Body = deployment });
+
+        // Act
+        var response = await Client.GetAsync("/api/deploy");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var deployResponses = await response.Content.ReadFromJsonAsync<List<DeployResponse>>();
+        deployResponses.Should().NotBeNull();
+        deployResponses.Should().HaveCountGreaterThanOrEqualTo(2);
+        deployResponses!.Select(resp => resp.Status).Should().ContainEquivalentOf(deployment.Status);
+    }
+
+    [Fact]
+    public async Task Deploy_ShouldHandleFailedGitBuild()
+    {
+        // Arrange
+        var gitApp = new Application 
+        {
+            Name = "git-fail-app", 
+            Type = ApplicationType.Git, 
+            Link = "https://github.com/example/broken-repo.git", 
+            Version = "1.0.0", 
+            Ports = [80] 
+        };
+        
+        _dbContext.Applications.Add(gitApp);
+        await _dbContext.SaveChangesAsync();
+        
+        var failedJob = new V1Job
+        {
+            Metadata = new V1ObjectMeta { Name = $"build-{gitApp.Name}" },
+            Status = new V1JobStatus { Failed = 1, Succeeded = 0 }
+        };
+        
+        _kubernetes.BatchV1.CreateNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<V1Job>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Job> { Body = failedJob });
+        
+        _kubernetes.BatchV1.ReadNamespacedJobWithHttpMessagesAsync(
+            Arg.Any<string>(),
+            gitApp.Id.ToNamespace()
+        ).Returns(new HttpOperationResponse<V1Job> { Body = failedJob });
+        
+        // Act
+        var response = await Client.PostAsync($"/api/deploy/{gitApp.Id}?isAsync=false", null);
+        
+        // Assert
+        response.StatusCode.Should().NotBe(HttpStatusCode.OK);
+    }
 }

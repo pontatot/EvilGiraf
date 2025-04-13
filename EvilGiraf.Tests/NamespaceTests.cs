@@ -9,12 +9,12 @@ using NSubstitute.ExceptionExtensions;
 
 namespace EvilGiraf.Tests;
 
-public class NamespaceServiceTests
+public class NamespaceTests
 {
     private readonly IKubernetes _kubernetes;
     private readonly NamespaceService _namespaceService;
 
-    public NamespaceServiceTests()
+    public NamespaceTests()
     {
         _kubernetes = Substitute.For<IKubernetes>();
         var corev1OperationsSubstitute = Substitute.For<ICoreV1Operations>();
@@ -181,7 +181,7 @@ public class NamespaceServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.Metadata.Name.Should().Be(namespaceName);
+        result.Metadata.Name.Should().Be(namespaceName);
         await _kubernetes.CoreV1.Received(1).ReadNamespaceWithHttpMessagesAsync(
             namespaceName);
         await _kubernetes.CoreV1.DidNotReceive().CreateNamespaceWithHttpMessagesAsync(
@@ -223,7 +223,7 @@ public class NamespaceServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.Metadata.Name.Should().Be(namespaceName);
+        result.Metadata.Name.Should().Be(namespaceName);
         await _kubernetes.CoreV1.Received(1).ReadNamespaceWithHttpMessagesAsync(
             namespaceName);
         await _kubernetes.CoreV1.Received(1).CreateNamespaceWithHttpMessagesAsync(
