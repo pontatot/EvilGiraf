@@ -3,7 +3,7 @@ export interface ApplicationCreateDto {
   type?: ApplicationType;
   link?: string;
   version?: string;
-  ports?: number[];
+  port?: number | null;
 }
 
 export interface ApplicationResultDto {
@@ -12,7 +12,7 @@ export interface ApplicationResultDto {
   type: ApplicationType;
   link?: string;
   version?: string;
-  ports?: number[];
+  port?: number | null;
 }
 
 export enum ApplicationType {
