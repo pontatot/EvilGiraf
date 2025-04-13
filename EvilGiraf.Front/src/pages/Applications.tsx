@@ -101,7 +101,7 @@ export function Applications() {
               <label className="block text-sm font-medium text-gray-700">Port</label>
               <input
                 type="number"
-                value={newApp.port || ''}
+                value={(newApp.port !== null && newApp.port !== undefined) ? newApp.port : ''}
                 onChange={(e) => {
                   const port = e.target.value ? parseInt(e.target.value) : null;
                   setNewApp({ ...newApp, port });
