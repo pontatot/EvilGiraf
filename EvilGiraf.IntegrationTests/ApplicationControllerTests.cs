@@ -60,22 +60,20 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
     
-    [Fact]
-    public async Task CreateWithNameContainingSpaces_ShouldReturnBadRequest()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("invalid name")]
+    public async Task CreateWithNameContainingSpaces_ShouldReturnBadRequest(string? name)
     {
-        
-        var invalidNames = new[] { "", "invalid name" };
-        foreach (var name in invalidNames)
-        {   
-            // Arrange
-            var createRequest = new ApplicationCreateDto(name, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", 22);
+        // Arrange
+        var createRequest = new ApplicationCreateDto(name!, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", 22);
 
-            // Act
-            var response = await Client.PostAsJsonAsync("/api/application", createRequest);
+        // Act
+        var response = await Client.PostAsJsonAsync("/api/application", createRequest);
 
-            // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        }
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
