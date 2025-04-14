@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using EvilGiraf.Interface;
 using EvilGiraf.Model;
+using EvilGiraf.Model.Kubernetes;
 using k8s;
 using k8s.Autorest;
 using k8s.Models;

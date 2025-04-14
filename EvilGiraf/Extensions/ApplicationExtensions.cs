@@ -14,7 +14,8 @@ public static class ApplicationExtensions
             application.Link,
             application.Version,
             application.Port,
-            application.DomainName
+            application.DomainName,
+            application.Variables.ToArray()
         );
     }
 
@@ -27,7 +28,8 @@ public static class ApplicationExtensions
             Link = applicationDto.Link,
             Version = applicationDto.Version,
             Port = applicationDto.Port,
-            DomainName = applicationDto.DomainName
+            DomainName = applicationDto.DomainName,
+            Variables = applicationDto.Variables?.ToList() ?? []
         };
     }
 }

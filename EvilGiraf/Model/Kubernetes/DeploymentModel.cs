@@ -1,8 +1,8 @@
 using k8s.Models;
 
-namespace EvilGiraf.Model;
+namespace EvilGiraf.Model.Kubernetes;
 
-public record DeploymentModel(string Name, string Namespace, int Replicas, string Image, int? Port);
+public record DeploymentModel(string Name, string Namespace, int Replicas, string Image, int? Port, string? ConfigMap);
 
 public static class DeploymentModelExtensions
 {
@@ -45,7 +45,10 @@ public static class DeploymentModelExtensions
                                 Image = model.Image,
                                 Ports = model.Port is null ?
                                     new List<V1ContainerPort>() :
-                                    new List<V1ContainerPort>{new(model.Port.Value)}
+                                    new List<V1ContainerPort>{new(model.Port.Value)},
+                                EnvFrom = model.ConfigMap is null ?
+                                    new List<V1EnvFromSource>() :
+                                    new List<V1EnvFromSource>{new(new V1ConfigMapEnvSource(model.ConfigMap))}
                             }
                         }
                     }

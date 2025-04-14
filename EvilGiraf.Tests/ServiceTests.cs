@@ -1,6 +1,6 @@
 using System.Net;
-using EvilGiraf.Interface;
-using EvilGiraf.Model;
+using EvilGiraf.Interface.Kubernetes;
+using EvilGiraf.Model.Kubernetes;
 using EvilGiraf.Service.Kubernetes;
 using FluentAssertions;
 using k8s.Models;

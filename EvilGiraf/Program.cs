@@ -70,6 +70,7 @@ public class Program
         builder.Services.AddScoped<IServiceService, ServiceService>();
         builder.Services.AddScoped<IGitBuildService, GitBuildService>();
         builder.Services.AddScoped<IIngressService, IngressService>();
+        builder.Services.AddScoped<IConfigMapService, ConfigMapService>();
 
         var app = builder.Build();
 

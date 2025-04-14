@@ -20,7 +20,7 @@ public class ApplicationTests
     public async Task CreateApplication_ShouldCreateAndReturnNewApplication()
     {
         // Arrange
-        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null);
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null, null);
 
         // Act
         var result = await _applicationService.CreateApplication(application);
@@ -38,7 +38,7 @@ public class ApplicationTests
     public async Task GetApplication_ShouldReturnApplication()
     {
         // Arrange
-        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null);
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null, null);
         var createdApplication = await _applicationService.CreateApplication(application);
 
         // Act
@@ -68,7 +68,7 @@ public class ApplicationTests
     public async Task DeleteApplication_ShouldDeleteApplication()
     {
         // Arrange
-        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null);
+        var application = new ApplicationCreateDto("TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null, null);
         var createdApplication = await _applicationService.CreateApplication(application);
 
         // Act
@@ -96,11 +96,11 @@ public class ApplicationTests
     {
         // Arrange
         var applicationDto = new ApplicationCreateDto(
-            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null);
+            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null, null);
         var createdApplication = await _applicationService.CreateApplication(applicationDto);
 
         var updatedApplicationDto = new ApplicationUpdateDto(
-            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0", 23, null);
+            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0", 23, null, null);
 
         // Act
         var result = await _applicationService.UpdateApplication(createdApplication.Id, updatedApplicationDto);
@@ -120,11 +120,11 @@ public class ApplicationTests
     {
         // Arrange
         var applicationDto = new ApplicationCreateDto(
-            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null);
+            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null, null);
         var createdApplication = await _applicationService.CreateApplication(applicationDto);
 
         var updatedApplicationDto = new ApplicationUpdateDto(
-            null, null, null, null, -1, null);
+            null, null, null, null, -1, null, null);
 
         // Act
         var result = await _applicationService.UpdateApplication(createdApplication.Id, updatedApplicationDto);
@@ -144,11 +144,11 @@ public class ApplicationTests
     {
         // Arrange
         var applicationDto = new ApplicationCreateDto(
-            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null);
+            "TestApp", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null, null);
         var createdApplication = await _applicationService.CreateApplication(applicationDto);
 
         var updatedApplicationDto = new ApplicationUpdateDto(
-            null, null, null, null, null, null);
+            null, null, null, null, null, null, null);
 
         // Act
         var result = await _applicationService.UpdateApplication(createdApplication.Id, updatedApplicationDto);
@@ -168,7 +168,7 @@ public class ApplicationTests
     {
         // Arrange
         var updatedApplicationDto = new ApplicationUpdateDto(
-            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0", 22, null);
+            "UpdatedTestApp", ApplicationType.Docker, "https://updatedtest.com", "2.0.0", 22, null, null);
 
         // Act
         var result = await _applicationService.UpdateApplication(999, updatedApplicationDto);
@@ -187,9 +187,9 @@ public class ApplicationTests
             await _applicationService.DeleteApplication(app.Id);
         }
 
-        var application1 = new ApplicationCreateDto("TestApp1", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null);
-        var application2 = new ApplicationCreateDto("TestApp2", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null);
-        var application3 = new ApplicationCreateDto("TestApp3", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null);
+        var application1 = new ApplicationCreateDto("TestApp1", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null, null);
+        var application2 = new ApplicationCreateDto("TestApp2", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null, null);
+        var application3 = new ApplicationCreateDto("TestApp3", ApplicationType.Docker, "https://test.com", "1.0.0", 22, null, null);
 
         await _applicationService.CreateApplication(application1);
         await _applicationService.CreateApplication(application2);

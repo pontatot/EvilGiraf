@@ -1,4 +1,5 @@
 using System.Net;
+using EvilGiraf.Interface.Kubernetes;
 using EvilGiraf.Model.Kubernetes;
 using EvilGiraf.Service.Kubernetes;
 using FluentAssertions;
@@ -10,32 +11,30 @@ using NSubstitute.ExceptionExtensions;
 
 namespace EvilGiraf.Tests;
 
-public class IngressTests
+public class ConfigMapTests
 {
     private readonly IKubernetes _kubernetes;
-    private readonly IngressService _ingressService;
+    private readonly IConfigMapService _configMapService;
 
-    public IngressTests()
+    public ConfigMapTests()
     {
         _kubernetes = Substitute.For<IKubernetes>();
-        _ingressService = new IngressService(_kubernetes);
+        _configMapService = new ConfigMapService(_kubernetes);
     }
 
     [Fact]
-    public async Task CreateIngress_Should_Return_Ingress()
+    public async Task CreateConfigMap_Should_Return_ConfigMap()
     {
         // Arrange
-        var model = new IngressModel(
-            "test-ingress",
+        var model = new ConfigMapModel(
+            "test-configmap",
             "default",
-            "test-host",
-            80,
-            "/"
+            ["KEY=value", "KEY2=value2"]
         );
 
-        var ingressResponse = new HttpOperationResponse<V1Ingress>
+        var configmapResponse = new HttpOperationResponse<V1ConfigMap>
         {
-            Body = new V1Ingress
+            Body = new V1ConfigMap
             {
                 Metadata = new V1ObjectMeta
                 {
@@ -45,38 +44,36 @@ public class IngressTests
             }
         };
 
-        _kubernetes.NetworkingV1.CreateNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        _kubernetes.CoreV1.CreateNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Namespace
-        ).Returns(ingressResponse);
+        ).Returns(configmapResponse);
         
         
         _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>())
             .Returns(new HttpOperationResponse<V1Namespace> { Body = new V1Namespace() });
 
         // Act
-        var result = await _ingressService.CreateIngress(model);
+        var result = await _configMapService.CreateConfigMap(model);
 
         // Assert
         result.Should().NotBeNull();
         result.Metadata.Name.Should().Be(model.Name);
         result.Metadata.NamespaceProperty.Should().Be(model.Namespace);
-        await _kubernetes.NetworkingV1.Received(1).CreateNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        await _kubernetes.CoreV1.Received(1).CreateNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Namespace
         );
     }
 
     [Fact]
-    public async Task CreateIngress_WhenNamespaceNotExists_ShouldCreateNamespaceAndReturnIngress()
+    public async Task CreateConfigMap_WhenNamespaceNotExists_ShouldCreateNamespaceAndReturnConfigMap()
     {
         // Arrange
-        var model = new IngressModel(
-            "test-ingress",
+        var model = new ConfigMapModel(
+            "test-configmap",
             "default",
-            "test-host",
-            80,
-            "/"
+            ["KEY=value", "KEY2=value2"]
         );
 
         var namespaceException = new HttpOperationException
@@ -93,9 +90,9 @@ public class IngressTests
             Arg.Any<V1Namespace>()
         ).Returns(namespaceResponse);
 
-        var ingressResponse = new HttpOperationResponse<V1Ingress>
+        var configmapResponse = new HttpOperationResponse<V1ConfigMap>
         {
-            Body = new V1Ingress
+            Body = new V1ConfigMap
             {
                 Metadata = new V1ObjectMeta
                 {
@@ -105,34 +102,34 @@ public class IngressTests
             }
         };
 
-        _kubernetes.NetworkingV1.CreateNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        _kubernetes.CoreV1.CreateNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Namespace
-        ).Returns(ingressResponse);
+        ).Returns(configmapResponse);
 
         // Act
-        var result = await _ingressService.CreateIngress(model);
+        var result = await _configMapService.CreateConfigMap(model);
 
         // Assert
         result.Should().NotBeNull();
         result.Metadata.Name.Should().Be(model.Name);
         result.Metadata.NamespaceProperty.Should().Be(model.Namespace);
-        await _kubernetes.NetworkingV1.Received(1).CreateNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        await _kubernetes.CoreV1.Received(1).CreateNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Namespace
         );
     }
 
     [Fact]
-    public async Task ReadIngress_Should_Return_Ingress()
+    public async Task ReadConfigMap_Should_Return_ConfigMap()
     {
         // Arrange
-        var name = "test-ingress";
+        var name = "test-configmap";
         var @namespace = "default";
 
-        var ingressResponse = new HttpOperationResponse<V1Ingress>
+        var configmapResponse = new HttpOperationResponse<V1ConfigMap>
         {
-            Body = new V1Ingress
+            Body = new V1ConfigMap
             {
                 Metadata = new V1ObjectMeta
                 {
@@ -142,29 +139,29 @@ public class IngressTests
             }
         };
 
-        _kubernetes.NetworkingV1.ReadNamespacedIngressWithHttpMessagesAsync(
+        _kubernetes.CoreV1.ReadNamespacedConfigMapWithHttpMessagesAsync(
             name,
             @namespace
-        ).Returns(ingressResponse);
+        ).Returns(configmapResponse);
 
         // Act
-        var result = await _ingressService.ReadIngress(name, @namespace);
+        var result = await _configMapService.ReadConfigMap(name, @namespace);
 
         // Assert
         result.Should().NotBeNull();
         result!.Metadata.Name.Should().Be(name);
         result.Metadata.NamespaceProperty.Should().Be(@namespace);
-        await _kubernetes.NetworkingV1.Received(1).ReadNamespacedIngressWithHttpMessagesAsync(
+        await _kubernetes.CoreV1.Received(1).ReadNamespacedConfigMapWithHttpMessagesAsync(
             name,
             @namespace
         );
     }
 
     [Fact]
-    public async Task ReadIngress_Should_Return_Null_When_NotFound()
+    public async Task ReadConfigMap_Should_Return_Null_When_NotFound()
     {
         // Arrange
-        var name = "non-existent-ingress";
+        var name = "non-existent-configmap";
         var @namespace = "default";
 
         var httpException = new HttpOperationException
@@ -172,37 +169,35 @@ public class IngressTests
             Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
         };
 
-        _kubernetes.NetworkingV1.ReadNamespacedIngressWithHttpMessagesAsync(
+        _kubernetes.CoreV1.ReadNamespacedConfigMapWithHttpMessagesAsync(
             name,
             @namespace
         ).Throws(httpException);
 
         // Act
-        var result = await _ingressService.ReadIngress(name, @namespace);
+        var result = await _configMapService.ReadConfigMap(name, @namespace);
 
         // Assert
         result.Should().BeNull();
-        await _kubernetes.NetworkingV1.Received(1).ReadNamespacedIngressWithHttpMessagesAsync(
+        await _kubernetes.CoreV1.Received(1).ReadNamespacedConfigMapWithHttpMessagesAsync(
             name,
             @namespace
         );
     }
 
     [Fact]
-    public async Task UpdateIngress_Should_Return_Ingress()
+    public async Task UpdateConfigMap_Should_Return_ConfigMap()
     {
         // Arrange
-        var model = new IngressModel(
-            "test-ingress",
+        var model = new ConfigMapModel(
+            "test-configmap",
             "default",
-            "test-host",
-            80,
-            "/"
+            ["KEY=value", "KEY2=value2"]
         );
 
-        var ingressResponse = new HttpOperationResponse<V1Ingress>
+        var configmapResponse = new HttpOperationResponse<V1ConfigMap>
         {
-            Body = new V1Ingress
+            Body = new V1ConfigMap
             {
                 Metadata = new V1ObjectMeta
                 {
@@ -212,36 +207,34 @@ public class IngressTests
             }
         };
 
-        _kubernetes.NetworkingV1.ReplaceNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        _kubernetes.CoreV1.ReplaceNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Name,
             model.Namespace
-        ).Returns(ingressResponse);
+        ).Returns(configmapResponse);
 
         // Act
-        var result = await _ingressService.UpdateIngress(model);
+        var result = await _configMapService.UpdateConfigMap(model);
 
         // Assert
         result.Should().NotBeNull();
         result!.Metadata.Name.Should().Be(model.Name);
         result.Metadata.NamespaceProperty.Should().Be(model.Namespace);
-        await _kubernetes.NetworkingV1.Received(1).ReplaceNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        await _kubernetes.CoreV1.Received(1).ReplaceNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Name,
             model.Namespace
         );
     }
 
     [Fact]
-    public async Task UpdateIngress_Should_Return_Null_When_NotFound()
+    public async Task UpdateConfigMap_Should_Return_Null_When_NotFound()
     {
         // Arrange
-        var model = new IngressModel(
-            "non-existent-ingress",
+        var model = new ConfigMapModel(
+            "non-existent-configmap",
             "default",
-            "test-host",
-            80,
-            "/"
+            ["KEY=value", "KEY2=value2"]
         );
 
         var httpException = new HttpOperationException
@@ -249,29 +242,29 @@ public class IngressTests
             Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
         };
 
-        _kubernetes.NetworkingV1.ReplaceNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        _kubernetes.CoreV1.ReplaceNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Name,
             model.Namespace
         ).Throws(httpException);
 
         // Act
-        var result = await _ingressService.UpdateIngress(model);
+        var result = await _configMapService.UpdateConfigMap(model);
 
         // Assert
         result.Should().BeNull();
-        await _kubernetes.NetworkingV1.Received(1).ReplaceNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        await _kubernetes.CoreV1.Received(1).ReplaceNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Name,
             model.Namespace
         );
     }
 
     [Fact]
-    public async Task DeleteIngress_Should_Return_Status()
+    public async Task DeleteConfigMap_Should_Return_Status()
     {
         // Arrange
-        var name = "test-ingress";
+        var name = "test-configmap";
         var @namespace = "default";
 
         var statusResponse = new HttpOperationResponse<V1Status>
@@ -279,28 +272,28 @@ public class IngressTests
             Body = new V1Status()
         };
 
-        _kubernetes.NetworkingV1.DeleteNamespacedIngressWithHttpMessagesAsync(
+        _kubernetes.CoreV1.DeleteNamespacedConfigMapWithHttpMessagesAsync(
             name,
             @namespace
         ).Returns(statusResponse);
 
         // Act
-        var result = await _ingressService.DeleteIngress(name, @namespace);
+        var result = await _configMapService.DeleteConfigMap(name, @namespace);
 
         // Assert
         result.Should().NotBeNull();
         result.Should().BeOfType<V1Status>();
-        await _kubernetes.NetworkingV1.Received(1).DeleteNamespacedIngressWithHttpMessagesAsync(
+        await _kubernetes.CoreV1.Received(1).DeleteNamespacedConfigMapWithHttpMessagesAsync(
             name,
             @namespace
         );
     }
 
     [Fact]
-    public async Task DeleteIngress_Should_Return_Null_When_NotFound()
+    public async Task DeleteConfigMap_Should_Return_Null_When_NotFound()
     {
         // Arrange
-        var name = "non-existent-ingress";
+        var name = "non-existent-configmap";
         var @namespace = "default";
 
         var httpException = new HttpOperationException
@@ -308,35 +301,38 @@ public class IngressTests
             Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
         };
 
-        _kubernetes.NetworkingV1.DeleteNamespacedIngressWithHttpMessagesAsync(
+        _kubernetes.CoreV1.DeleteNamespacedConfigMapWithHttpMessagesAsync(
             name,
             @namespace
         ).Throws(httpException);
 
         // Act
-        var result = await _ingressService.DeleteIngress(name, @namespace);
+        var result = await _configMapService.DeleteConfigMap(name, @namespace);
 
         // Assert
         result.Should().BeNull();
-        await _kubernetes.NetworkingV1.Received(1).DeleteNamespacedIngressWithHttpMessagesAsync(
+        await _kubernetes.CoreV1.Received(1).DeleteNamespacedConfigMapWithHttpMessagesAsync(
             name,
             @namespace
         );
     }
 
     [Fact]
-    public async Task CreateIfNotExistsIngress_WhenIngressExists_Should_Return_ExistingIngress()
+    public async Task CreateOrReplaceConfigMap_WhenConfigMapExists_Should_Update_ExistingConfigMap()
     {
         // Arrange
-        var model = new IngressModel(
-            "test-ingress",
+        var model = new ConfigMapModel(
+            "test-configmap",
             "default",
-            "test-host",
-            80,
-            "/"
+            ["KEY=value", "KEY2=value2"]
+        );
+        var updatedModel = new ConfigMapModel(
+            "test-configmap",
+            "default",
+            ["KEY=value", "KEY2=value2"]
         );
 
-        var existingIngress = new V1Ingress
+        var configMap = new V1ConfigMap
         {
             Metadata = new V1ObjectMeta
             {
@@ -345,33 +341,46 @@ public class IngressTests
             }
         };
 
-        _kubernetes.NetworkingV1.ReadNamespacedIngressWithHttpMessagesAsync(
+        var updatedConfigMap = new V1ConfigMap
+        {
+            Metadata = new V1ObjectMeta
+            {
+                Name = updatedModel.Name,
+                NamespaceProperty = updatedModel.Namespace
+            }
+        };
+
+        _kubernetes.CoreV1.ReadNamespacedConfigMapWithHttpMessagesAsync(
             model.Name,
             model.Namespace
-        ).Returns(new HttpOperationResponse<V1Ingress> { Body = existingIngress });
+        ).Returns(new HttpOperationResponse<V1ConfigMap> { Body = configMap });
+
+        _kubernetes.CoreV1.ReplaceNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
+            model.Name,
+            model.Namespace
+        ).Returns(new HttpOperationResponse<V1ConfigMap> { Body = updatedConfigMap });
 
         // Act
-        var result = await _ingressService.CreateIfNotExistsIngress(model);
+        var result = await _configMapService.CreateOrReplaceConfigMap(updatedModel);
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().BeSameAs(existingIngress);
-        await _kubernetes.NetworkingV1.DidNotReceive().CreateNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        result.Should().BeSameAs(updatedConfigMap);
+        await _kubernetes.CoreV1.DidNotReceive().CreateNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Namespace
         );
     }
 
     [Fact]
-    public async Task CreateIfNotExistsIngress_WhenIngressNotExists_Should_Create_And_Return_NewIngress()
+    public async Task CreateOrReplaceConfigMap_WhenConfigMapNotExists_Should_Create_And_Return_NewConfigMap()
     {
         // Arrange
-        var model = new IngressModel(
-            "test-ingress",
+        var model = new ConfigMapModel(
+            "test-configmap",
             "default",
-            "test-host",
-            80,
-            "/"
+            ["KEY=value", "KEY2=value2"]
         );
 
         var httpException = new HttpOperationException
@@ -379,12 +388,12 @@ public class IngressTests
             Response = new HttpResponseMessageWrapper(new HttpResponseMessage(HttpStatusCode.NotFound), string.Empty)
         };
 
-        _kubernetes.NetworkingV1.ReadNamespacedIngressWithHttpMessagesAsync(
+        _kubernetes.CoreV1.ReadNamespacedConfigMapWithHttpMessagesAsync(
             model.Name,
             model.Namespace
         ).Throws(httpException);
 
-        var newIngress = new V1Ingress
+        var newConfigMap = new V1ConfigMap
         {
             Metadata = new V1ObjectMeta
             {
@@ -393,22 +402,22 @@ public class IngressTests
             }
         };
 
-        _kubernetes.NetworkingV1.CreateNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        _kubernetes.CoreV1.CreateNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Namespace
-        ).Returns(new HttpOperationResponse<V1Ingress> { Body = newIngress });
+        ).Returns(new HttpOperationResponse<V1ConfigMap> { Body = newConfigMap });
         
         _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>())
             .Returns(new HttpOperationResponse<V1Namespace> { Body = new V1Namespace() });
         
         // Act
-        var result = await _ingressService.CreateIfNotExistsIngress(model);
+        var result = await _configMapService.CreateOrReplaceConfigMap(model);
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().BeSameAs(newIngress);
-        await _kubernetes.NetworkingV1.Received(1).CreateNamespacedIngressWithHttpMessagesAsync(
-            Arg.Any<V1Ingress>(),
+        result.Should().BeSameAs(newConfigMap);
+        await _kubernetes.CoreV1.Received(1).CreateNamespacedConfigMapWithHttpMessagesAsync(
+            Arg.Any<V1ConfigMap>(),
             model.Namespace
         );
     }

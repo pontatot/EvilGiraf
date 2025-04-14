@@ -1,7 +1,7 @@
-using EvilGiraf.Model;
+using EvilGiraf.Model.Kubernetes;
 using k8s.Models;
 
-namespace EvilGiraf.Interface;
+namespace EvilGiraf.Interface.Kubernetes;
 
 public interface IServiceService
 {

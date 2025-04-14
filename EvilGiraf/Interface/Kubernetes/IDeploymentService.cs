@@ -1,4 +1,4 @@
-using EvilGiraf.Model;
+using EvilGiraf.Model.Kubernetes;
 using k8s.Models;
 
 namespace EvilGiraf.Interface.Kubernetes;

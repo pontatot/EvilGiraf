@@ -1,6 +1,6 @@
 using k8s.Models;
 
-namespace EvilGiraf.Model;
+namespace EvilGiraf.Model.Kubernetes;
 
 public record IngressModel(
     string Name,

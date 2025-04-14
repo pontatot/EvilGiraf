@@ -1,7 +1,7 @@
 using EvilGiraf.Dto;
 using EvilGiraf.Interface;
 using EvilGiraf.Interface.Kubernetes;
-using EvilGiraf.Model;
+using EvilGiraf.Model.Kubernetes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
