@@ -6,11 +6,19 @@ using k8s.Models;
 
 namespace EvilGiraf.Service.Kubernetes;
 
-public class IngressService(IKubernetes client) : IIngressService
+public class IngressService(IKubernetes client, IConfiguration configuration) : IIngressService
 {
     public async Task<V1Ingress> CreateIngress(IngressModel model)
     {
-        return await client.NetworkingV1.CreateNamespacedIngressAsync(model.ToIngress(), model.Namespace);   
+        var ingress = model.ToIngress();
+        if (configuration.GetSection("IngressAnnotations").Get<Dictionary<string, string>>()?.Count > 0)
+        {
+            ingress = (model with
+            {
+                Annotations = configuration.GetSection("IngressAnnotations").Get<Dictionary<string, string>>()
+            }).ToIngress();
+        }
+        return await client.NetworkingV1.CreateNamespacedIngressAsync(ingress, model.Namespace);   
     }
 
     public async Task<V1Ingress?> ReadIngress(string name, string @namespace)

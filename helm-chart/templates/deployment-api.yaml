@@ -81,6 +81,10 @@ spec:
               value: {{ .Values.api.dockerRegistry.username | default "" }}
             - name: DockerRegistry__Password
               value: {{ .Values.api.dockerRegistry.password | default "" }}
+            {{- range $key, $value := .Values.api.ingressAnnotations }}
+            - name: IngressAnnotations__{{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
           livenessProbe:
             {{- toYaml .Values.api.livenessProbe | nindent 12 }}
           readinessProbe:

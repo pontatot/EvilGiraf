@@ -97,6 +97,14 @@ api:
     url: "***"
     username: ""
     password: ""
+    
+  ingressAnnotations:
+    # Example annotations
+    "cert-manager.io/cluster-issuer": "letsencrypt",
+    "spec.ingressClassName": "traefik",
+    "traefik.ingress.kubernetes.io/router.entrypoints": "web, websecure",
+    "traefik.ingress.kubernetes.io/router.tls": "true",
+    "traefik.ingress.kubernetes.io/router.middlewares": "default-redirect-https@kubernetescrd"
 
 
 front:
