@@ -18,8 +18,8 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
             return;
         }
 
-        var existed = await HandleDeployment(app, imageLink);
-        await HandleServiceAndIngress(app, existed);
+        await HandleDeployment(app, imageLink);
+        await HandleServiceAndIngress(app);
         await HandleConfigmaps(app);
     }
     
@@ -33,48 +33,32 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
         return app.Link;
     }
     
-    private async Task<bool> HandleDeployment(Application app, string imageLink)
+    private async Task HandleDeployment(Application app, string imageLink)
     {
-        var deployment = await deploymentService.ReadDeployment(app.Name, app.Id.ToNamespace());
-        var deploymentModel = new DeploymentModel(app.Name, app.Id.ToNamespace(), 1, imageLink, app.Port, app.Variables is null || app.Variables.Count == 0 ? null : app.Name);
-        
-        if (deployment is null)
-        {
-            await deploymentService.CreateDeployment(deploymentModel);
-            return false;
-        }
-        await deploymentService.UpdateDeployment(deploymentModel);
-        return true;
+        var deploymentModel = new DeploymentModel(app.Name, app.Id.ToNamespace(), 1, imageLink, app.Port,
+            app.Variables is null || app.Variables.Count == 0 ? null : app.Name);
+        await deploymentService.CreateOrReplaceDeployment(deploymentModel);
     }
     
-    private async Task HandleServiceAndIngress(Application app, bool existed)
+    private async Task HandleServiceAndIngress(Application app)
     {
         if (app.Port is null)
+        {
+            await serviceService.DeleteService(app.Name, app.Id.ToNamespace());
+            await ingressService.DeleteIngress(app.Name, app.Id.ToNamespace());
             return;
+        }
             
         var serviceModel = new ServiceModel(app.Name, app.Id.ToNamespace(), app.Port.Value);
         
-        if (existed)
+        await serviceService.CreateOrReplaceService(serviceModel);
+        if (app.DomainName is not null)
         {
-            await serviceService.CreateIfNotExistsService(serviceModel);
-            
-            if (app.DomainName is not null)
-            {
-                var ingressModel = new IngressModel(app.Name, app.Id.ToNamespace(), app.DomainName, app.Port.Value, "/");
-                await ingressService.CreateIfNotExistsIngress(ingressModel);
-            }
+            var ingressModel = new IngressModel(app.Name, app.Id.ToNamespace(), app.DomainName, app.Port.Value, "/");
+            await ingressService.CreateOrReplaceIngress(ingressModel);
         }
         else
-        {
-            
-            await serviceService.CreateService(serviceModel);
-            
-            if (app.DomainName is not null)
-            {
-                var ingressModel = new IngressModel(app.Name, app.Id.ToNamespace(), app.DomainName, app.Port.Value, "/");
-                await ingressService.CreateIngress(ingressModel);
-            }
-        }
+            await ingressService.DeleteIngress(app.Name, app.Id.ToNamespace());
     }
     
     private async Task HandleConfigmaps(Application app)

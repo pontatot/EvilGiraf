@@ -49,10 +49,10 @@ public class ServiceService(IKubernetes client) : IServiceService
         }
     }
 
-    public async Task<V1Service> CreateIfNotExistsService(ServiceModel model)
+    public async Task<V1Service?> CreateOrReplaceService(ServiceModel model)
     {
-        if (await ReadService(model.Name, model.Namespace) is { } service)
-            return service;
-        return await CreateService(model);
+        if (await ReadService(model.Name, model.Namespace) is null)
+            return await CreateService(model);
+        return await UpdateService(model);
     }
 }

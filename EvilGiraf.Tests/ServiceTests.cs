@@ -185,7 +185,7 @@ public class ServiceTests
     }
 
     [Fact]
-    public async Task CreateIfNotExistsService_Should_Return_Existing_Service()
+    public async Task CreateOrReplaceService_Should_Replace_Existing_Service()
     {
         var model = new ServiceModel(
             "service-test",
@@ -202,21 +202,24 @@ public class ServiceTests
             }
         };
         
-        Kubernetes.CoreV1.ReadNamespacedServiceWithHttpMessagesAsync(model.Name, model.Namespace, null, null, Arg.Any<CancellationToken>())
+        Kubernetes.CoreV1.ReadNamespacedServiceWithHttpMessagesAsync(model.Name, model.Namespace)
+            .Returns(new HttpOperationResponse<V1Service> { Body = existingService });
+        
+        Kubernetes.CoreV1.ReplaceNamespacedServiceWithHttpMessagesAsync(Arg.Any<V1Service>(), model.Name, model.Namespace)
             .Returns(new HttpOperationResponse<V1Service> { Body = existingService });
 
-        var result = await ServiceService.CreateIfNotExistsService(model);
+        var result = await ServiceService.CreateOrReplaceService(model);
         
         result.Should().NotBeNull();
         result.Should().BeOfType<V1Service>();
-        result.Metadata.Name.Should().Be(model.Name);
+        result!.Metadata.Name.Should().Be(model.Name);
         result.Metadata.NamespaceProperty.Should().Be(model.Namespace);
         
         await Kubernetes.CoreV1.DidNotReceive().CreateNamespacedServiceWithHttpMessagesAsync(Arg.Any<V1Service>(), Arg.Any<string>());
     }
 
     [Fact]
-    public async Task CreateIfNotExistsService_Should_Create_New_Service()
+    public async Task CreateOrReplaceService_Should_Create_New_Service()
     {
         var model = new ServiceModel(
             "service-test",
@@ -244,11 +247,11 @@ public class ServiceTests
         Kubernetes.CoreV1.CreateNamespacedServiceWithHttpMessagesAsync(Arg.Any<V1Service>(), Arg.Any<string>())
             .Returns(new HttpOperationResponse<V1Service> { Body = newService });
 
-        var result = await ServiceService.CreateIfNotExistsService(model);
+        var result = await ServiceService.CreateOrReplaceService(model);
         
         result.Should().NotBeNull();
         result.Should().BeOfType<V1Service>();
-        result.Metadata.Name.Should().Be(model.Name);
+        result!.Metadata.Name.Should().Be(model.Name);
         result.Metadata.NamespaceProperty.Should().Be(model.Namespace);
         
         await Kubernetes.CoreV1.Received().CreateNamespacedServiceWithHttpMessagesAsync(Arg.Any<V1Service>(), model.Namespace);

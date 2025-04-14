@@ -49,10 +49,7 @@ public class KubernetesTests
 
         // Assert
         await _deploymentService.Received(1)
-            .ReadDeployment(app.Name, app.Id.ToNamespace());
-        
-        await _deploymentService.Received(1)
-            .CreateDeployment(Arg.Is<DeploymentModel>(d => 
+            .CreateOrReplaceDeployment(Arg.Is<DeploymentModel>(d => 
                 d.Name == app.Name && 
                 d.Namespace == app.Id.ToNamespace() &&
                 d.Image == app.Link &&
@@ -78,13 +75,7 @@ public class KubernetesTests
 
         // Assert
         await _deploymentService.Received(1)
-            .ReadDeployment(app.Name, app.Id.ToNamespace());
-        
-        await _deploymentService.DidNotReceive()
-            .CreateDeployment(Arg.Any<DeploymentModel>());
-        
-        await _deploymentService.Received(1)
-            .UpdateDeployment(Arg.Is<DeploymentModel>(d => 
+            .CreateOrReplaceDeployment(Arg.Is<DeploymentModel>(d => 
                 d.Name == app.Name && 
                 d.Namespace == app.Id.ToNamespace() &&
                 d.Image == app.Link &&
@@ -96,7 +87,7 @@ public class KubernetesTests
     {
         // Arrange
         var app = CreateTestApplication();
-        _deploymentService.ReadDeployment(app.Name, app.Id.ToNamespace())
+        _deploymentService.CreateOrReplaceDeployment(Arg.Any<DeploymentModel>())
             .ThrowsAsync(new Exception("Deployment service error"));
 
         // Act
@@ -105,11 +96,5 @@ public class KubernetesTests
         // Assert
         await act.Should().ThrowAsync<Exception>()
             .WithMessage("Deployment service error");
-        
-        await _deploymentService.DidNotReceive()
-            .CreateDeployment(Arg.Any<DeploymentModel>());
-        
-        await _deploymentService.DidNotReceive()
-            .UpdateDeployment(Arg.Any<DeploymentModel>());
     }
 }
