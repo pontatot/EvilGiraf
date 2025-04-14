@@ -13,5 +13,5 @@ public interface IServiceService
     
     public Task<V1Service?> DeleteService(string name, string @namespace);
 
-    public Task<V1Service> CreateIfNotExistsService(ServiceModel model);
+    public Task<V1Service?> CreateOrReplaceService(ServiceModel model);
 }

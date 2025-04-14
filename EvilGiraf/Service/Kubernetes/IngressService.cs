@@ -49,11 +49,10 @@ public class IngressService(IKubernetes client) : IIngressService
         }
     }
 
-    public async Task<V1Ingress> CreateIfNotExistsIngress(IngressModel model)
+    public async Task<V1Ingress?> CreateOrReplaceIngress(IngressModel model)
     {
-        var ingress = await ReadIngress(model.Name, model.Namespace);
-        if (ingress != null)
-            return ingress;
-        return await CreateIngress(model);
+        if (await ReadIngress(model.Name, model.Namespace) is null)
+            return await CreateIngress(model);
+        return await UpdateIngress(model);
     }
 }

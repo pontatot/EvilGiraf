@@ -51,9 +51,8 @@ public class ConfigMapService(IKubernetes client) : IConfigMapService
 
     public async Task<V1ConfigMap?> CreateOrReplaceConfigMap(ConfigMapModel model)
     {
-        var configMap = await ReadConfigMap(model.Name, model.Namespace);
-        if (configMap is not null)
-            return await UpdateConfigMap(model);
-        return await CreateConfigMap(model);
+        if (await ReadConfigMap(model.Name, model.Namespace) is null)
+            return await CreateConfigMap(model);
+        return await UpdateConfigMap(model);
     }
 }

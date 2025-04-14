@@ -325,7 +325,7 @@ public class IngressTests
     }
 
     [Fact]
-    public async Task CreateIfNotExistsIngress_WhenIngressExists_Should_Return_ExistingIngress()
+    public async Task CreateOrReplaceIngress_WhenIngressExists_Should_Replace_ExistingIngress()
     {
         // Arrange
         var model = new IngressModel(
@@ -350,8 +350,14 @@ public class IngressTests
             model.Namespace
         ).Returns(new HttpOperationResponse<V1Ingress> { Body = existingIngress });
 
+        _kubernetes.NetworkingV1.ReplaceNamespacedIngressWithHttpMessagesAsync(
+            Arg.Any<V1Ingress>(),
+            model.Name,
+            model.Namespace
+        ).Returns(new HttpOperationResponse<V1Ingress> { Body = existingIngress });
+
         // Act
-        var result = await _ingressService.CreateIfNotExistsIngress(model);
+        var result = await _ingressService.CreateOrReplaceIngress(model);
 
         // Assert
         result.Should().NotBeNull();
@@ -363,7 +369,7 @@ public class IngressTests
     }
 
     [Fact]
-    public async Task CreateIfNotExistsIngress_WhenIngressNotExists_Should_Create_And_Return_NewIngress()
+    public async Task CreateOrReplaceIngress_WhenIngressNotExists_Should_Create_And_Return_NewIngress()
     {
         // Arrange
         var model = new IngressModel(
@@ -402,7 +408,7 @@ public class IngressTests
             .Returns(new HttpOperationResponse<V1Namespace> { Body = new V1Namespace() });
         
         // Act
-        var result = await _ingressService.CreateIfNotExistsIngress(model);
+        var result = await _ingressService.CreateOrReplaceIngress(model);
 
         // Assert
         result.Should().NotBeNull();

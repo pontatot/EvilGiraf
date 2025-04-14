@@ -12,4 +12,6 @@ public interface IDeploymentService
     public Task<V1Deployment?> UpdateDeployment(DeploymentModel model);
     
     public Task<V1Status?> DeleteDeployment(string name, string @namespace);
+    
+    public Task<V1Deployment?> CreateOrReplaceDeployment(DeploymentModel model);
 }

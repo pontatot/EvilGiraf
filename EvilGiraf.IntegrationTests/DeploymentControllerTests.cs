@@ -132,6 +132,10 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(deployment);
         
         _kubernetes.NetworkingV1.ReadNamespacedIngressWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(new HttpOperationResponse<V1Ingress>{ Body = new V1Ingress() });
+        _kubernetes.CoreV1.ReadNamespacedServiceWithHttpMessagesAsync(Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Service>{Body = new V1Service()});
+        _kubernetes.CoreV1.ReplaceNamespacedServiceWithHttpMessagesAsync(Arg.Any<V1Service>(), Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Service>());
+        _kubernetes.NetworkingV1.ReadNamespacedIngressWithHttpMessagesAsync(Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Ingress>{Body = new V1Ingress()});
+        _kubernetes.NetworkingV1.ReplaceNamespacedIngressWithHttpMessagesAsync(Arg.Any<V1Ingress>(), Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Ingress>());
         _kubernetes.CoreV1.ReadNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1ConfigMap>{Body = new V1ConfigMap()});
         _kubernetes.CoreV1.ReplaceNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<V1ConfigMap>(), Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1ConfigMap>());
 
@@ -208,6 +212,10 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace()});
         
         _kubernetes.NetworkingV1.CreateNamespacedIngressWithHttpMessagesAsync(Arg.Any<V1Ingress>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Ingress>{ Body = new V1Ingress()});
+        _kubernetes.CoreV1.ReadNamespacedServiceWithHttpMessagesAsync(Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Service>());
+        _kubernetes.CoreV1.CreateNamespacedServiceWithHttpMessagesAsync(Arg.Any<V1Service>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Service>());
+        _kubernetes.NetworkingV1.ReadNamespacedIngressWithHttpMessagesAsync(Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Ingress>());
+        _kubernetes.NetworkingV1.CreateNamespacedIngressWithHttpMessagesAsync(Arg.Any<V1Ingress>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Ingress>());
         _kubernetes.CoreV1.ReadNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1ConfigMap>());
         _kubernetes.CoreV1.CreateNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<V1ConfigMap>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1ConfigMap>());
 
@@ -465,6 +473,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         ).Returns(new HttpOperationResponse<V1Deployment>{ Body = new V1Deployment() });
         
         _kubernetes.CoreV1.ReadNamespacedSecretWithHttpMessagesAsync(Arg.Any<string>(), gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Secret>());
+        _kubernetes.CoreV1.DeleteNamespacedServiceWithHttpMessagesAsync(Arg.Any<string>(), gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Service>());
+        _kubernetes.NetworkingV1.DeleteNamespacedIngressWithHttpMessagesAsync(Arg.Any<string>(), gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Status>());
         _kubernetes.CoreV1.DeleteNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<string>(), gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Status>());
         
         // Act

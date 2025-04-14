@@ -13,5 +13,5 @@ public interface IIngressService
     
     public Task<V1Status?> DeleteIngress(string name, string @namespace);
 
-    public Task<V1Ingress> CreateIfNotExistsIngress(IngressModel model);
+    public Task<V1Ingress?> CreateOrReplaceIngress(IngressModel model);
 }

@@ -49,4 +49,11 @@ public class DeploymentService(IKubernetes client) : IDeploymentService
             return null;
         }
     }
+    
+    public async Task<V1Deployment?> CreateOrReplaceDeployment(DeploymentModel model)
+    {
+        if (await ReadDeployment(model.Name, model.Namespace) is null)
+            return await CreateDeployment(model);
+        return await UpdateDeployment(model);
+    }
 }
