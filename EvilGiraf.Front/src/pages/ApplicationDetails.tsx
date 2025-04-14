@@ -102,6 +102,7 @@ export function ApplicationDetails() {
         link: application.link,
         version: application.version,
         port: application.port === null ? -1 : application.port,
+        domainName: application.domainName,
       });
       setIsEditing(true);
     }
@@ -238,6 +239,25 @@ export function ApplicationDetails() {
                       placeholder="e.g. 80"
                     />
                   </div>
+                  <div>
+                    <span className="font-medium">Domain Name:</span>
+                    <input
+                      type="text"
+                      value={editedApp.domainName || ''}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/^https?:\/\//, '');
+                        setEditedApp({ ...editedApp, domainName: value });
+                      }}
+                      className={`ml-2 p-1 border rounded ${(!editedApp.port || editedApp.port === -1) ? 'bg-gray-100' : ''}`}
+                      placeholder="e.g. app.example.com"
+                      disabled={!editedApp.port || editedApp.port === -1}
+                    />
+                    <span className="text-sm text-gray-500 ml-2">
+                      {(!editedApp.port || editedApp.port === -1) 
+                        ? '(Port must be set to use domain name)'
+                        : '(Enter domain without http:// or https:// that points to the server)'}
+                    </span>
+                  </div>
                 </>
               ) : (
                 <>
@@ -259,6 +279,28 @@ export function ApplicationDetails() {
                     {application?.port !== null && application?.port !== undefined && application?.port !== -1
                       ? application.port
                       : 'No port exposed'}
+                  </p>
+                  <p>
+                    <span className="font-medium">Domain Name:</span>{' '}
+                    {application?.domainName ? (
+                      <a
+                        href={`https://${application.domainName}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:text-blue-700 hover:underline"
+                      >
+                        {application.domainName}
+                      </a>
+                    ) : (
+                      'Not set'
+                    )}
+                    {!application?.domainName && (
+                      <span className="text-sm text-gray-500 ml-2">
+                        {(!application?.port || application?.port === -1)
+                          ? '(Port must be set to use domain name)'
+                          : '(Enter domain without http:// or https:// that points to the server)'}
+                      </span>
+                    )}
                   </p>
                 </>
               )}
