@@ -7,7 +7,8 @@ public record IngressModel(
     string Namespace,
     string Host,
     int Port,
-    string Path
+    string Path,
+    Dictionary<string, string>? Annotations = null
 );
 
 public static class IngressModelExtensions
@@ -19,7 +20,8 @@ public static class IngressModelExtensions
             Metadata = new V1ObjectMeta
             {
                 Name = model.Name,
-                NamespaceProperty = model.Namespace
+                NamespaceProperty = model.Namespace,
+                Annotations = model.Annotations
             },
             Spec = new V1IngressSpec
             {
@@ -50,6 +52,14 @@ public static class IngressModelExtensions
                                 }
                             }
                         }
+                    }
+                },
+                Tls = new List<V1IngressTLS>
+                {
+                    new()
+                    {
+                        Hosts = new List<string>{model.Host},
+                        SecretName = $"{model.Name}-tls-secret"
                     }
                 }
             }

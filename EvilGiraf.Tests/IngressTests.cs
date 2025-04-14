@@ -5,6 +5,7 @@ using FluentAssertions;
 using k8s;
 using k8s.Autorest;
 using k8s.Models;
+using Microsoft.Extensions.Configuration;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -18,7 +19,7 @@ public class IngressTests
     public IngressTests()
     {
         _kubernetes = Substitute.For<IKubernetes>();
-        _ingressService = new IngressService(_kubernetes);
+        _ingressService = new IngressService(_kubernetes, Substitute.For<IConfiguration>());
     }
 
     [Fact]
