@@ -92,6 +92,12 @@ api:
   
   auth:
     apiKey: '***'
+  
+  dockerRegistry:
+    url: "***"
+    username: ""
+    password: ""
+
 
 front:
   nameOverride: ""
