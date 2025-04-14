@@ -52,6 +52,8 @@ public class ApplicationService(DatabaseService databaseService) : IApplicationS
                     applicationUpdateDto.Port;
         if (applicationUpdateDto.DomainName is not null)
             application.DomainName = applicationUpdateDto.DomainName;
+        if (applicationUpdateDto.Variables is not null)
+            application.Variables = applicationUpdateDto.Variables.ToList();
 
         var updatedApp = databaseService.Applications.Update(application).Entity;
         await databaseService.SaveChangesAsync();

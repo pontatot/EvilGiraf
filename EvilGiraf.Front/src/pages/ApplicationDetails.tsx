@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { ArrowLeft, RefreshCw, Trash2, Edit2, Save, X, Power } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Trash2, Edit2, Power } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ApplicationCreateDto, ApplicationType } from '../types/api';
@@ -12,6 +12,7 @@ export function ApplicationDetails() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editedApp, setEditedApp] = useState<ApplicationCreateDto>({});
+  const [newVariable, setNewVariable] = useState('');
 
   const {
     data: application,
@@ -84,6 +85,7 @@ export function ApplicationDetails() {
         queryClient.invalidateQueries(['application', id]);
         setIsEditing(false);
         setEditedApp({});
+        setNewVariable('');
       },
     }
   );
@@ -103,6 +105,7 @@ export function ApplicationDetails() {
         version: application.version,
         port: application.port === null ? -1 : application.port,
         domainName: application.domainName,
+        variables: application.variables || [],
       });
       setIsEditing(true);
     }
@@ -115,6 +118,26 @@ export function ApplicationDetails() {
   const handleCancel = () => {
     setIsEditing(false);
     setEditedApp({});
+    setNewVariable('');
+  };
+
+  const handleAddVariable = () => {
+    if (newVariable.trim() && newVariable.includes('=')) {
+      setEditedApp({
+        ...editedApp,
+        variables: [...(editedApp.variables || []), newVariable.trim()]
+      });
+      setNewVariable('');
+    }
+  };
+
+  const handleRemoveVariable = (index: number) => {
+    const updatedVariables = [...(editedApp.variables || [])];
+    updatedVariables.splice(index, 1);
+    setEditedApp({
+      ...editedApp,
+      variables: updatedVariables
+    });
   };
 
   if (isLoadingApp) return <LoadingSpinner />;
@@ -150,23 +173,12 @@ export function ApplicationDetails() {
               </button>
             </>
           ) : (
-            <>
-              <button
-                onClick={handleCancel}
-                className="flex items-center gap-2 text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={updateMutation.isLoading}
-                className="flex items-center gap-2 text-green-500 hover:text-green-700 disabled:opacity-50"
-              >
-                <Save className="h-5 w-5" />
-                {updateMutation.isLoading ? 'Saving...' : 'Save'}
-              </button>
-            </>
+            <button
+              onClick={handleCancel}
+              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 border border-gray-300"
+            >
+              Cancel
+            </button>
           )}
         </div>
       </div>
@@ -258,8 +270,44 @@ export function ApplicationDetails() {
                         : '(Enter domain without http:// or https:// that points to the server)'}
                     </span>
                   </div>
+                  <div>
+                    <span className="font-medium">Environment Variables:</span>
+                    <div className="mt-1 flex">
+                      <input
+                        type="text"
+                        value={newVariable}
+                        onChange={(e) => setNewVariable(e.target.value)}
+                        placeholder="KEY=VALUE"
+                        className="ml-2 p-1 border rounded-l w-full"
+                      />
+                      <button
+                        onClick={handleAddVariable}
+                        className="bg-blue-500 text-white px-3 py-1 rounded-r hover:bg-blue-600"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-500 ml-2 mt-1">
+                      Format: KEY=VALUE (e.g., DATABASE_URL=postgres://user:pass@host:5432/db)
+                    </p>
+                    {editedApp.variables && editedApp.variables.length > 0 && (
+                      <div className="mt-2 space-y-1 ml-2">
+                        {editedApp.variables.map((variable, index) => (
+                          <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            <span className="text-sm font-mono">{variable}</span>
+                            <button
+                              onClick={() => handleRemoveVariable(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </>
-              ) : (
+              ) :
                 <>
                   <p>
                     <span className="font-medium">Type:</span>{' '}
@@ -302,8 +350,20 @@ export function ApplicationDetails() {
                       </span>
                     )}
                   </p>
+                  {application?.variables && application.variables.length > 0 && (
+                    <div>
+                      <span className="font-medium">Environment Variables:</span>
+                      <div className="mt-2 space-y-1">
+                        {application.variables.map((variable, index) => (
+                          <div key={index} className="bg-gray-50 p-2 rounded">
+                            <span className="text-sm font-mono">{variable}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
-              )}
+              }
             </div>
           </div>
 
@@ -370,6 +430,17 @@ export function ApplicationDetails() {
             )}
           </div>
         </div>
+        {isEditing && (
+          <div className="flex justify-end gap-2 mt-6">
+            <button
+              onClick={handleSave}
+              disabled={updateMutation.isLoading}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+            >
+              {updateMutation.isLoading ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

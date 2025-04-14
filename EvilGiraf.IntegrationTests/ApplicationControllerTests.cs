@@ -20,7 +20,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task Create_ShouldCreateApplication()
     {
         // Arrange
-        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", 22, null);
+        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", 22, "test.com", ["KEY=VAR", "KEY2=VAR2"]);
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/application", createRequest);
@@ -36,6 +36,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         application.Version.Should().Be(createRequest.Version);
         application.Id.Should().NotBe(0);
         application.Port.Should().Be(createRequest.Port);
+        application.DomainName.Should().Be(createRequest.DomainName);
+        application.Variables.Should().BeEquivalentTo(createRequest.Variables);
 
         // Verify the application was saved to the database
         var savedApplication = await _dbContext.Applications.FindAsync(application.Id);
@@ -45,19 +47,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         savedApplication.Link.Should().Be(createRequest.Link);
         savedApplication.Version.Should().Be(createRequest.Version);
         savedApplication.Port.Should().Be(createRequest.Port);
-    }
-
-    [Fact]
-    public async Task CreateWithWrongBody_ShouldReturnBadRequest()
-    {
-        // Arrange
-        var createRequest = new ApplicationCreateDto(null!, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", 22, null);
-
-        // Act
-        var response = await Client.PostAsJsonAsync("/api/application", createRequest);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        savedApplication.DomainName.Should().Be(createRequest.DomainName);
+        savedApplication.Variables.Should().BeEquivalentTo(createRequest.Variables);
     }
     
     [Theory]
@@ -67,7 +58,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task CreateWithNameContainingSpaces_ShouldReturnBadRequest(string? name)
     {
         // Arrange
-        var createRequest = new ApplicationCreateDto(name!, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", 22, null);
+        var createRequest = new ApplicationCreateDto(name!, ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", 22, null, null);
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/application", createRequest);
@@ -186,7 +177,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         var invalidNames = new[] { "", "invalid name" }; //null value wasn't added because it's DTO work
         foreach (var name in invalidNames)
         {
-            var updateRequest = new ApplicationUpdateDto(name, ApplicationType.Git, "k8s.io/invalid-name:latest", "2.0.0", 23, null);
+            var updateRequest = new ApplicationUpdateDto(name, ApplicationType.Git, "k8s.io/invalid-name:latest", "2.0.0", 23, null, null);
 
             // Act
             var response = await Client.PatchAsJsonAsync($"/api/application/{application.Id}", updateRequest);
@@ -207,13 +198,14 @@ public class ApplicationControllerTests : AuthenticatedTestBase
             Link = "docker.io/test-application:latest",
             Version = "1.0.0",
             Port = 22,
-            DomainName = "test-application.com"
+            DomainName = "test-application.com",
+            Variables = ["KEY=VALUE", "KEY2=VALUE2"]
         };
 
         _dbContext.Applications.Add(application);
         await _dbContext.SaveChangesAsync();
 
-        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0", 23, "updated-application.com");
+        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0", 23, "updated-application.com", ["KEY=UPDATED", "KEY2=UPDATED2"]);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/api/application/{application.Id}", updateRequest);
@@ -250,7 +242,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task UpdateWithNonExistingId_ShouldReturnNotFound()
     {
         // Arrange
-        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0", 22, null);
+        var updateRequest = new ApplicationUpdateDto("updated-application", ApplicationType.Git, "k8s.io/updated-application:latest", "2.0.0", 22, null, null);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/api/application/{999}", updateRequest);
@@ -275,7 +267,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
         _dbContext.Applications.Add(application);
         await _dbContext.SaveChangesAsync();
 
-        var updateRequest = new ApplicationUpdateDto(null, null, null, null, null, null);
+        var updateRequest = new ApplicationUpdateDto(null, null, null, null, null, null, null);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/api/application/{application.Id}", updateRequest);
@@ -317,7 +309,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
                 Type = ApplicationType.Docker,
                 Link = "docker.io/test-application-1:latest",
                 Version = "1.0.0",
-                Port = 22
+                Port = 22,
+                Variables = []
             },
             new()
             {
@@ -325,7 +318,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
                 Type = ApplicationType.Git,
                 Link = "k8s.io/test-application-2:latest",
                 Version = "2.0.0",
-                Port = 22
+                Port = 22,
+                Variables = ["KEY=VALUE", "KEY2=VALUE2"]
             }
         };
 
@@ -350,7 +344,7 @@ public class ApplicationControllerTests : AuthenticatedTestBase
     public async Task CreateWithNoPort_ShouldReturnApplication()
     {
         // Arrange
-        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", null, null);
+        var createRequest = new ApplicationCreateDto("test-application", ApplicationType.Docker, "docker.io/test-application:latest", "1.0.0", null, null, null);
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/application", createRequest);

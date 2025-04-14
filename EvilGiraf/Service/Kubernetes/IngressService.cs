@@ -1,6 +1,5 @@
-using EvilGiraf.Interface;
 using EvilGiraf.Interface.Kubernetes;
-using EvilGiraf.Model;
+using EvilGiraf.Model.Kubernetes;
 using k8s;
 using k8s.Autorest;
 using k8s.Models;

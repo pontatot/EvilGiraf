@@ -1,4 +1,5 @@
 using EvilGiraf.Model;
+using EvilGiraf.Model.Kubernetes;
 using EvilGiraf.Service;
 using FluentAssertions;
 using k8s;

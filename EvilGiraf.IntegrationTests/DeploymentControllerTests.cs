@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using EvilGiraf.Dto;
 using EvilGiraf.Model;
+using EvilGiraf.Model.Kubernetes;
 using EvilGiraf.Service;
 using FluentAssertions;
 using k8s;
@@ -90,7 +91,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
             Port = 22,
-            DomainName = "test.com"
+            DomainName = "test.com",
+            Variables = ["KEY=VALUE", "KEY2=VALUE2"]
         };
         var deployment = new HttpOperationResponse<V1Deployment>
         {
@@ -130,6 +132,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             .Returns(deployment);
         
         _kubernetes.NetworkingV1.ReadNamespacedIngressWithHttpMessagesAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(new HttpOperationResponse<V1Ingress>{ Body = new V1Ingress() });
+        _kubernetes.CoreV1.ReadNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1ConfigMap>{Body = new V1ConfigMap()});
+        _kubernetes.CoreV1.ReplaceNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<V1ConfigMap>(), Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1ConfigMap>());
 
         // Act
         var response = await Client.PostAsync($"/api/deploy/{application.Id}?isAsync=false", null);
@@ -158,7 +162,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
             Link = "docker.io/test-app:latest",
             Version = "1.0.0",
             Port = 22,
-            DomainName = "test.com"
+            DomainName = "test.com",
+            Variables = ["KEY=VALUE=VALUE2=VALUE3", "KEY2=VALUE2"]
         };
 
         var deployment = new HttpOperationResponse<V1Deployment>
@@ -203,7 +208,9 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         _kubernetes.CoreV1.ReadNamespaceWithHttpMessagesAsync(Arg.Any<string>()).Returns(new HttpOperationResponse<V1Namespace>{ Body = new V1Namespace()});
         
         _kubernetes.NetworkingV1.CreateNamespacedIngressWithHttpMessagesAsync(Arg.Any<V1Ingress>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Ingress>{ Body = new V1Ingress()});
-        
+        _kubernetes.CoreV1.ReadNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<string>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1ConfigMap>());
+        _kubernetes.CoreV1.CreateNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<V1ConfigMap>(), application.Id.ToNamespace()).Returns(new HttpOperationResponse<V1ConfigMap>());
+
         // Act
         var response = await Client.PostAsync($"/api/deploy/{application.Id}?isAsync=false", null);
 
@@ -458,6 +465,8 @@ public class DeploymentControllerTests : AuthenticatedTestBase
         ).Returns(new HttpOperationResponse<V1Deployment>{ Body = new V1Deployment() });
         
         _kubernetes.CoreV1.ReadNamespacedSecretWithHttpMessagesAsync(Arg.Any<string>(), gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Secret>());
+        _kubernetes.CoreV1.DeleteNamespacedConfigMapWithHttpMessagesAsync(Arg.Any<string>(), gitApp.Id.ToNamespace()).Returns(new HttpOperationResponse<V1Status>());
+        
         // Act
         var response = await Client.PostAsync($"/api/deploy/{gitApp.Id}?isAsync=false", null);
         

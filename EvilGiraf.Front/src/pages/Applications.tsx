@@ -15,7 +15,9 @@ export function Applications() {
     version: '',
     port: null,
     domainName: null,
+    variables: [],
   });
+  const [newVariable, setNewVariable] = useState('');
 
   const { data: applications, isLoading, error } = useQuery(
     'applications',
@@ -28,7 +30,8 @@ export function Applications() {
       onSuccess: () => {
         queryClient.invalidateQueries('applications');
         setIsCreating(false);
-        setNewApp({ name: '', link: '', version: '', port: null, domainName: null });
+        setNewApp({ name: '', link: '', version: '', port: null, domainName: null, variables: [] });
+        setNewVariable('');
       },
     }
   );
@@ -40,6 +43,25 @@ export function Applications() {
     }
   );
 
+  const handleAddVariable = () => {
+    if (newVariable.trim() && newVariable.includes('=')) {
+      setNewApp({
+        ...newApp,
+        variables: [...(newApp.variables || []), newVariable.trim()]
+      });
+      setNewVariable('');
+    }
+  };
+
+  const handleRemoveVariable = (index: number) => {
+    const updatedVariables = [...(newApp.variables || [])];
+    updatedVariables.splice(index, 1);
+    setNewApp({
+      ...newApp,
+      variables: updatedVariables
+    });
+  };
+
   if (isLoading) return <LoadingSpinner />;
   if (error) return <div className="text-red-500">Error: {(error as Error).message}</div>;
 
@@ -47,13 +69,22 @@ export function Applications() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Applications</h1>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
-        >
-          <Plus className="h-5 w-5" />
-          New Application
-        </button>
+        {!isCreating ? (
+          <button
+            onClick={() => setIsCreating(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
+          >
+            <Plus className="h-5 w-5" />
+            New Application
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsCreating(false)}
+            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 border border-gray-300"
+          >
+            Cancel
+          </button>
+        )}
       </div>
 
       {isCreating && (
@@ -132,13 +163,43 @@ export function Applications() {
                   : '(Enter domain without http:// or https:// that points to the server)'}
               </p>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Environment Variables</label>
+              <div className="mt-1 flex">
+                <input
+                  type="text"
+                  value={newVariable}
+                  onChange={(e) => setNewVariable(e.target.value)}
+                  placeholder="KEY=VALUE"
+                  className="block w-full rounded-l-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+                <button
+                  onClick={handleAddVariable}
+                  className="bg-blue-500 text-white px-3 py-2 rounded-r-md hover:bg-blue-600"
+                >
+                  Add
+                </button>
+              </div>
+              <p className="mt-1 text-sm text-gray-500">
+                Format: KEY=VALUE (e.g., DATABASE_URL=postgres://user:pass@host:5432/db)
+              </p>
+              {newApp.variables && newApp.variables.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {newApp.variables.map((variable, index) => (
+                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                      <span className="text-sm font-mono">{variable}</span>
+                      <button
+                        onClick={() => handleRemoveVariable(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setIsCreating(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
               <button
                 onClick={() => createMutation.mutate(newApp)}
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
@@ -168,6 +229,9 @@ export function Applications() {
               <p className="text-gray-600">Version: {app.version || 'N/A'}</p>
               {app.link && (
                 <p className="text-gray-600">Link: {app.link}</p>
+              )}
+              {app.variables && app.variables.length > 0 && (
+                <p className="text-gray-600">Environment Variables: {app.variables.length}</p>
               )}
             </div>
             <Link

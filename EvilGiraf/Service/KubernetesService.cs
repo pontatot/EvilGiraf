@@ -1,10 +1,11 @@
 using EvilGiraf.Interface;
 using EvilGiraf.Interface.Kubernetes;
 using EvilGiraf.Model;
+using EvilGiraf.Model.Kubernetes;
 
 namespace EvilGiraf.Service;
 
-public class KubernetesService(IDeploymentService deploymentService, INamespaceService namespaceService, IServiceService serviceService, IGitBuildService gitBuildService, IIngressService ingressService) : IKubernetesService
+public class KubernetesService(IDeploymentService deploymentService, INamespaceService namespaceService, IServiceService serviceService, IGitBuildService gitBuildService, IIngressService ingressService, IConfigMapService configMapService) : IKubernetesService
 {
     public async Task Deploy(Application app, int timeoutSeconds = 600)
     {
@@ -19,6 +20,7 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
 
         var existed = await HandleDeployment(app, imageLink);
         await HandleServiceAndIngress(app, existed);
+        await HandleConfigmaps(app);
     }
     
     private async Task<string?> GetImageLink(Application app, int timeoutSeconds)
@@ -34,7 +36,7 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
     private async Task<bool> HandleDeployment(Application app, string imageLink)
     {
         var deployment = await deploymentService.ReadDeployment(app.Name, app.Id.ToNamespace());
-        var deploymentModel = new DeploymentModel(app.Name, app.Id.ToNamespace(), 1, imageLink, app.Port);
+        var deploymentModel = new DeploymentModel(app.Name, app.Id.ToNamespace(), 1, imageLink, app.Port, app.Variables is null || app.Variables.Count == 0 ? null : app.Name);
         
         if (deployment is null)
         {
@@ -73,6 +75,20 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
                 await ingressService.CreateIngress(ingressModel);
             }
         }
+    }
+    
+    private async Task HandleConfigmaps(Application app)
+    {
+        if (app.Variables is null || app.Variables.Count == 0)
+        {
+            await configMapService.DeleteConfigMap(app.Name, app.Id.ToNamespace());
+            return;
+        }
+            
+        var configModel = new ConfigMapModel(app.Name, app.Id.ToNamespace(), app.Variables);
+        
+        await configMapService.CreateOrReplaceConfigMap(configModel);
+            
     }
     
     public async Task Undeploy(Application app)

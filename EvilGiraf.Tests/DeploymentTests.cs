@@ -1,6 +1,6 @@
 using System.Net;
 using EvilGiraf.Interface.Kubernetes;
-using EvilGiraf.Model;
+using EvilGiraf.Model.Kubernetes;
 using EvilGiraf.Service.Kubernetes;
 using FluentAssertions;
 using k8s;
@@ -54,7 +54,8 @@ public class DeploymentTests
             "default",
             1,
             "nginx",
-            80
+            80,
+            "configmap-test"
         );
         var result = await DeploymentService.CreateDeployment(model);
         result.Should().NotBeNull();
@@ -77,7 +78,8 @@ public class DeploymentTests
             "default",
             1,
             "nginx",
-            80
+            80,
+            null
         );
         var result = await DeploymentService.CreateDeployment(model);
         result.Should().NotBeNull();
@@ -166,7 +168,8 @@ public class DeploymentTests
             "default",
             1,
             "nginx",
-            80
+            80,
+            null
         );
         var result = await DeploymentService.UpdateDeployment(model);
         result.Should().NotBeNull();
@@ -182,7 +185,8 @@ public class DeploymentTests
             "default",
             1,
             "nginx",
-            80
+            80,
+            null
         );
         var httpException = new HttpOperationException
         {

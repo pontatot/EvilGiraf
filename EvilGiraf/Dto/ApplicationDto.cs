@@ -8,7 +8,8 @@ public record ApplicationCreateDto(
     string Link,
     string? Version,
     int? Port,
-    string? DomainName
+    string? DomainName,
+    string[]? Variables
 );
 
 public record ApplicationResultDto(
@@ -18,7 +19,8 @@ public record ApplicationResultDto(
     string Link,
     string? Version,
     int? Port,
-    string? DomainName
+    string? DomainName,
+    string[] Variables
 );
 
 public record ApplicationUpdateDto(
@@ -27,5 +29,6 @@ public record ApplicationUpdateDto(
     string? Link,
     string? Version,
     int? Port,
-    string? DomainName
+    string? DomainName,
+    string[]? Variables
 );
