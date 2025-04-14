@@ -121,7 +121,7 @@ export function Applications() {
                   setNewApp({ ...newApp, domainName: value });
                 }}
                 placeholder="e.g. app.example.com"
-                disabled={!newApp.port}
+                disabled={newApp.port === null || newApp.port === undefined}
                 className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
                   !newApp.port ? 'bg-gray-100' : ''
                 }`}
