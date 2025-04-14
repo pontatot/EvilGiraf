@@ -12,6 +12,7 @@ export function ApplicationDetails() {
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editedApp, setEditedApp] = useState<ApplicationCreateDto>({});
+  const [newVariable, setNewVariable] = useState('');
 
   const {
     data: application,
@@ -84,6 +85,7 @@ export function ApplicationDetails() {
         queryClient.invalidateQueries(['application', id]);
         setIsEditing(false);
         setEditedApp({});
+        setNewVariable('');
       },
     }
   );
@@ -103,6 +105,7 @@ export function ApplicationDetails() {
         version: application.version,
         port: application.port === null ? -1 : application.port,
         domainName: application.domainName,
+        variables: application.variables || [],
       });
       setIsEditing(true);
     }
@@ -115,6 +118,26 @@ export function ApplicationDetails() {
   const handleCancel = () => {
     setIsEditing(false);
     setEditedApp({});
+    setNewVariable('');
+  };
+
+  const handleAddVariable = () => {
+    if (newVariable.trim() && newVariable.includes('=')) {
+      setEditedApp({
+        ...editedApp,
+        variables: [...(editedApp.variables || []), newVariable.trim()]
+      });
+      setNewVariable('');
+    }
+  };
+
+  const handleRemoveVariable = (index: number) => {
+    const updatedVariables = [...(editedApp.variables || [])];
+    updatedVariables.splice(index, 1);
+    setEditedApp({
+      ...editedApp,
+      variables: updatedVariables
+    });
   };
 
   if (isLoadingApp) return <LoadingSpinner />;
@@ -258,8 +281,44 @@ export function ApplicationDetails() {
                         : '(Enter domain without http:// or https:// that points to the server)'}
                     </span>
                   </div>
+                  <div>
+                    <span className="font-medium">Environment Variables:</span>
+                    <div className="mt-1 flex">
+                      <input
+                        type="text"
+                        value={newVariable}
+                        onChange={(e) => setNewVariable(e.target.value)}
+                        placeholder="KEY=VALUE"
+                        className="ml-2 p-1 border rounded-l w-full"
+                      />
+                      <button
+                        onClick={handleAddVariable}
+                        className="bg-blue-500 text-white px-3 py-1 rounded-r hover:bg-blue-600"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-500 ml-2 mt-1">
+                      Format: KEY=VALUE (e.g., DATABASE_URL=postgres://user:pass@host:5432/db)
+                    </p>
+                    {editedApp.variables && editedApp.variables.length > 0 && (
+                      <div className="mt-2 space-y-1 ml-2">
+                        {editedApp.variables.map((variable, index) => (
+                          <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            <span className="text-sm font-mono">{variable}</span>
+                            <button
+                              onClick={() => handleRemoveVariable(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </>
-              ) : (
+              ) :
                 <>
                   <p>
                     <span className="font-medium">Type:</span>{' '}
@@ -302,8 +361,20 @@ export function ApplicationDetails() {
                       </span>
                     )}
                   </p>
+                  {application?.variables && application.variables.length > 0 && (
+                    <div>
+                      <span className="font-medium">Environment Variables:</span>
+                      <div className="mt-2 space-y-1">
+                        {application.variables.map((variable, index) => (
+                          <div key={index} className="bg-gray-50 p-2 rounded">
+                            <span className="text-sm font-mono">{variable}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
-              )}
+              }
             </div>
           </div>
 

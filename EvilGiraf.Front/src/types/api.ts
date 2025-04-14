@@ -5,6 +5,7 @@ export interface ApplicationCreateDto {
   version?: string;
   port?: number | null;
   domainName?: string | null;
+  variables?: string[] | null;
 }
 
 export interface ApplicationResultDto {
@@ -15,6 +16,7 @@ export interface ApplicationResultDto {
   version?: string;
   port?: number | null;
   domainName?: string | null;
+  variables?: string[] | null;
 }
 
 export enum ApplicationType {
