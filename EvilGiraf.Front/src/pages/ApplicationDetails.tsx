@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { ArrowLeft, RefreshCw, Trash2, Edit2, Save, X, Power } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Trash2, Edit2, Power } from 'lucide-react';
 import { api } from '../lib/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ApplicationCreateDto, ApplicationType } from '../types/api';
@@ -173,23 +173,12 @@ export function ApplicationDetails() {
               </button>
             </>
           ) : (
-            <>
-              <button
-                onClick={handleCancel}
-                className="flex items-center gap-2 text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={updateMutation.isLoading}
-                className="flex items-center gap-2 text-green-500 hover:text-green-700 disabled:opacity-50"
-              >
-                <Save className="h-5 w-5" />
-                {updateMutation.isLoading ? 'Saving...' : 'Save'}
-              </button>
-            </>
+            <button
+              onClick={handleCancel}
+              className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 border border-gray-300"
+            >
+              Cancel
+            </button>
           )}
         </div>
       </div>
@@ -441,6 +430,17 @@ export function ApplicationDetails() {
             )}
           </div>
         </div>
+        {isEditing && (
+          <div className="flex justify-end gap-2 mt-6">
+            <button
+              onClick={handleSave}
+              disabled={updateMutation.isLoading}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
+            >
+              {updateMutation.isLoading ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

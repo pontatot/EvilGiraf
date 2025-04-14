@@ -69,13 +69,22 @@ export function Applications() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Applications</h1>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
-        >
-          <Plus className="h-5 w-5" />
-          New Application
-        </button>
+        {!isCreating ? (
+          <button
+            onClick={() => setIsCreating(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600"
+          >
+            <Plus className="h-5 w-5" />
+            New Application
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsCreating(false)}
+            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-gray-200 border border-gray-300"
+          >
+            Cancel
+          </button>
+        )}
       </div>
 
       {isCreating && (
@@ -191,12 +200,6 @@ export function Applications() {
               )}
             </div>
             <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setIsCreating(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
               <button
                 onClick={() => createMutation.mutate(newApp)}
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
