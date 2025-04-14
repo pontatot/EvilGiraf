@@ -4,6 +4,7 @@ export interface ApplicationCreateDto {
   link?: string;
   version?: string;
   port?: number | null;
+  domainName?: string | null;
 }
 
 export interface ApplicationResultDto {
@@ -13,6 +14,7 @@ export interface ApplicationResultDto {
   link?: string;
   version?: string;
   port?: number | null;
+  domainName?: string | null;
 }
 
 export enum ApplicationType {

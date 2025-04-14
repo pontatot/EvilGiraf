@@ -14,6 +14,7 @@ export function Applications() {
     link: '',
     version: '',
     port: null,
+    domainName: null,
   });
 
   const { data: applications, isLoading, error } = useQuery(
@@ -27,7 +28,7 @@ export function Applications() {
       onSuccess: () => {
         queryClient.invalidateQueries('applications');
         setIsCreating(false);
-        setNewApp({ name: '', link: '', version: '', port: null });
+        setNewApp({ name: '', link: '', version: '', port: null, domainName: null });
       },
     }
   );
@@ -109,6 +110,27 @@ export function Applications() {
                 placeholder="e.g. 80"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Domain Name</label>
+              <input
+                type="text"
+                value={newApp.domainName || ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/^https?:\/\//, '');
+                  setNewApp({ ...newApp, domainName: value });
+                }}
+                placeholder="e.g. app.example.com"
+                disabled={newApp.port === null || newApp.port === undefined}
+                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                  !newApp.port ? 'bg-gray-100' : ''
+                }`}
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                {!newApp.port
+                  ? '(Port must be set to use domain name)'
+                  : '(Enter domain without http:// or https:// that points to the server)'}
+              </p>
             </div>
             <div className="flex justify-end gap-2">
               <button
