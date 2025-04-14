@@ -51,7 +51,6 @@ namespace EvilGiraf.Migrations
                         .HasColumnType("integer");
 
                     b.PrimitiveCollection<List<string>>("Variables")
-                        .IsRequired()
                         .HasColumnType("text[]");
 
                     b.Property<string>("Version")

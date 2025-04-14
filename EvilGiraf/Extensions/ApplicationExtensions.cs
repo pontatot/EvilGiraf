@@ -15,7 +15,7 @@ public static class ApplicationExtensions
             application.Version,
             application.Port,
             application.DomainName,
-            application.Variables.ToArray()
+            application.Variables?.ToArray() ?? []
         );
     }
 

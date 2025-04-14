@@ -25,5 +25,5 @@ public class Application
     [MaxLength(255)]
     public string? DomainName { get; set; }
 
-    public List<string> Variables { get; set; } = new();
+    public List<string>? Variables { get; set; }
 }

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EvilGiraf.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    [Migration("20250414181507_ApplicationVariables")]
+    [Migration("20250414203029_ApplicationVariables")]
     partial class ApplicationVariables
     {
         /// <inheritdoc />
@@ -54,7 +54,6 @@ namespace EvilGiraf.Migrations
                         .HasColumnType("integer");
 
                     b.PrimitiveCollection<List<string>>("Variables")
-                        .IsRequired()
                         .HasColumnType("text[]");
 
                     b.Property<string>("Version")

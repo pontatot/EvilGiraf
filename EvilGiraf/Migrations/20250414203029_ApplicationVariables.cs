@@ -15,7 +15,7 @@ namespace EvilGiraf.Migrations
                 name: "Variables",
                 table: "Applications",
                 type: "text[]",
-                nullable: false);
+                nullable: true);
         }
 
         /// <inheritdoc />

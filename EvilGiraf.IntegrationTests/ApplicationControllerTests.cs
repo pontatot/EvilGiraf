@@ -309,7 +309,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
                 Type = ApplicationType.Docker,
                 Link = "docker.io/test-application-1:latest",
                 Version = "1.0.0",
-                Port = 22
+                Port = 22,
+                Variables = []
             },
             new()
             {
@@ -317,7 +318,8 @@ public class ApplicationControllerTests : AuthenticatedTestBase
                 Type = ApplicationType.Git,
                 Link = "k8s.io/test-application-2:latest",
                 Version = "2.0.0",
-                Port = 22
+                Port = 22,
+                Variables = ["KEY=VALUE", "KEY2=VALUE2"]
             }
         };
 

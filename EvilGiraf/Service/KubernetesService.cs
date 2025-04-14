@@ -36,7 +36,7 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
     private async Task<bool> HandleDeployment(Application app, string imageLink)
     {
         var deployment = await deploymentService.ReadDeployment(app.Name, app.Id.ToNamespace());
-        var deploymentModel = new DeploymentModel(app.Name, app.Id.ToNamespace(), 1, imageLink, app.Port, app.Variables.Count > 0 ? app.Name : null);
+        var deploymentModel = new DeploymentModel(app.Name, app.Id.ToNamespace(), 1, imageLink, app.Port, app.Variables is null || app.Variables.Count == 0 ? null : app.Name);
         
         if (deployment is null)
         {
@@ -79,7 +79,7 @@ public class KubernetesService(IDeploymentService deploymentService, INamespaceS
     
     private async Task HandleConfigmaps(Application app)
     {
-        if (app.Variables.Count == 0)
+        if (app.Variables is null || app.Variables.Count == 0)
         {
             await configMapService.DeleteConfigMap(app.Name, app.Id.ToNamespace());
             return;
