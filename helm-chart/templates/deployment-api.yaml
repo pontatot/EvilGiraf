@@ -75,6 +75,12 @@ spec:
               value: {{ .Values.postgresql.auth.username }}
             - name: POSTGRES__PASSWORD
               value: {{ .Values.postgresql.auth.password }}
+            - name: DockerRegistry__Url
+              value: {{ .Values.api.dockerRegistry.url }}
+            - name: DockerRegistry__Username
+              value: {{ .Values.api.dockerRegistry.username | default "" }}
+            - name: DockerRegistry__Password
+              value: {{ .Values.api.dockerRegistry.password | default "" }}
           livenessProbe:
             {{- toYaml .Values.api.livenessProbe | nindent 12 }}
           readinessProbe:
