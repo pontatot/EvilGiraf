@@ -54,14 +54,14 @@ jobs:
           helm upgrade --install evilgiraf helm-chart \
             --namespace evilgiraf \
             --create-namespace \
-            --set api.image.tag='${{ steps.version.outputs.semVer }}' \
-            --set api.baseImage.tag='${{ steps.version.outputs.semVer }}' \
-            --set front.image.tag='${{ steps.version.outputs.semVer }}' \
-            --set api.auth.apiKey='${{ secrets.API_KEY }}' \
-            --set postgresql.auth.password='${{ secrets.POSTGRES_PASSWORD }}' \
-            --set api.dockerRegistry.url='${{ secrets.REGISTRY_URL }}' \
-            --set api.dockerRegistry.username='${{ secrets.REGISTRY_USERNAME }}' \
-            --set api.dockerRegistry.password='${{ secrets.REGISTRY_PASSWORD }}' \
+            --set 'api.image.tag=${{ steps.version.outputs.semVer }}' \
+            --set 'api.baseImage.tag=${{ steps.version.outputs.semVer }}' \
+            --set 'front.image.tag=${{ steps.version.outputs.semVer }}' \
+            --set 'api.auth.apiKey=${{ secrets.API_KEY }}' \
+            --set 'postgresql.auth.password=${{ secrets.POSTGRES_PASSWORD }}' \
+            --set 'api.dockerRegistry.url=${{ secrets.REGISTRY_URL }}' \
+            --set 'api.dockerRegistry.username=${{ secrets.REGISTRY_USERNAME }}' \
+            --set 'api.dockerRegistry.password=${{ secrets.REGISTRY_PASSWORD }}' \
             --wait --timeout 15m
 
       - name: Create Git Tag
