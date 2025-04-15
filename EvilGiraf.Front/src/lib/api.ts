@@ -76,7 +76,7 @@ export const api = {
   
   deployments: {
     deploy: async (id: number): Promise<void> => {
-      const response = await fetch(`${API_URL}/deploy/${id}`, {
+      const response = await fetch(`${API_URL}/deploy/${id}?isAsync=false`, {
         method: 'POST',
         headers: getHeaders(),
       });
